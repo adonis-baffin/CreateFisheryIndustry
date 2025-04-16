@@ -1,0 +1,9 @@
+{
+  "block.create_integrated_farming.chicken_coop": "鸡舍",
+  "block.create_integrated_farming.empty_chicken_coop": "空鸡舍",
+  "block.create_integrated_farming.fishing_net": "渔网",
+  "block.create_integrated_farming.hay_carpet": "干草地毯",
+  "block.create_integrated_farming.sticky_hay_carpet": "黏性干草地毯",
+  "entity.create_integrated_farming.carpet_seat": "地毯坐垫",
+  "itemGroup.create_integrated_farming.base": "机械动力：集成农业"
+}

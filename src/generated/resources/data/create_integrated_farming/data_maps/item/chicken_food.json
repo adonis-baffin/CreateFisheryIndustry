@@ -1,0 +1,12 @@
+{
+  "values": {
+    "#minecraft:chicken_food": {
+      "cooldown": {
+        "type": "minecraft:uniform",
+        "max_inclusive": 800,
+        "min_inclusive": 400
+      },
+      "progress": 2400
+    }
+  }
+}

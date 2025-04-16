@@ -1,0 +1,16 @@
+{
+  "values": [
+    {
+      "id": "mynethersdelight:powdery_cane",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:powdery_cannon",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:bullet_pepper",
+      "required": false
+    }
+  ]
+}

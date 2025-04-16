@@ -1,0 +1,43 @@
+{
+  "criteria": {
+    "has_andesite_alloy": {
+      "conditions": {
+        "items": [
+          {
+            "items": "create:andesite_alloy"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_safety_net": {
+      "conditions": {
+        "items": [
+          {
+            "items": "farmersdelight:safety_net"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "create_integrated_farming:fishing_net"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_safety_net",
+      "has_andesite_alloy"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "create_integrated_farming:fishing_net"
+    ]
+  },
+  "sends_telemetry_event": true
+}

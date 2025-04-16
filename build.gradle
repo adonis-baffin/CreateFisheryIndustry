@@ -1,0 +1,202 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '1.0.21'
+    id "me.modmuss50.mod-publish-plugin" version "0.8.4"
+    id "com.diffplug.spotless" version "7.0.2"
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_artifact_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            data()
+            programArguments.addAll '--mod', project.mod_id,
+                    '--all',
+                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/translations/').getAbsolutePath(),
+                    "--existing-mod", "create",
+                    "--existing-mod", "create_dragons_plus",
+                    "--existing-mod", "farmersdelight"
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+configurations {
+    localImplementation
+    compileClasspath.extendsFrom localImplementation
+    runtimeClasspath.extendsFrom localImplementation
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+
+    maven { url "https://maven.dragons.plus/releases" } // Ponder, Flywheel
+    maven { url "https://maven.createmod.net" } // Ponder, Flywheel
+    maven { url "https://mvn.devos.one/snapshots" } // Registrate
+    maven { url "https://maven.blamejared.com" } // JEI
+    maven { url "https://maven.theillusivec4.top/" } // Curios API
+    maven { url "https://www.cursemaven.com" }
+    maven { url "https://api.modrinth.com/maven" }
+    maven { url "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // NeoForge config api port, needed by ponder
+}
+
+dependencies {
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${flywheel_minecraft_version}:${flywheel_version}")
+    runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_version}")
+    runtimeOnly("dev.engine-room.vanillin:vanillin-neoforge-${flywheel_minecraft_version}:${vanillin_version}")
+    implementation("com.tterrag.registrate:Registrate:${registrate_version}")
+    implementation("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
+    implementation("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive false }
+    implementation("plus.dragons.createdragonsplus:create-dragons-plus-${minecraft_version}:${create_dragons_plus_version}")
+
+    compileOnly("mezz.jei:jei-${jei_minecraft_version}-common-api:${jei_version}")
+    compileOnly("mezz.jei:jei-${jei_minecraft_version}-neoforge-api:${jei_version}")
+    localRuntime("mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}")
+
+    compileOnly("top.theillusivec4.curios:curios-neoforge:${curios_version}+${curios_minecraft_version}:api")
+    localRuntime("top.theillusivec4.curios:curios-neoforge:${curios_version}+${curios_minecraft_version}")
+
+    localImplementation("maven.modrinth:farmers-delight:${farmers_delight_version}")
+    localImplementation("maven.modrinth:my-nethers-delight:${my_nethers_delight_version}")
+    localImplementation("maven.modrinth:mmlib:${mmlib_version}")
+    localRuntime("maven.modrinth:corn-delight:${corn_delight_version}")
+    compileOnly("maven.modrinth:create-enchantable-machinery:${create_enchantable_machinery_version}")
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version                   : minecraft_version,
+            minecraft_version_range             : minecraft_version_range,
+            neo_version                         : neo_version,
+            neo_version_range                   : neo_version_range,
+            loader_version_range                : loader_version_range,
+            mod_id                              : mod_id,
+            mod_name                            : mod_name,
+            mod_license                         : mod_license,
+            mod_version                         : mod_version,
+            mod_authors                         : mod_authors,
+            mod_description                     : mod_description,
+            mod_github                          : mod_github,
+            mod_logo                            : mod_logo,
+            create_version_range                : create_version_range,
+            create_dragons_plus_version_range   : create_dragons_plus_version_range,
+            farmers_delight_version_range       : farmers_delight_version_range
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    srcDir generateModMetadata
+}
+neoForge.ideSyncTask generateModMetadata
+
+tasks.withType(Jar) {
+    from "LICENSE.txt"
+    exclude ".cache"
+}
+
+spotless {
+    java {
+        endWithNewline()
+        leadingTabsToSpaces()
+        removeUnusedImports()
+        toggleOffOn()
+        importOrder()
+        eclipse().configFile "codeformat/formatter-config.xml"
+        licenseHeaderFile "codeformat/HEADER.txt"
+    }
+}
+
+build.dependsOn(spotlessApply)
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifactId = mod_artifact_id + "-" + minecraft_version
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name "DragonsPlus"
+            url "https://maven.dragons.plus/releases"
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
