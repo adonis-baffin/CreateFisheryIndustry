@@ -20,7 +20,10 @@ package plus.dragons.createintegratedfarming.common;
 
 import com.simibubi.create.foundation.item.ItemDescription;
 import net.createmod.catnip.lang.FontHelper;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -38,12 +41,16 @@ import plus.dragons.createintegratedfarming.common.registry.CIFDataMaps;
 import plus.dragons.createintegratedfarming.common.registry.CIFHarvestBehaviours;
 import plus.dragons.createintegratedfarming.config.CIFConfig;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Mod(CIFCommon.ID)
 public class CIFCommon {
     public static final String ID = "create_integrated_farming";
     public static final Logger LOGGER = LoggerFactory.getLogger("Create: Integrated Farming");
     public static final CDPRegistrate REGISTRATE = new CDPRegistrate(ID)
             .setTooltipModifier(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE));
+    public static final Set<EntityType<?>> FISHING_NET_POTENTIAL_TARGETS = new HashSet<>();
 
     public CIFCommon(IEventBus modBus, ModContainer modContainer) {
         REGISTRATE.registerEventListeners(modBus);
@@ -60,6 +67,21 @@ public class CIFCommon {
     public void setup(final FMLCommonSetupEvent event) {
         event.enqueueWork(CIFHarvestBehaviours::register);
         event.enqueueWork(CIFBlockSpoutingBehaviours::register);
+        event.enqueueWork(this::initializeFishingNetTargets);
+    }
+
+    private void initializeFishingNetTargets() {
+        try {
+            for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
+                try {
+                    if (Mob.class.isAssignableFrom(entityType.getBaseClass())) {
+                        FISHING_NET_POTENTIAL_TARGETS.add(entityType);
+                    }
+                } catch (Exception e) {
+                }
+            }
+        } catch (Exception e) {
+        }
     }
 
     public static ResourceLocation asResource(String path) {
