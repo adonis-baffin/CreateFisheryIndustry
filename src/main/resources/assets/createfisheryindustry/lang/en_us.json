@@ -1,0 +1,6 @@
+{
+  "block.createfisheryindustry.frame_trap": "Frame Trap",
+  "block.createfisheryindustry.mesh_trap": "Mesh Trap",
+  "item.createfisheryindustry.zinc_plate": "Zinc Plate",
+  "itemGroup.createfisheryindustry.base": "Create:Fishery Industry"
+}

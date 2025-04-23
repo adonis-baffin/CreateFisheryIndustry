@@ -2,7 +2,6 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '1.0.21'
-    id "me.modmuss50.mod-publish-plugin" version "0.8.4"
     id "com.diffplug.spotless" version "7.0.2"
 }
 
@@ -53,9 +52,7 @@ neoForge {
                     '--output', file('src/generated/resources/').getAbsolutePath(),
                     '--existing', file('src/main/resources/').getAbsolutePath(),
                     '--existing', file('src/main/translations/').getAbsolutePath(),
-                    "--existing-mod", "create",
-                    "--existing-mod", "create_dragons_plus",
-                    "--existing-mod", "farmersdelight"
+                    "--existing-mod", "create"
         }
 
         configureEach {
@@ -84,7 +81,6 @@ repositories {
         dirs 'libs'
     }
 
-    maven { url "https://maven.dragons.plus/releases" } // Ponder, Flywheel
     maven { url "https://maven.createmod.net" } // Ponder, Flywheel
     maven { url "https://mvn.devos.one/snapshots" } // Registrate
     maven { url "https://maven.blamejared.com" } // JEI
@@ -101,7 +97,6 @@ dependencies {
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
     implementation("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
     implementation("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive false }
-    implementation("plus.dragons.createdragonsplus:create-dragons-plus-${minecraft_version}:${create_dragons_plus_version}")
 
     compileOnly("mezz.jei:jei-${jei_minecraft_version}-common-api:${jei_version}")
     compileOnly("mezz.jei:jei-${jei_minecraft_version}-neoforge-api:${jei_version}")
@@ -109,12 +104,6 @@ dependencies {
 
     compileOnly("top.theillusivec4.curios:curios-neoforge:${curios_version}+${curios_minecraft_version}:api")
     localRuntime("top.theillusivec4.curios:curios-neoforge:${curios_version}+${curios_minecraft_version}")
-
-    localImplementation("maven.modrinth:farmers-delight:${farmers_delight_version}")
-    localImplementation("maven.modrinth:my-nethers-delight:${my_nethers_delight_version}")
-    localImplementation("maven.modrinth:mmlib:${mmlib_version}")
-    localRuntime("maven.modrinth:corn-delight:${corn_delight_version}")
-    compileOnly("maven.modrinth:create-enchantable-machinery:${create_enchantable_machinery_version}")
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -126,15 +115,13 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             loader_version_range                : loader_version_range,
             mod_id                              : mod_id,
             mod_name                            : mod_name,
+            mod_logo                            : mod_logo,
             mod_license                         : mod_license,
             mod_version                         : mod_version,
             mod_authors                         : mod_authors,
             mod_description                     : mod_description,
-            mod_github                          : mod_github,
-            mod_logo                            : mod_logo,
             create_version_range                : create_version_range,
-            create_dragons_plus_version_range   : create_dragons_plus_version_range,
-            farmers_delight_version_range       : farmers_delight_version_range
+
     ]
     inputs.properties replaceProperties
     expand replaceProperties
@@ -142,10 +129,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
     into "build/generated/sources/modMetadata"
 }
 
-sourceSets.main.resources {
-    srcDir 'src/generated/resources'
-    srcDir generateModMetadata
-}
+sourceSets.main.resources.srcDir generateModMetadata
 neoForge.ideSyncTask generateModMetadata
 
 tasks.withType(Jar) {
@@ -153,17 +137,6 @@ tasks.withType(Jar) {
     exclude ".cache"
 }
 
-spotless {
-    java {
-        endWithNewline()
-        leadingTabsToSpaces()
-        removeUnusedImports()
-        toggleOffOn()
-        importOrder()
-        eclipse().configFile "codeformat/formatter-config.xml"
-        licenseHeaderFile "codeformat/HEADER.txt"
-    }
-}
 
 build.dependsOn(spotlessApply)
 
@@ -171,27 +144,8 @@ java {
     withSourcesJar()
 }
 
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            artifactId = mod_artifact_id + "-" + minecraft_version
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            name "DragonsPlus"
-            url "https://maven.dragons.plus/releases"
-            credentials(PasswordCredentials)
-            authentication {
-                basic(BasicAuthentication)
-            }
-        }
-    }
-}
-
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    options.encoding = 'UTF-8'
 }
 
 idea {

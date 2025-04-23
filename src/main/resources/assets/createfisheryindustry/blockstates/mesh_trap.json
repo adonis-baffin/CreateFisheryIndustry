@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=down,waterlogged=false": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 180
+    },
+    "facing=up,waterlogged=false": {
+      "model": "createfisheryindustry:block/mesh_trap"
+    },
+    "facing=north,waterlogged=false": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 90
+    },
+    "facing=south,waterlogged=false": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 90,
+      "y": 180
+    },
+    "facing=west,waterlogged=false": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,waterlogged=false": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 90,
+      "y": 90
+    },
+    "facing=down,waterlogged=true": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 180
+    },
+    "facing=up,waterlogged=true": {
+      "model": "createfisheryindustry:block/mesh_trap"
+    },
+    "facing=north,waterlogged=true": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 90
+    },
+    "facing=south,waterlogged=true": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 90,
+      "y": 180
+    },
+    "facing=west,waterlogged=true": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,waterlogged=true": {
+      "model": "createfisheryindustry:block/mesh_trap",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

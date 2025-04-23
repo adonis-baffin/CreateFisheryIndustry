@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=up": { "model": "createfisheryindustry:block/frame_trap" },
+    "facing=down": { "model": "createfisheryindustry:block/frame_trap", "x": 180 },
+    "facing=north": { "model": "createfisheryindustry:block/frame_trap", "x": 90 },
+    "facing=south": { "model": "createfisheryindustry:block/frame_trap", "x": 90, "y": 180 },
+    "facing=west": { "model": "createfisheryindustry:block/frame_trap", "x": 90, "y": 270 },
+    "facing=east": { "model": "createfisheryindustry:block/frame_trap", "x": 90, "y": 90 }
+  }
+}

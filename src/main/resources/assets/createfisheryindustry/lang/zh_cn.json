@@ -1,0 +1,6 @@
+{
+  "block.createfisheryindustry.frame_trap": "捕鱼框",
+  "block.createfisheryindustry.mesh_trap": "捕获网",
+  "item.createfisheryindustry.zinc_plate": "锌板",
+  "itemGroup.createfisheryindustry.base": "机械动力：渔业"
+}

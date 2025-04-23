@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "createfisheryindustry:zinc_plate"
+    },
+    {
+      "item": "minecraft:string"
+    }
+  ],
+  "result": {
+    "id": "createfisheryindustry:frame_trap",
+    "count": 2
+  }
+}

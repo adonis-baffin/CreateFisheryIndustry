@@ -3,9 +3,9 @@
   "priority": 1000,
   "package": "com.adonis.createfisheryindustry.mixin",
   "compatibilityLevel": "JAVA_21",
-  "refmap": "create_integrated_farming.refmap.json",
+  "refmap": "createfisheryindustry.refmap.json",
   "mixins": [
-    "LightningBoltMixin"
+    "AllArmInteractionPointTypesMixin"
   ],
   "client": [],
   "injectors": {
