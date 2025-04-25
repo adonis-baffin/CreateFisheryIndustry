@@ -1,7 +1,7 @@
 {
   "block.createfisheryindustry.frame_trap": "捕鱼框",
   "block.createfisheryindustry.mesh_trap": "捕获网",
-  "item.createfisheryindustry.zinc_plate": "锌板",
+  "item.createfisheryindustry.zinc_sheet": "锌板",
   "itemGroup.createfisheryindustry.base": "机械动力：渔业",
   "create.gui.goggles.mesh_trap_contents": "捕获网内含：",
   "create.gui.goggles.inventory.empty": "空"

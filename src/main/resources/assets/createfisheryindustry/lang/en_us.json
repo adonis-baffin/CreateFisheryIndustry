@@ -1,7 +1,7 @@
 {
   "block.createfisheryindustry.frame_trap": "Frame Trap",
   "block.createfisheryindustry.mesh_trap": "Mesh Trap",
-  "item.createfisheryindustry.zinc_plate": "Zinc Plate",
+  "item.createfisheryindustry.zinc_sheet": "Zinc Sheet",
   "itemGroup.createfisheryindustry.base": "Create:Fishery Industry",
   "create.gui.goggles.mesh_trap_contents": "Mesh Trap Contents",
   "create.gui.goggles.inventory.empty": "Empty"

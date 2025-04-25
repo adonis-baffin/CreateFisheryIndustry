@@ -25,6 +25,6 @@ public class CreateFisheryItems {
         return new Item.Properties().stacksTo(64);
     }
 
-    public static final Supplier<Item> ZINC_PLATE = registerWithTab("zinc_plate",
+    public static final Supplier<Item> ZINC_SHEET = registerWithTab("zinc_sheet",
             () -> new Item(basicItem()));
 }

@@ -28,7 +28,7 @@ public class CreateFisheryTabs {
         public void accept(CreativeModeTab.@NotNull ItemDisplayParameters parameters, CreativeModeTab.@NotNull Output output) {
             output.accept(CreateFisheryBlocks.FRAME_TRAP);
             output.accept(CreateFisheryBlocks.MESH_TRAP);
-            output.accept(CreateFisheryItems.ZINC_PLATE.get());
+            output.accept(CreateFisheryItems.ZINC_SHEET.get());
         }
     }
 

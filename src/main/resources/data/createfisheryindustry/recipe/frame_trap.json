@@ -3,7 +3,7 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "createfisheryindustry:zinc_plate"
+      "item": "createfisheryindustry:zinc_sheet"
     },
     {
       "item": "minecraft:string"
