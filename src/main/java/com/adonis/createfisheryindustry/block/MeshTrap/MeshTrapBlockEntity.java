@@ -1,14 +1,13 @@
-
 package com.adonis.createfisheryindustry.block.MeshTrap;
 
 import com.adonis.createfisheryindustry.block.common.TrapBlockEntity;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.foundation.utility.CreateLang;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -25,11 +24,22 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class MeshTrapBlockEntity extends TrapBlockEntity {
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleInformation {
+    private static final Logger LOGGER = LogManager.getLogger();
     protected static final int PROCESSING_TIME = 20;
-    protected static final double ENTITY_KILL_RANGE = 1.0; // 与 FrameTrapMovementBehaviour 一致
-    protected static final float PHANTOM_MAX_HEALTH = 20.0F; // 与 FrameTrapMovementBehaviour 一致
+    protected static final double ENTITY_KILL_RANGE = 1.0;
+    protected static final float PHANTOM_MAX_HEALTH = 20.0F;
     private static final Set<String> FISH_ITEM_IDS = new HashSet<>(Arrays.asList(
             "minecraft:cod",
             "minecraft:salmon",
@@ -43,7 +53,7 @@ public class MeshTrapBlockEntity extends TrapBlockEntity {
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, MeshTrapBlockEntity be) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             return;
         }
 
@@ -56,7 +66,13 @@ public class MeshTrapBlockEntity extends TrapBlockEntity {
             be.processingTicks = 0;
             be.collectNearbyItems(serverLevel);
             be.tryProcessFish(serverLevel);
+
+            be.setChanged();
+            be.sendData();
+            serverLevel.sendBlockUpdated(pos, state, state, 3);
         }
+
+        be.tick(); // 调用同步计时
     }
 
     @Override
@@ -67,11 +83,9 @@ public class MeshTrapBlockEntity extends TrapBlockEntity {
         for (Entity entity : entities) {
             if (entity == null || !entity.isAlive()) continue;
 
-            // Check for rabbits and phantoms
             boolean isRabbit = entity instanceof Rabbit || entity.getType() == EntityType.RABBIT;
             boolean isPhantom = entity instanceof Phantom || entity.getType() == EntityType.PHANTOM;
 
-            // Check for aquatic entities
             boolean isAquatic = entity.getType() == EntityType.COD ||
                     entity.getType() == EntityType.SALMON ||
                     entity.getType() == EntityType.TROPICAL_FISH ||
@@ -84,15 +98,12 @@ public class MeshTrapBlockEntity extends TrapBlockEntity {
             }
 
             if ((isAquatic || isRabbit || isPhantom) && entity instanceof Mob mob) {
-                // Apply health limit for aquatic entities and rabbits, but not for phantoms
                 if ((isAquatic || isRabbit) && mob.getMaxHealth() >= 10.0F) continue;
                 if (isPhantom && mob.getMaxHealth() > PHANTOM_MAX_HEALTH) continue;
 
-                // Get the ResourceKey<LootTable> and use it directly
                 ResourceKey<LootTable> lootTableKey = mob.getLootTable();
                 if (lootTableKey == null) continue;
 
-                // Build LootParams with additional context for phantoms
                 LootParams.Builder paramsBuilder = new LootParams.Builder(level)
                         .withParameter(LootContextParams.THIS_ENTITY, mob)
                         .withParameter(LootContextParams.ORIGIN, mob.position())
@@ -105,13 +116,6 @@ public class MeshTrapBlockEntity extends TrapBlockEntity {
                 LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(lootTableKey);
                 List<ItemStack> loots = lootTable.getRandomItems(params);
 
-                // Log generated loot for debugging
-                for (ItemStack stack : loots) {
-                    System.out.println("MeshTrapBlockEntity: Generated loot for " + mob.getType().getDescriptionId() +
-                            ": " + stack.getCount() + "x " + stack.getItem().getDescriptionId());
-                }
-
-                // For aquatic entities, check if loot contains fish-related items
                 boolean isValidLoot = isRabbit || isPhantom;
                 if (isAquatic) {
                     boolean hasFish = false;
@@ -127,29 +131,76 @@ public class MeshTrapBlockEntity extends TrapBlockEntity {
 
                 if (!isValidLoot) continue;
 
-                // Insert loots into inventory
+                LOGGER.info("MeshTrapBlockEntity: Processing entity {} at {} {}", mob.getType().getDescriptionId(), getBlockPos(), isRabbit ? "(Rabbit)" : isPhantom ? "(Phantom)" : "(Aquatic)");
+                for (ItemStack stack : loots) {
+                    LOGGER.info("MeshTrapBlockEntity: Generated loot: {} x{}", stack.getCount(), stack.getItem().getDescriptionId());
+                }
+
                 boolean allInserted = true;
                 for (ItemStack stack : loots) {
                     ItemStack remainder = stack.copy();
                     for (int i = 0; i < inventory.getSlots(); i++) {
                         remainder = inventory.insertItem(i, remainder, false);
+                        LOGGER.info("MeshTrapBlockEntity: Inserted into slot {}, remaining: {}", i, remainder.isEmpty() ? "None" : remainder.getCount() + "x " + remainder.getItem().getDescriptionId());
                         if (remainder.isEmpty()) break;
                     }
                     if (!remainder.isEmpty()) {
                         ItemEntity itemEntity = new ItemEntity(level, mob.getX(), mob.getY(), mob.getZ(), remainder);
                         level.addFreshEntity(itemEntity);
                         allInserted = false;
-                        System.out.println("MeshTrapBlockEntity: Dropped " + remainder.getCount() + "x " + remainder.getItem().getDescriptionId() + " at " + mob.position());
+                        LOGGER.info("MeshTrapBlockEntity: Dropped {} x{} at {}", remainder.getCount(), remainder.getItem().getDescriptionId(), mob.position());
                     }
-                    System.out.println("MeshTrapBlockEntity: Captured entity " + mob.getType().getDescriptionId() +
-                            ", dropped " + stack.getCount() + "x " + stack.getItem().getDescriptionId() + " at " + getBlockPos() +
-                            (isRabbit ? " (Rabbit)" : isPhantom ? " (Phantom)" : " (Aquatic)"));
                 }
+
+                setChanged();
+                sendData();
+                level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
 
                 if (allInserted) {
                     mob.setRemoved(Entity.RemovalReason.KILLED);
                 }
             }
         }
+    }
+
+    @Override
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        LOGGER.info("MeshTrapBlockEntity: addToGoggleTooltip called at {}, isClientSide: {}", getBlockPos(), level != null && level.isClientSide());
+
+        CreateLang.translate("gui.goggles.mesh_trap_contents").forGoggles(tooltip);
+
+        ItemStackHandler inv = getInventory();
+        boolean isEmpty = true;
+
+        for (int i = 0; i < inv.getSlots(); i++) {
+            ItemStack stack = inv.getStackInSlot(i);
+            LOGGER.info("MeshTrapBlockEntity: Slot {}: {}", i, stack.isEmpty() ? "Empty" : stack.getCount() + "x " + stack.getItem().getDescriptionId());
+            if (!stack.isEmpty()) {
+                isEmpty = false;
+                CreateLang.text("")
+                        .add(Component.translatable(stack.getDescriptionId()).withStyle(ChatFormatting.GRAY))
+                        .add(CreateLang.text(" x" + stack.getCount()).style(ChatFormatting.GREEN))
+                        .forGoggles(tooltip, 1);
+            }
+        }
+
+        if (isEmpty) {
+            CreateLang.translate("gui.goggles.inventory.empty").forGoggles(tooltip, 1);
+        }
+
+        if (!level.isClientSide()) {
+            IItemHandler capInv = level.getCapability(Capabilities.ItemHandler.BLOCK, getBlockPos(), getBlockState(), this, null);
+            if (capInv != null) {
+                LOGGER.info("MeshTrapBlockEntity: Capability inventory check at {}", getBlockPos());
+                for (int i = 0; i < capInv.getSlots(); i++) {
+                    ItemStack stack = capInv.getStackInSlot(i);
+                    LOGGER.info("MeshTrapBlockEntity: Capability Slot {}: {}", i, stack.isEmpty() ? "Empty" : stack.getCount() + "x " + stack.getItem().getDescriptionId());
+                }
+            } else {
+                LOGGER.warn("MeshTrapBlockEntity: Capability inventory is null at {}", getBlockPos());
+            }
+        }
+
+        return true;
     }
 }

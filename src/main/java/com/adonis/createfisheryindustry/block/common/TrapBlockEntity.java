@@ -1,4 +1,3 @@
-
 package com.adonis.createfisheryindustry.block.common;
 
 import java.util.List;
@@ -6,6 +5,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -21,19 +22,26 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.ItemStackHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class TrapBlockEntity extends BlockEntity {
-    public static final int INVENTORY_SLOTS = 9; // 可调整的库存槽位数量
+    private static final Logger LOGGER = LogManager.getLogger();
+    public static final int INVENTORY_SLOTS = 9;
     protected static final double COLLECTION_RANGE = 1.5;
     protected static final double FISH_PROCESSING_RANGE = 1.5;
     protected final ItemStackHandler inventory;
     protected int processingTicks = 0;
+    protected int syncCooldown = 0;
+    protected boolean queuedSync = false;
+    private static final int SYNC_RATE = 8;
 
     public TrapBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         this.inventory = createInventory();
+        LOGGER.info("TrapBlockEntity: Inventory initialized with {} slots at {}", INVENTORY_SLOTS, pos);
     }
 
     protected ItemStackHandler createInventory() {
@@ -41,14 +49,26 @@ public abstract class TrapBlockEntity extends BlockEntity {
             @Override
             protected void onContentsChanged(int slot) {
                 setChanged();
-                if (level != null && !level.isClientSide) {
+                if (level != null && !level.isClientSide()) {
                     level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+                    sendData();
                 }
             }
 
             @Override
             public boolean isItemValid(int slot, @NotNull ItemStack stack) {
                 return true;
+            }
+
+            @Override
+            public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+                CompoundTag nbt = super.serializeNBT(provider);
+                return nbt;
+            }
+
+            @Override
+            public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+                super.deserializeNBT(provider, nbt);
             }
         };
     }
@@ -58,7 +78,7 @@ public abstract class TrapBlockEntity extends BlockEntity {
     }
 
     public boolean insertItem(ItemStack stack) {
-        if (stack.isEmpty() || level == null || level.isClientSide) {
+        if (stack.isEmpty() || level == null || level.isClientSide()) {
             return false;
         }
 
@@ -68,6 +88,8 @@ public abstract class TrapBlockEntity extends BlockEntity {
             if (remainder.isEmpty()) {
                 setChanged();
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+                sendData();
+                LOGGER.info("TrapBlockEntity: Item inserted successfully at slot {}: {} x{}", i, stack.getItem().getDescriptionId(), stack.getCount());
                 return true;
             }
         }
@@ -76,6 +98,8 @@ public abstract class TrapBlockEntity extends BlockEntity {
         if (partialSuccess) {
             setChanged();
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            sendData();
+            LOGGER.info("TrapBlockEntity: Item partially inserted: {} x{}", stack.getItem().getDescriptionId(), stack.getCount() - remainder.getCount());
         }
         return partialSuccess;
     }
@@ -83,17 +107,42 @@ public abstract class TrapBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
-        tag.put("Inventory", inventory.serializeNBT(provider));
+        CompoundTag inventoryTag = inventory.serializeNBT(provider);
+        tag.put("Inventory", inventoryTag);
         tag.putInt("ProcessingTicks", processingTicks);
+        LOGGER.info("TrapBlockEntity: Saving inventory to NBT at {}: {}", worldPosition, inventoryTag);
     }
 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
         if (tag.contains("Inventory")) {
-            inventory.deserializeNBT(provider, tag.getCompound("Inventory"));
+            CompoundTag inventoryTag = tag.getCompound("Inventory");
+            inventory.deserializeNBT(provider, inventoryTag);
+            LOGGER.info("TrapBlockEntity: Loading inventory from NBT at {}: {}", worldPosition, inventoryTag);
         }
         processingTicks = tag.getInt("ProcessingTicks");
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        CompoundTag tag = super.getUpdateTag(provider);
+        saveAdditional(tag, provider);
+        LOGGER.info("TrapBlockEntity: Sending update tag at {}: {}", worldPosition, tag);
+        return tag;
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        LOGGER.info("TrapBlockEntity: Sending update packet at {}", worldPosition);
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider provider) {
+        super.onDataPacket(net, pkt, provider);
+        handleUpdateTag(pkt.getTag(), provider);
+        LOGGER.info("TrapBlockEntity: Received update packet at {}: {}", worldPosition, pkt.getTag());
     }
 
     @Nullable
@@ -148,7 +197,7 @@ public abstract class TrapBlockEntity extends BlockEntity {
                     mob.hurt(level.damageSources().generic(), mob.getMaxHealth() * 2);
                     entity.discard();
                 } catch (Exception e) {
-                    // 记录异常但不中断游戏
+                    LOGGER.error("TrapBlockEntity: Error processing fish at {}: {}", worldPosition, e.getMessage());
                 }
             }
         }
@@ -164,6 +213,29 @@ public abstract class TrapBlockEntity extends BlockEntity {
                     serverLevel.addFreshEntity(itemEntity);
                     inventory.setStackInSlot(i, ItemStack.EMPTY);
                 }
+            }
+        }
+    }
+
+    public void sendData() {
+        if (syncCooldown > 0) {
+            queuedSync = true;
+            return;
+        }
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            setChanged();
+            LOGGER.info("TrapBlockEntity: Triggering sendData at {}", worldPosition);
+        }
+        queuedSync = false;
+        syncCooldown = SYNC_RATE;
+    }
+
+    public void tick() {
+        if (syncCooldown > 0) {
+            syncCooldown--;
+            if (syncCooldown == 0 && queuedSync) {
+                sendData();
             }
         }
     }

@@ -1,4 +1,3 @@
-
 package com.adonis.createfisheryindustry.block.MeshTrap;
 
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
@@ -159,7 +158,7 @@ public class MeshTrapBlock extends Block implements EntityBlock, ProperWaterlogg
             ItemHandlerHelper.giveItemToPlayer(player, extracted);
             return ItemInteractionResult.sidedSuccess(false);
         } else {
-            player.displayClientMessage(Component.literal(hasItems ? "Try it again！" : "Trap is empty！"), true);
+            player.displayClientMessage(Component.literal(hasItems ? "Try it again！" : "Trap is empty"), true);
             return ItemInteractionResult.CONSUME;
         }
     }
@@ -183,7 +182,7 @@ public class MeshTrapBlock extends Block implements EntityBlock, ProperWaterlogg
 
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
-            LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+                                  LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         updateWater(level, state, pos);
         return state;
     }

@@ -1,5 +1,3 @@
-
-
 package com.adonis.createfisheryindustry.block.MeshTrap;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
