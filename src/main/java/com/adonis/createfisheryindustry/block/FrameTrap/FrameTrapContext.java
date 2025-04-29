@@ -1,5 +1,3 @@
-
-
 package com.adonis.createfisheryindustry.block.FrameTrap;
 
 import java.util.HashSet;
@@ -22,7 +20,6 @@ public class FrameTrapContext {
 
     protected final int minCatchTime = 800;
     protected final int maxCatchTime = 1400;
-
     protected final float catchSuccessRate = 0.4f;
 
     public int timeUntilCatch;
@@ -40,8 +37,7 @@ public class FrameTrapContext {
 
     public boolean visitNewPosition(ServerLevel level, BlockPos pos) {
         boolean inWater = fishingHook.getOpenWaterTypeForBlock(pos) == FishingHook.OpenWaterType.INSIDE_WATER;
-        if (!inWater)
-            return false;
+        if (!inWater) return false;
         visitedBlocks.add(pos);
         return true;
     }

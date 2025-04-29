@@ -6,11 +6,11 @@
       "item": "createfisheryindustry:zinc_sheet"
     },
     {
-      "item": "minecraft:string"
+      "item": "create:nozzle"
     }
   ],
   "result": {
-    "id": "createfisheryindustry:frame_trap",
+    "id": "createfisheryindustry:trap_nozzle",
     "count": 1
   }
 }

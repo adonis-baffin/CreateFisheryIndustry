@@ -1,5 +1,3 @@
-
-
 package com.adonis.createfisheryindustry.block.FrameTrap;
 
 import com.simibubi.create.content.equipment.wrench.IWrenchable;

@@ -36,18 +36,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.IBlockCapabilityProvider;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import com.mojang.logging.LogUtils;
 
-public class MeshTrapBlock extends Block implements EntityBlock, ProperWaterloggedBlock, IWrenchable, IBlockCapabilityProvider<IItemHandler, Direction> {
-    private static final Logger LOGGER = LogUtils.getLogger();
+public class MeshTrapBlock extends Block implements EntityBlock, ProperWaterloggedBlock, IWrenchable {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
     public MeshTrapBlock(Properties properties) {
@@ -55,18 +50,6 @@ public class MeshTrapBlock extends Block implements EntityBlock, ProperWaterlogg
         registerDefaultState(defaultBlockState()
                 .setValue(FACING, Direction.UP)
                 .setValue(WATERLOGGED, false));
-    }
-
-    // 实现 IBlockCapabilityProvider，提供物品处理能力
-    @Override
-    @Nullable
-    public IItemHandler getCapability(Level level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, @Nullable Direction side) {
-        if (blockEntity instanceof MeshTrapBlockEntity meshTrap) {
-            IItemHandler inventory = meshTrap.getInventory();
-
-            return inventory;
-        }
-        return null;
     }
 
     // 透明方块相关方法
@@ -122,7 +105,6 @@ public class MeshTrapBlock extends Block implements EntityBlock, ProperWaterlogg
 
     @Override
     public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        LOGGER.debug("MeshTrapBlock: useItemOn called at {} with item {}", pos, stack.getItem());
         // 检查玩家是否持有扳手
         if (stack.getItem() instanceof WrenchItem) {
             UseOnContext wrenchContext = new UseOnContext(level, player, hand, stack, hitResult);
@@ -174,7 +156,7 @@ public class MeshTrapBlock extends Block implements EntityBlock, ProperWaterlogg
             ItemHandlerHelper.giveItemToPlayer(player, extracted);
             return ItemInteractionResult.sidedSuccess(false);
         } else {
-            player.displayClientMessage(Component.literal(hasItems ? "Try it again！" : "Trap is empty"), true);
+            player.displayClientMessage(Component.literal(hasItems ? "Try it again" : "Trap is empty"), true);
             return ItemInteractionResult.CONSUME;
         }
     }
@@ -239,7 +221,8 @@ public class MeshTrapBlock extends Block implements EntityBlock, ProperWaterlogg
             if (stack.isEmpty()) {
                 return 0;
             }
-            return (int) Math.floor((stack.getCount() / (float) stack.getMaxStackSize()) * 14) + 1;
+            int signal = (int) Math.floor((stack.getCount() / (float) stack.getMaxStackSize()) * 14) + 1;
+            return signal;
         }
         return 0;
     }

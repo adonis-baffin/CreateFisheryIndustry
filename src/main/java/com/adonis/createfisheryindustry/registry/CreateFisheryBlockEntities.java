@@ -2,29 +2,29 @@ package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
-import net.minecraft.core.registries.BuiltInRegistries;
+import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class CreateFisheryBlockEntities {
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, CreateFisheryMod.ID);
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeshTrapBlockEntity>> MESH_TRAP = BLOCK_ENTITIES.register("mesh_trap", () -> BlockEntityType.Builder.of(MeshTrapBlockEntity::new, CreateFisheryBlocks.MESH_TRAP.get()).build(null));
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
+            DeferredRegister.create(net.minecraft.core.registries.Registries.BLOCK_ENTITY_TYPE, CreateFisheryMod.ID);
 
-    public static void register(IEventBus modBus) {
-        BLOCK_ENTITIES.register(modBus);
-        modBus.addListener(CreateFisheryBlockEntities::registerCapabilities);
-    }
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeshTrapBlockEntity>> MESH_TRAP =
+            BLOCK_ENTITIES.register("mesh_trap", () ->
+                    BlockEntityType.Builder.of(MeshTrapBlockEntity::new, CreateFisheryBlocks.MESH_TRAP.get()).build(null));
 
-    private static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                MESH_TRAP.get(),
-                (be, side) -> be.getInventory()
-        );
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TrapNozzleBlockEntity>> TRAP_NOZZLE =
+            BLOCK_ENTITIES.register("trap_nozzle", () ->
+                    BlockEntityType.Builder.of(
+                            (pos, state) -> new TrapNozzleBlockEntity(CreateFisheryBlockEntities.TRAP_NOZZLE.get(), pos, state),
+                            CreateFisheryBlocks.TRAP_NOZZLE.get()
+                    ).build(null));
+
+    public static void register(IEventBus bus) {
+        BLOCK_ENTITIES.register(bus);
     }
 }

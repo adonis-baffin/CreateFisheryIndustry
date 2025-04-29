@@ -1,5 +1,7 @@
 package com.adonis.createfisheryindustry;
 
+import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
+import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
 import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
@@ -15,10 +17,18 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
 import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+// --- 新增导入 ---
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+// --- 新增导入结束 ---
 import org.slf4j.Logger;
 
 @Mod(CreateFisheryMod.ID)
@@ -38,26 +48,66 @@ public class CreateFisheryMod {
     }
 
     public CreateFisheryMod(IEventBus bus, ModContainer modContainer) {
-        REGISTRATE.registerEventListeners(bus);
+        LOGGER.info("Create Fishery Industry initializing..."); // --- 新增日志 ---
 
+        // 注册 Create 基础内容
+        REGISTRATE.registerEventListeners(bus);
         CreateFisheryBlocks.register();
-        CreateFisheryBlockEntities.BLOCK_ENTITIES.register(bus);
-        CreateFisheryItems.ITEMS.register(bus);
+        CreateFisheryBlockEntities.register(bus);
+        CreateFisheryItems.register(bus);
         CreateFisheryTabs.register(bus);
 
+
+        // 注册配置
+//        CreateFisheryCommonConfig.register();
+        modContainer.registerConfig(ModConfig.Type.COMMON, CreateFisheryCommonConfig.CONFIG_SPEC);
+
+        // 注册事件监听器
+        bus.addListener(this::registerCapabilities);
         bus.addListener(this::setup);
         bus.addListener(this::enqueueIMC);
         bus.addListener(this::processIMC);
         bus.addListener(CreateFisheryMod::clientInit);
+
+        // --- 新增或修改内容开始 ---
+        // 注册服务器启动/关闭监听器
+        NeoForge.EVENT_BUS.addListener(this::onServerStarting);
+        NeoForge.EVENT_BUS.addListener(this::onServerStopping);
+        // --- 新增或修改内容结束 ---
     }
 
-    private void setup(final FMLCommonSetupEvent event) {
-        LOGGER.info("Create: Fishery Industry is setting up!");
+    public void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                CreateFisheryBlockEntities.MESH_TRAP.get(),
+                (be, side) -> be.getCapability(Capabilities.ItemHandler.BLOCK, side) // 去掉了分号
+        );
+        TrapNozzleBlockEntity.registerCapabilities(event);
     }
+
+
+    private void setup(final FMLCommonSetupEvent event) {
+        LOGGER.info("Create Fishery Industry setup..."); // --- 新增日志 ---
+        // 初始化配置
+        CreateFisheryCommonConfig.onLoad(); // --- 新增调用 ---
+    }
+
+
 
     private void enqueueIMC(final InterModEnqueueEvent event) {}
 
     private void processIMC(final InterModProcessEvent event) {}
 
     public static void clientInit(final FMLClientSetupEvent event) {}
+
+    // --- 新增方法开始 ---
+    private void onServerStarting(ServerStartingEvent event) {
+        LOGGER.info("Create Fishery Industry server starting...");
+        CreateFisheryCommonConfig.refreshCache();
+    }
+
+    private void onServerStopping(ServerStoppingEvent event) {
+        LOGGER.info("Create Fishery Industry server stopping...");
+    }
+    // --- 新增方法结束 ---
 }
