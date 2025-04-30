@@ -16,6 +16,7 @@ public class ClientSetup {
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.FRAME_TRAP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.MESH_TRAP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.TRAP_NOZZLE.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_TRAP.get(), RenderType.cutout());
         });
     }
 }

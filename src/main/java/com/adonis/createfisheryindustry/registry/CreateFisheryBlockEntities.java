@@ -2,6 +2,7 @@ package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
+import com.adonis.createfisheryindustry.block.SmartTrap.SmartTrapBlockEntity;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -16,6 +17,10 @@ public class CreateFisheryBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeshTrapBlockEntity>> MESH_TRAP =
             BLOCK_ENTITIES.register("mesh_trap", () ->
                     BlockEntityType.Builder.of(MeshTrapBlockEntity::new, CreateFisheryBlocks.MESH_TRAP.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SmartTrapBlockEntity>> SMART_TRAP =
+            BLOCK_ENTITIES.register("smart_trap", () ->
+                    BlockEntityType.Builder.of(SmartTrapBlockEntity::new, CreateFisheryBlocks.SMART_TRAP.get()).build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TrapNozzleBlockEntity>> TRAP_NOZZLE =
             BLOCK_ENTITIES.register("trap_nozzle", () ->

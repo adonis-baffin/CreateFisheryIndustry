@@ -1,5 +1,3 @@
-
-
 package com.adonis.createfisheryindustry.registry;
 
 import static com.adonis.createfisheryindustry.CreateFisheryMod.REGISTRATE;
@@ -9,6 +7,7 @@ import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapBlock;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapMovementBehaviour;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlock;
+import com.adonis.createfisheryindustry.block.SmartTrap.SmartTrapBlock;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlock;
 import com.simibubi.create.AllTags;
 import com.simibubi.create.foundation.data.BlockStateGen;
@@ -42,6 +41,18 @@ public class CreateFisheryBlocks {
                     .noOcclusion())
             .transform(axeOrPickaxe())
             .blockstate((ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models().cubeAll(ctx.getName(), prov.modLoc("block/mesh_trap"))))
+            .simpleItem()
+            .register();
+
+    public static final BlockEntry<SmartTrapBlock> SMART_TRAP = REGISTRATE
+            .block("smart_trap", SmartTrapBlock::new)
+            .initialProperties(SharedProperties::wooden)
+            .properties(prop -> prop
+                    .mapColor(DyeColor.GRAY)
+                    .sound(SoundType.NETHER_WOOD)
+                    .noOcclusion())
+            .transform(axeOrPickaxe())
+            .blockstate((ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models().cubeAll(ctx.getName(), prov.modLoc("block/smart_trap"))))
             .simpleItem()
             .register();
 

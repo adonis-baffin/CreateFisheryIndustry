@@ -22,6 +22,8 @@ public class AllArmInteractionPointTypesMixin {
             registerMethod.invoke(null, "mesh_trap", new MeshTrapInteractionPointType());
             // 注册 TrapNozzleInteractionPointType
             registerMethod.invoke(null, "trap_nozzle", new TrapNozzleInteractionPointType());
+
+            registerMethod.invoke(null, "smart_trap", new TrapNozzleInteractionPointType());
         } catch (Exception e) {
             // 记录异常以便调试，但不抛出以避免崩溃
             System.err.println("Failed to register interaction point types: " + e.getMessage());
