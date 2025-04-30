@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "#": {
-      "item": "createfisheryindustry:zinc_sheet"
+      "tag": "c:plates/zinc"
     },
     "w": {
       "tag": "minecraft:wool"

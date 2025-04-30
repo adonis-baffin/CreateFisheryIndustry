@@ -2,6 +2,8 @@
   "block.createfisheryindustry.frame_trap": "捕鱼框",
   "block.createfisheryindustry.mesh_trap": "捕获网",
   "item.createfisheryindustry.zinc_sheet": "锌板",
+  "item.createfisheryindustry.copper_diving_leggings": "铜潜水护腿",
+  "item.createfisheryindustry.netherite_diving_leggings": "下界合金潜水护腿",
   "itemGroup.createfisheryindustry.base": "机械动力：渔业",
   "create.gui.goggles.mesh_trap_contents": "捕获网内含：",
   "create.gui.goggles.inventory.empty": "空"

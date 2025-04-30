@@ -3,10 +3,10 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "createfisheryindustry:zinc_sheet"
+      "tag": "c:plates/zinc"
     },
     {
-      "item": "minecraft:string"
+      "tag": "c:strings"
     }
   ],
   "result": {

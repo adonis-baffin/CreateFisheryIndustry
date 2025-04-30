@@ -2,6 +2,8 @@
   "block.createfisheryindustry.frame_trap": "Frame Trap",
   "block.createfisheryindustry.mesh_trap": "Mesh Trap",
   "item.createfisheryindustry.zinc_sheet": "Zinc Sheet",
+  "item.createfisheryindustry.copper_diving_leggings": "Copper Diving Leggings",
+  "item.createfisheryindustry.netherite_diving_leggings": "Netherite Diving Leggings",
   "itemGroup.createfisheryindustry.base": "Create:Fishery Industry",
   "create.gui.goggles.mesh_trap_contents": "Mesh Trap Contents",
   "create.gui.goggles.inventory.empty": "Empty",

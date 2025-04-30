@@ -6,16 +6,16 @@
       "tag": "c:plates/zinc"
     },
     "w": {
-      "item": "create:nozzle"
+      "tag": "c:ingots/copper"
     }
   },
   "pattern": [
-    " # ",
-    " w ",
-    " # "
+    "www",
+    "# #",
+    "w w"
   ],
   "result": {
     "count": 1,
-    "id": "createfisheryindustry:trap_nozzle"
+    "id": "createfisheryindustry:copper_diving_leggings"
   }
 }
