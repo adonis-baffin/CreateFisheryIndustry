@@ -2,6 +2,7 @@ package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.item.CopperDivingLeggingsItem;
+import com.adonis.createfisheryindustry.item.HarpoonItem;
 import com.adonis.createfisheryindustry.item.NetheriteDivingLeggingsItem;
 import com.google.common.collect.Sets;
 import com.simibubi.create.content.equipment.armor.AllArmorMaterials;
@@ -51,6 +52,12 @@ public class CreateFisheryItems {
                     new Item.Properties().durability(555).fireResistant(), // 耐久度555，防火
                     ResourceLocation.fromNamespaceAndPath(CreateFisheryMod.ID, "netherite_diving_leggings.png")
             ));
+
+    // 鱼叉
+// 鱼叉
+    public static final DeferredHolder<Item, Item> HARPOON = registerWithTab("harpoon",
+            () -> new HarpoonItem(new Item.Properties().durability(250).stacksTo(1)));
+
 
     public static void register(IEventBus bus) {
         ITEMS.register(bus);

@@ -452,20 +452,11 @@ public class TrapNozzleBlockEntity extends SmartBlockEntity implements IHaveGogg
         return true;
     }
 
-    // 这是NeoForge 1.21新的能力注册方法
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 CreateFisheryBlockEntities.TRAP_NOZZLE.get(),
-                (be, side) -> {
-                    if (side == null) {
-                        return be.inventory;
-                    } else if (side == Direction.DOWN) {
-                        return be.extractionHandler.get();
-                    } else {
-                        return be.insertionHandler.get();
-                    }
-                }
+                (be, side) -> be.inventory // 所有方向都返回完整库存，允许输入和输出
         );
     }
 

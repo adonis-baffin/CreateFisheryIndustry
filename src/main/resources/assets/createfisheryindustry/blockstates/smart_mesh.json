@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "createfisheryindustry:block/smart_mesh"
+    }
+  }
+}

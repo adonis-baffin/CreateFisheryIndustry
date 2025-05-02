@@ -1,4 +1,4 @@
-package com.adonis.createfisheryindustry.block.SmartTrap;
+package com.adonis.createfisheryindustry.block.SmartMesh;
 
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
@@ -29,8 +29,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -38,17 +36,13 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
-public class SmartTrapBlock extends Block implements EntityBlock, ProperWaterloggedBlock, IWrenchable {
-    public static final DirectionProperty FACING = BlockStateProperties.FACING;
-
-    public SmartTrapBlock(Properties properties) {
+public class SmartMeshBlock extends Block implements EntityBlock, ProperWaterloggedBlock, IWrenchable {
+    public SmartMeshBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState()
-                .setValue(FACING, Direction.UP)
                 .setValue(WATERLOGGED, false));
     }
 
@@ -124,7 +118,7 @@ public class SmartTrapBlock extends Block implements EntityBlock, ProperWaterlog
         }
 
         BlockEntity be = level.getBlockEntity(pos);
-        if (!(be instanceof SmartTrapBlockEntity smartTrap)) {
+        if (!(be instanceof SmartMeshBlockEntity smartTrap)) {
             return ItemInteractionResult.FAIL;
         }
 
@@ -153,21 +147,19 @@ public class SmartTrapBlock extends Block implements EntityBlock, ProperWaterlog
             ItemHandlerHelper.giveItemToPlayer(player, extracted);
             return ItemInteractionResult.sidedSuccess(false);
         } else {
-            player.displayClientMessage(Component.literal(hasItems ? "Try it again" : "Trap is empty"), true);
+            player.displayClientMessage(Component.literal(hasItems ? "Try it again" : "Mesh is empty"), true);
             return ItemInteractionResult.CONSUME;
         }
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, WATERLOGGED);
+        builder.add(WATERLOGGED);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return withWater(
-                defaultBlockState().setValue(FACING, context.getClickedFace()),
-                context);
+        return withWater(defaultBlockState(), context);
     }
 
     @Override
@@ -185,7 +177,7 @@ public class SmartTrapBlock extends Block implements EntityBlock, ProperWaterlog
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return CreateFisheryBlockEntities.SMART_TRAP.get().create(pos, state);
+        return CreateFisheryBlockEntities.SMART_MESH.get().create(pos, state);
     }
 
     @Nullable
@@ -194,7 +186,7 @@ public class SmartTrapBlock extends Block implements EntityBlock, ProperWaterlog
         if (level.isClientSide) {
             return null;
         }
-        return type == CreateFisheryBlockEntities.SMART_TRAP.get() ? (lvl, pos, blockState, be) -> SmartTrapBlockEntity.tick(lvl, pos, blockState, (SmartTrapBlockEntity) be) : null;
+        return type == CreateFisheryBlockEntities.SMART_MESH.get() ? (lvl, pos, blockState, be) -> SmartMeshBlockEntity.tick(lvl, pos, blockState, (SmartMeshBlockEntity) be) : null;
     }
 
     @Override
@@ -205,7 +197,7 @@ public class SmartTrapBlock extends Block implements EntityBlock, ProperWaterlog
     @Override
     public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof SmartTrapBlockEntity smartTrap) {
+        if (be instanceof SmartMeshBlockEntity smartTrap) {
             var inventory = smartTrap.getInventory();
             ItemStack stack = ItemStack.EMPTY;
             for (int i = 0; i < inventory.getSlots(); i++) {
@@ -228,7 +220,7 @@ public class SmartTrapBlock extends Block implements EntityBlock, ProperWaterlog
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
             BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof SmartTrapBlockEntity smartTrap) {
+            if (be instanceof SmartMeshBlockEntity smartTrap) {
                 smartTrap.dropInventory();
             }
             super.onRemove(state, level, pos, newState, isMoving);
@@ -237,18 +229,7 @@ public class SmartTrapBlock extends Block implements EntityBlock, ProperWaterlog
 
     @Override
     public InteractionResult onWrenched(BlockState state, UseOnContext context) {
-        Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        BlockState rotated = getRotatedBlockState(state, context.getClickedFace());
-        if (!rotated.canSurvive(level, pos)) {
-            return InteractionResult.PASS;
-        }
-
-        if (level.setBlock(pos, rotated, 3)) {
-            IWrenchable.playRotateSound(level, pos);
-            return InteractionResult.SUCCESS;
-        }
-
+        // 禁用扳手旋转
         return InteractionResult.PASS;
     }
 
@@ -286,16 +267,7 @@ public class SmartTrapBlock extends Block implements EntityBlock, ProperWaterlog
 
     @Override
     public BlockState getRotatedBlockState(BlockState originalState, Direction targetedFace) {
-        if (!originalState.hasProperty(FACING)) {
-            return originalState;
-        }
-
-        Direction currentFacing = originalState.getValue(FACING);
-        if (currentFacing.getAxis().equals(targetedFace.getAxis())) {
-            return originalState;
-        }
-
-        Direction newFacing = currentFacing.getClockWise(targetedFace.getAxis());
-        return originalState.setValue(FACING, newFacing);
+        // 无朝向，直接返回原始状态
+        return originalState;
     }
 }

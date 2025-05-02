@@ -1,9 +1,11 @@
 package com.adonis.createfisheryindustry;
 
+import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
+import com.adonis.createfisheryindustry.registry.CreateFisheryEntityTypes;
 import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
 import com.adonis.createfisheryindustry.registry.CreateFisheryTabs;
 import com.mojang.logging.LogUtils;
@@ -24,11 +26,10 @@ import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
 import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-// --- 新增导入 ---
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
-// --- 新增导入结束 ---
 import org.slf4j.Logger;
 
 @Mod(CreateFisheryMod.ID)
@@ -48,18 +49,17 @@ public class CreateFisheryMod {
     }
 
     public CreateFisheryMod(IEventBus bus, ModContainer modContainer) {
-        LOGGER.info("Create Fishery Industry initializing..."); // --- 新增日志 ---
+        LOGGER.info("Create Fishery Industry initializing...");
 
         // 注册 Create 基础内容
         REGISTRATE.registerEventListeners(bus);
         CreateFisheryBlocks.register();
         CreateFisheryBlockEntities.register(bus);
+        CreateFisheryEntityTypes.register(bus); // 添加实体类型注册
         CreateFisheryItems.register(bus);
         CreateFisheryTabs.register(bus);
 
-
         // 注册配置
-//        CreateFisheryCommonConfig.register();
         modContainer.registerConfig(ModConfig.Type.COMMON, CreateFisheryCommonConfig.CONFIG_SPEC);
 
         // 注册事件监听器
@@ -69,30 +69,28 @@ public class CreateFisheryMod {
         bus.addListener(this::processIMC);
         bus.addListener(CreateFisheryMod::clientInit);
 
-        // --- 新增或修改内容开始 ---
-        // 注册服务器启动/关闭监听器
+        // 注册服务器和 tooltip 事件
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
-        // --- 新增或修改内容结束 ---
+        NeoForge.EVENT_BUS.addListener(TooltipHandler::onTooltip);
     }
 
     public void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 CreateFisheryBlockEntities.MESH_TRAP.get(),
-                (be, side) -> be.getCapability(Capabilities.ItemHandler.BLOCK, side) // 去掉了分号
+                (be, side) -> be.getCapability(Capabilities.ItemHandler.BLOCK, side)
         );
         TrapNozzleBlockEntity.registerCapabilities(event);
+        SmartMeshBlockEntity.registerCapabilities(event);
     }
-
 
     private void setup(final FMLCommonSetupEvent event) {
-        LOGGER.info("Create Fishery Industry setup..."); // --- 新增日志 ---
-        // 初始化配置
-        CreateFisheryCommonConfig.onLoad(); // --- 新增调用 ---
+        LOGGER.info("Create Fishery Industry setup...");
+        CreateFisheryCommonConfig.onLoad();
+        // 初始化 tooltip 描述
+        TooltipHandler.init();
     }
-
-
 
     private void enqueueIMC(final InterModEnqueueEvent event) {}
 
@@ -100,7 +98,6 @@ public class CreateFisheryMod {
 
     public static void clientInit(final FMLClientSetupEvent event) {}
 
-    // --- 新增方法开始 ---
     private void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Create Fishery Industry server starting...");
         CreateFisheryCommonConfig.refreshCache();
@@ -109,5 +106,4 @@ public class CreateFisheryMod {
     private void onServerStopping(ServerStoppingEvent event) {
         LOGGER.info("Create Fishery Industry server stopping...");
     }
-    // --- 新增方法结束 ---
 }

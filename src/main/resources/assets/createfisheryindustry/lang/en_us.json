@@ -1,12 +1,45 @@
 {
   "block.createfisheryindustry.frame_trap": "Frame Trap",
   "block.createfisheryindustry.mesh_trap": "Mesh Trap",
+  "block.createfisheryindustry.trap_nozzle": "Trap Nozzle",
+  "block.createfisheryindustry.smart_mesh": "Smart Mesh",
   "item.createfisheryindustry.zinc_sheet": "Zinc Sheet",
   "item.createfisheryindustry.copper_diving_leggings": "Copper Diving Leggings",
   "item.createfisheryindustry.netherite_diving_leggings": "Netherite Diving Leggings",
+  "item.createfisheryindustry.harpoon": "Harpoon",
   "itemGroup.createfisheryindustry.base": "Create:Fishery Industry",
+
   "create.gui.goggles.mesh_trap_contents": "Mesh Trap Contents",
   "create.gui.goggles.inventory.empty": "Empty",
   "create.gui.goggles.trap_nozzle_contents": "Trap Nozzle Contents",
-  "create.gui.goggles.inventory.empty": "Empty"
+  "create.gui.goggles.inventory.empty": "Empty",
+  "create.gui.goggles.smart_mesh_contents": "Smart Mesh Contents",
+  "create.gui.goggles.inventory.empty": "Empty",
+
+  "tooltip.keyShift": "Shift",
+  "tooltip.holdForDescription": "Hold [$] for summary",
+
+  "tooltip.createfishery.copper_leggings": "Copper Diving Leggings Used with diving boots to experience a moonwalk-like feeling underwater.",
+  "tooltip.createfishery.when_worn": "When worn:",
+  "tooltip.createfishery.copper_leggings.effect": "The wearer gains super jump ability in water, up to four blocks high, with no fall damage upon landing.",
+
+  "tooltip.createfishery.netherite_leggings": "Netherite Diving Leggings Used with diving boots to experience a moonwalk-like feeling underwater or in lava seas.",
+  "tooltip.createfishery.netherite_leggings.effect": "The wearer gains super jump ability in water or lava, up to four blocks high, with no fall damage upon landing.",
+
+  "tooltip.createfishery.frame_trap": "Component for fishing on contraption.",
+  "tooltip.createfishery.when_in_water": "When in contraption:",
+  "tooltip.createfishery.frame_trap.capture": "Captures nearby fish, or other small creatures, and items along the path. Also gains fishing loot from the current biome over time. Grants experience nuggets when fishing triggers or creatures are captured.",
+
+  "tooltip.createfishery.mesh_trap": "Mesh Trap Automatically collects nearby items, captures fish, or other small creatures, and stores them. Grants experience nuggets when capturing. Attempts to output stored items to adjacent containers. Can be used with a mechanical arm for easy access. Adjacent conveyor items are automatically drawn in.",
+  "tooltip.createfishery.right_click": "When right-clicked:",
+  "tooltip.createfishery.mesh_trap.extract": "Extracts items, up to one stack at a time.",
+
+  "tooltip.createfishery.trap_nozzle": "Attach to the front of an Encased Fan to distribute its effect on Entities in all directions. Automatically collects nearby items, captures fish, or other small creatures, and stores them. Grants experience nuggets when capturing. Attempts to output stored items to adjacent containers. Can be used with a mechanical arm for easy access.",
+  "tooltip.createfishery.when_attached": "When attached to an encased fan:",
+  "tooltip.createfishery.trap_nozzle.guide": "Guides captured items to a specific output.",
+  "tooltip.createfishery.trap_nozzle.extract": "Extracts items, up to one stack at a time.",
+
+  "tooltip.createfishery.smart_mesh": "Smart Mesh Automatically collects nearby items and stores them. Attempts to output stored items to adjacent containers. Can be used with a mechanical arm for easy access. Adjacent conveyor items are automatically drawn in. Can be configured with items or filters.",
+  "tooltip.createfishery.right_click_empty": "When right-clicked with empty hand:",
+  "tooltip.createfishery.smart_mesh.extract": "Extracts items, up to one stack at a time."
 }

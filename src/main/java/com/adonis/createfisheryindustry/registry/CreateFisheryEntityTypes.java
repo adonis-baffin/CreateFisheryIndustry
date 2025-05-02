@@ -1,0 +1,26 @@
+package com.adonis.createfisheryindustry.registry;
+
+import com.adonis.createfisheryindustry.CreateFisheryMod;
+import com.adonis.createfisheryindustry.entity.HarpoonEntity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+public class CreateFisheryEntityTypes {
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = 
+            DeferredRegister.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, CreateFisheryMod.ID);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<HarpoonEntity>> HARPOON = 
+            ENTITY_TYPES.register("harpoon", 
+                    () -> EntityType.Builder.<HarpoonEntity>of(HarpoonEntity::new, MobCategory.MISC)
+                            .sized(0.5F, 0.5F)
+                            .clientTrackingRange(4)
+                            .updateInterval(20)
+                            .build("harpoon"));
+
+    public static void register(IEventBus bus) {
+        ENTITY_TYPES.register(bus);
+    }
+}

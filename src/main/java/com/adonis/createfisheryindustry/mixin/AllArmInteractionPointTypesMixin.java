@@ -1,6 +1,7 @@
 package com.adonis.createfisheryindustry.mixin;
 
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapInteractionPointType;
+import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshInteractionPointType;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleInteractionPointType;
 import com.simibubi.create.content.kinetics.mechanicalArm.AllArmInteractionPointTypes;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointType;
@@ -23,7 +24,7 @@ public class AllArmInteractionPointTypesMixin {
             // 注册 TrapNozzleInteractionPointType
             registerMethod.invoke(null, "trap_nozzle", new TrapNozzleInteractionPointType());
 
-            registerMethod.invoke(null, "smart_trap", new TrapNozzleInteractionPointType());
+            registerMethod.invoke(null, "smart_mesh", new SmartMeshInteractionPointType());
         } catch (Exception e) {
             // 记录异常以便调试，但不抛出以避免崩溃
             System.err.println("Failed to register interaction point types: " + e.getMessage());

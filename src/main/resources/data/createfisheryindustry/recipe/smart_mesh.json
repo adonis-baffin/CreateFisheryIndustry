@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "tag": "c:plates/brass"
+    },
+    "w": {
+      "tag": "minecraft:wool"
+    },
+    "e": {
+      "item": "create:electron_tube"
+    }
+  },
+  "pattern": [
+    " # ",
+    " w ",
+    " e "
+  ],
+  "result": {
+    "count": 1,
+    "id": "createfisheryindustry:smart_mesh"
+  }
+}

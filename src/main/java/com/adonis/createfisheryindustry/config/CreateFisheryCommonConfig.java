@@ -76,8 +76,8 @@ public class CreateFisheryCommonConfig {
             lastWhitelistUpdate = currentTime;
 
             // 记录日志，便于调试
-            CreateFisheryMod.LOGGER.info("Updated whitelist: {}",
-                    cachedWhitelist.stream().map(ResourceLocation::toString).collect(Collectors.joining(", ")));
+//            CreateFisheryMod.LOGGER.info("Updated whitelist: {}",
+//                    cachedWhitelist.stream().map(ResourceLocation::toString).collect(Collectors.joining(", ")));
         }
         return cachedWhitelist;
     }
@@ -94,8 +94,8 @@ public class CreateFisheryCommonConfig {
             lastBlacklistUpdate = currentTime;
 
             // 记录日志，便于调试
-            CreateFisheryMod.LOGGER.info("Updated blacklist: {}",
-                    cachedBlacklist.stream().map(ResourceLocation::toString).collect(Collectors.joining(", ")));
+//            CreateFisheryMod.LOGGER.info("Updated blacklist: {}",
+//                    cachedBlacklist.stream().map(ResourceLocation::toString).collect(Collectors.joining(", ")));
         }
         return cachedBlacklist;
     }
@@ -106,18 +106,18 @@ public class CreateFisheryCommonConfig {
         lastBlacklistUpdate = 0;
         getWhitelist();
         getBlacklist();
-        CreateFisheryMod.LOGGER.info("Config cache forcibly refreshed");
+//        CreateFisheryMod.LOGGER.info("Config cache forcibly refreshed");
     }
 
     // 配置加载事件处理
     public static void onLoad() {
-        CreateFisheryMod.LOGGER.info("CreateFisheryCommonConfig loaded.");
+//        CreateFisheryMod.LOGGER.info("CreateFisheryCommonConfig loaded.");
         refreshCache();
     }
 
     // 配置重载事件处理
     public static void onReload() {
-        CreateFisheryMod.LOGGER.info("CreateFisheryCommonConfig reloaded.");
+//        CreateFisheryMod.LOGGER.info("CreateFisheryCommonConfig reloaded.");
         refreshCache();
     }
 
@@ -127,8 +127,8 @@ public class CreateFisheryCommonConfig {
         boolean result = whitelist.contains(entityId);
         if (entityId.toString().equals("minecraft:breeze")) {
             // 特殊调试breeze实体
-            CreateFisheryMod.LOGGER.debug("Checking if breeze is whitelisted: {} (whitelist size: {})",
-                    result, whitelist.size());
+//            CreateFisheryMod.LOGGER.debug("Checking if breeze is whitelisted: {} (whitelist size: {})",
+//                    result, whitelist.size());
         }
         return result;
     }

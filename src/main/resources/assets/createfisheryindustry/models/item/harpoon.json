@@ -1,0 +1,30 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "createfisheryindustry:item/harpoon"
+  },
+  "display": {
+    "gui": {
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1]
+    },
+    "fixed": {
+      "rotation": [0, 180, 0],
+      "scale": [1, 1, 1]
+    }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "createfisheryindustry:custom_model_data": 1
+      },
+      "model": "createfisheryindustry:item/harpoon_in_hand"
+    },
+    {
+      "predicate": {
+        "createfisheryindustry:throwing": 1
+      },
+      "model": "createfisheryindustry:item/harpoon_throwing"
+    }
+  ]
+}
