@@ -26,8 +26,6 @@ public class AllArmInteractionPointTypesMixin {
 
             registerMethod.invoke(null, "smart_mesh", new SmartMeshInteractionPointType());
         } catch (Exception e) {
-            // 记录异常以便调试，但不抛出以避免崩溃
-            System.err.println("Failed to register interaction point types: " + e.getMessage());
         }
     }
 }

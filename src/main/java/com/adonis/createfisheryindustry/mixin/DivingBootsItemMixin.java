@@ -44,7 +44,6 @@ public class DivingBootsItemMixin {
             entity.setDeltaMovement(motion.x, 0.8, motion.z);
             // 设置强化跳跃标志
             entity.getPersistentData().putBoolean("EnhancedJumpActive", true);
-            System.out.println("Enhanced jump in " + (entity.isInLava() ? "lava" : "water") + ": Y velocity set to 0.8 for " + entity.getName().getString());
         }
     }
 }

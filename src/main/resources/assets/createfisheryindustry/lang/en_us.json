@@ -4,6 +4,8 @@
   "block.createfisheryindustry.trap_nozzle": "Trap Nozzle",
   "block.createfisheryindustry.smart_mesh": "Smart Mesh",
   "item.createfisheryindustry.zinc_sheet": "Zinc Sheet",
+  "item.createfisheryindustry.worn_harpoon": "Worn Harpoon",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "An ancient, worn harpoon lost in the depths; polish it to restore its former gloss",
   "item.createfisheryindustry.copper_diving_leggings": "Copper Diving Leggings",
   "item.createfisheryindustry.netherite_diving_leggings": "Netherite Diving Leggings",
   "item.createfisheryindustry.harpoon": "Harpoon",
@@ -30,13 +32,13 @@
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "When in contraption:",
   "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "Captures nearby fish, or other small creatures, and items along the path. Also gains fishing loot from the current biome over time. Grants experience nuggets when fishing triggers or creatures are captured.",
 
-  "block.createfisheryindustry.mesh_trap.tooltip.summary": "Mesh Trap automatically collects nearby items, captures fish, or other small creatures, and stores them.",
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "Automatically collects nearby items, captures fish, or other small creatures, and stores them",
   "block.createfisheryindustry.mesh_trap.tooltip.condition1": "When right-clicked:",
   "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "Extracts items, up to one stack at a time.",
 
   "block.createfisheryindustry.trap_nozzle.tooltip.summary": "Attach to the front of an Encased Fan to distribute its effect on Entities in all directions.",
   "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "When attached to an encased fan:",
-  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "Guides captured items to a specific output.",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "Automatically collects nearby items, captures fish, or other small creatures, and stores them",
   "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "When right-clicked:",
   "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "Extracts items, up to one stack at a time.",
 

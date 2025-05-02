@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
@@ -28,19 +27,27 @@ public class CreateFisheryItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(net.minecraft.core.registries.Registries.ITEM, CreateFisheryMod.ID);
     public static LinkedHashSet<Supplier<Item>> CREATIVE_TAB_ITEMS = Sets.newLinkedHashSet();
 
-    public static DeferredHolder<Item, Item> registerWithTab(final String name, final Supplier<Item> supplier) {
-        DeferredHolder<Item, Item> item = ITEMS.register(name, supplier);
-        CREATIVE_TAB_ITEMS.add(item);
-        return item;
-    }
-
     public static Item.Properties basicItem() {
         return new Item.Properties().stacksTo(64);
     }
 
-    public static final DeferredHolder<Item, Item> ZINC_SHEET = registerWithTab("zinc_sheet",
-            () -> new Item(basicItem()));
+    public static final ItemEntry<Item> ZINC_SHEET = REGISTRATE.item("zinc_sheet",
+                    p -> new Item(basicItem()))
+            .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("zinc_sheet", net.minecraft.core.registries.Registries.ITEM)))
+            .register();
 
+    public static final ItemEntry<Item> WORN_HARPOON = REGISTRATE.item("worn_harpoon",
+                    p -> new Item(basicItem()))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.worn_harpoon");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("worn_harpoon", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<HarpoonItem> HARPOON = REGISTRATE.item("harpoon",
+                    p -> new HarpoonItem(new Item.Properties().durability(250).stacksTo(1)))
+            .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("harpoon", net.minecraft.core.registries.Registries.ITEM)))
+            .register();
 
     public static final ItemEntry<CopperDivingLeggingsItem> COPPER_DIVING_LEGGINGS = REGISTRATE.item("copper_diving_leggings",
                     p -> new CopperDivingLeggingsItem(
@@ -65,12 +72,6 @@ public class CreateFisheryItems {
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("netherite_diving_leggings", net.minecraft.core.registries.Registries.ITEM));
             })
             .register();
-
-    // 鱼叉
-// 鱼叉
-    public static final DeferredHolder<Item, Item> HARPOON = registerWithTab("harpoon",
-            () -> new HarpoonItem(new Item.Properties().durability(250).stacksTo(1)));
-
 
     public static void register(IEventBus bus) {
         ITEMS.register(bus);

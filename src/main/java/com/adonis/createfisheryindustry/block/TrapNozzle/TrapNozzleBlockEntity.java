@@ -143,12 +143,10 @@ public class TrapNozzleBlockEntity extends SmartBlockEntity implements IHaveGogg
                     if (inWater) {
                         level.addParticle(new FluidParticleData(AllParticleTypes.FLUID_DRIP.get(), new FluidStack(Fluids.WATER, 1000)),
                                 start.x, start.y, start.z, motion.x, motion.y, motion.z);
-                        CreateFisheryMod.LOGGER.debug("Spawned FLUID_PARTICLE at ({}, {}, {}) with motion ({}, {}, {})",
-                                start.x, start.y, start.z, motion.x, motion.y, motion.z);
+
                     } else {
                         level.addParticle(ParticleTypes.POOF, start.x, start.y, start.z, motion.x, motion.y, motion.z);
-                        CreateFisheryMod.LOGGER.debug("Spawned POOF particle at ({}, {}, {}) with motion ({}, {}, {})",
-                                start.x, start.y, start.z, motion.x, motion.y, motion.z);
+
                     }
                 }
             }
@@ -307,7 +305,6 @@ public class TrapNozzleBlockEntity extends SmartBlockEntity implements IHaveGogg
     // 修改 processEntityDrops 方法
     private void processEntityDrops(ServerLevel level, Mob mob) {
         ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
-        CreateFisheryMod.LOGGER.debug("Processing drops for entity in TrapNozzle: {}", entityId);
 
         var lootTableKey = mob.getLootTable();
         if (lootTableKey == null) {
@@ -349,7 +346,6 @@ public class TrapNozzleBlockEntity extends SmartBlockEntity implements IHaveGogg
         boolean inWater = getBlockState().getValue(TrapNozzleBlock.WATERLOGGED);
         spawnParticles(level, mob.getX(), mob.getY() + 0.5, mob.getZ(), inWater);
         addExperienceNugget(level, mob.getX(), mob.getY() + 0.5, mob.getZ());
-        CreateFisheryMod.LOGGER.debug("Successfully captured entity in TrapNozzle: {}", entityId);
     }
 
     // 新增 spawnParticles 方法
@@ -358,8 +354,7 @@ public class TrapNozzleBlockEntity extends SmartBlockEntity implements IHaveGogg
         level.sendParticles(particleType, x, y, z, 30, 0.5, 0.5, 0.5, 0.1);
         level.playSound(null, new BlockPos((int) x, (int) y, (int) z),
                 SoundEvents.BUCKET_FILL_FISH, SoundSource.BLOCKS, 1.0F, 1.0F);
-        CreateFisheryMod.LOGGER.debug("Spawned {} particles at ({}, {}, {}), inWater: {}",
-                particleType == ParticleTypes.BUBBLE ? "BUBBLE" : "CLOUD", x, y, z, inWater);
+
     }
 
     // 新增 addExperienceNugget 方法
@@ -378,9 +373,7 @@ public class TrapNozzleBlockEntity extends SmartBlockEntity implements IHaveGogg
                 ItemEntity itemEntity = new ItemEntity(level, x, y, z, remainder);
                 level.addFreshEntity(itemEntity);
             }
-            CreateFisheryMod.LOGGER.debug("Added experience nugget at ({}, {}, {})", x, y, z);
         } else {
-            CreateFisheryMod.LOGGER.warn("Experience nugget item not found, falling back to ExperienceOrb at ({}, {}, {})", x, y, z);
             level.addFreshEntity(new net.minecraft.world.entity.ExperienceOrb(level, x, y, z, 1));
         }
     }

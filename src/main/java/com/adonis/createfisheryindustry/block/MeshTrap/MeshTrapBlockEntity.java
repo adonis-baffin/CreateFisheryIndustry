@@ -244,7 +244,6 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
             // 检查目标方块实体类型，如果是 MeshTrap 或 SmartMesh 则跳过
             if (level.getBlockEntity(neighborPos) instanceof MeshTrapBlockEntity ||
                     level.getBlockEntity(neighborPos) instanceof SmartMeshBlockEntity) {
-                CreateFisheryMod.LOGGER.debug("Skipping export to another trap at {}", neighborPos);
                 continue;
             }
 
@@ -322,26 +321,22 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
             ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
 
             if (entityId.toString().equals("minecraft:breeze")) {
-                CreateFisheryMod.LOGGER.debug("Found breeze entity in MeshTrap: {}", entityId);
             }
 
             if (CreateFisheryCommonConfig.isEntityBlacklisted(entityId)) {
                 if (entityId.toString().equals("minecraft:breeze")) {
-                    CreateFisheryMod.LOGGER.debug("Breeze is in blacklist, skipping in MeshTrap");
                 }
                 continue;
             }
 
             if (CreateFisheryCommonConfig.isEntityWhitelisted(entityId)) {
                 if (entityId.toString().equals("minecraft:breeze")) {
-                    CreateFisheryMod.LOGGER.debug("Breeze is in whitelist, capturing in MeshTrap");
                 }
                 processEntityDrops(level, mob);
                 continue;
             }
 
             if (entityId.toString().equals("minecraft:breeze")) {
-                CreateFisheryMod.LOGGER.debug("Breeze is neither in whitelist nor blacklist, checking size in MeshTrap");
             }
 
             AABB collisionBox = entity.getBoundingBox();
@@ -350,24 +345,20 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
             double depth = collisionBox.getZsize();
 
             if (entityId.toString().equals("minecraft:breeze")) {
-                CreateFisheryMod.LOGGER.debug("Breeze size in MeshTrap: {}x{}x{}, limit: {}",
-                        width, height, depth, MAX_COLLISION_BOX_SIZE);
             }
 
             if (width <= MAX_COLLISION_BOX_SIZE && height <= MAX_COLLISION_BOX_SIZE && depth <= MAX_COLLISION_BOX_SIZE) {
                 if (entityId.toString().equals("minecraft:breeze")) {
-                    CreateFisheryMod.LOGGER.debug("Breeze size check passed in MeshTrap, capturing");
                 }
                 processEntityDrops(level, mob);
             } else if (entityId.toString().equals("minecraft:breeze")) {
-                CreateFisheryMod.LOGGER.debug("Breeze size check failed in MeshTrap, not capturing");
             }
         }
     }
 
     private void processEntityDrops(ServerLevel level, Mob mob) {
         ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
-        CreateFisheryMod.LOGGER.debug("Processing drops for entity in MeshTrap: {}", entityId);
+
 
         var lootTableKey = mob.getLootTable();
         if (lootTableKey == null) return;
@@ -414,9 +405,7 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
                 15, 0.5, 0.5, 0.5, 0.1);
         level.playSound(null, new BlockPos((int) mob.getX(), (int) mob.getY(), (int) mob.getZ()),
                 SoundEvents.BUCKET_FILL_FISH, SoundSource.BLOCKS, 1.0F, 1.0F);
-        CreateFisheryMod.LOGGER.debug("Spawned {} particles at ({}, {}, {}), inWater: {}",
-                particleType == ParticleTypes.BUBBLE ? "BUBBLE" : "CLOUD",
-                mob.getX(), mob.getY() + 0.5, mob.getZ(), inWater);
+
 
         // 固定生成1个经验颗粒
         Item expNuggetItem = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("create", "experience_nugget"));
@@ -433,16 +422,9 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
                 ItemEntity itemEntity = new ItemEntity(level, mob.getX(), mob.getY(), mob.getZ(), remainder);
                 level.addFreshEntity(itemEntity);
             }
-        } else {
-            // 回退到生成经验球
-            CreateFisheryMod.LOGGER.warn("Experience nugget item not found, falling back to ExperienceOrb");
-            level.addFreshEntity(new net.minecraft.world.entity.ExperienceOrb(level, mob.getX(), mob.getY(), mob.getZ(), 1));
         }
 
         mob.setRemoved(Entity.RemovalReason.KILLED);
-
-        CreateFisheryMod.LOGGER.debug("Successfully captured entity in MeshTrap: {}", entityId);
-
         setChanged();
         sendData();
         level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);

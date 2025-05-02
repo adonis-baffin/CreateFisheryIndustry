@@ -1,0 +1,19 @@
+{
+  "type": "create:crushing",
+  "ingredients": [
+    {
+      "item": "createfisheryindustry:harpoon"
+    }
+  ],
+  "processing_time": 200,
+  "results": [
+    {
+      "id": "create:zinc_ingot"
+    },
+    {
+      "chance": 0.75,
+      "count": 3,
+      "id": "create:zinc_nugget"
+    }
+  ]
+}

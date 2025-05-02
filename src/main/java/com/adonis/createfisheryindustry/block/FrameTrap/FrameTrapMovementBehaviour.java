@@ -2,6 +2,7 @@ package com.adonis.createfisheryindustry.block.FrameTrap;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
+import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import net.minecraft.core.BlockPos;
@@ -35,6 +36,8 @@ import java.util.List;
 public class FrameTrapMovementBehaviour implements MovementBehaviour {
     // 可调参数：最大碰撞箱尺寸（宽、高、深）
     private static final double MAX_COLLISION_BOX_SIZE = 0.8;
+    // 新增：worn_harpoon 的生成概率（2%）
+    private static final float WORN_HARPOON_CHANCE = 0.03f;
 
     @Override
     public void tick(MovementContext context) {
@@ -59,6 +62,12 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
                 LootParams params = fishing.buildLootContext(context, level, pos);
                 LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.FISHING);
                 List<ItemStack> loots = lootTable.getRandomItems(params);
+
+                // 新增：以 WORN_HARPOON_CHANCE 概率添加 worn_harpoon
+                if (fishing.getFishingHook().getRandom().nextFloat() < WORN_HARPOON_CHANCE) {
+                    ItemStack wornHarpoon = new ItemStack(CreateFisheryItems.WORN_HARPOON.get());
+                    loots.add(wornHarpoon);
+                }
 
                 List<ServerPlayer> players = level.getServer().getPlayerList().getPlayers();
                 ServerPlayer selectedPlayer = null;
@@ -125,13 +134,11 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
 
             // 调试日志
             if (entityId.toString().equals("minecraft:breeze")) {
-                CreateFisheryMod.LOGGER.debug("Found breeze entity: {}", entityId);
             }
 
             // 规则1：黑名单中的实体直接跳过，绝对不捕获
             if (CreateFisheryCommonConfig.isEntityBlacklisted(entityId)) {
                 if (entityId.toString().equals("minecraft:breeze")) {
-                    CreateFisheryMod.LOGGER.debug("Breeze is in blacklist, skipping");
                 }
                 continue;
             }
@@ -139,7 +146,6 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
             // 规则2：白名单中的实体直接捕获，不考虑大小限制
             if (CreateFisheryCommonConfig.isEntityWhitelisted(entityId)) {
                 if (entityId.toString().equals("minecraft:breeze")) {
-                    CreateFisheryMod.LOGGER.debug("Breeze is in whitelist, capturing");
                 }
                 processEntityDrops(context, level, mob);
                 continue;
@@ -147,7 +153,6 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
 
             // 如果是breeze实体但执行到这里，说明既不在白名单也不在黑名单
             if (entityId.toString().equals("minecraft:breeze")) {
-                CreateFisheryMod.LOGGER.debug("Breeze is neither in whitelist nor blacklist, checking size");
             }
 
             // 规则3：既不在白名单也不在黑名单的实体，根据尺寸判断是否捕获
@@ -157,24 +162,19 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
             double depth = collisionBox.getZsize();
 
             if (entityId.toString().equals("minecraft:breeze")) {
-                CreateFisheryMod.LOGGER.debug("Breeze size: {}x{}x{}, limit: {}",
-                        width, height, depth, MAX_COLLISION_BOX_SIZE);
             }
 
             if (width <= MAX_COLLISION_BOX_SIZE && height <= MAX_COLLISION_BOX_SIZE && depth <= MAX_COLLISION_BOX_SIZE) {
                 if (entityId.toString().equals("minecraft:breeze")) {
-                    CreateFisheryMod.LOGGER.debug("Breeze size check passed, capturing");
                 }
                 processEntityDrops(context, level, mob);
             } else if (entityId.toString().equals("minecraft:breeze")) {
-                CreateFisheryMod.LOGGER.debug("Breeze size check failed, not capturing");
             }
         }
     }
 
     private void processEntityDrops(MovementContext context, ServerLevel level, Mob mob) {
         ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
-        CreateFisheryMod.LOGGER.debug("Processing drops for entity: {}", entityId);
 
         var lootTableKey = mob.getLootTable();
         if (lootTableKey == null) return;
@@ -205,7 +205,6 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
         spawnParticles(level, mob.getX(), mob.getY() + 0.5, mob.getZ(), level.getFluidState(new BlockPos((int) mob.getX(), (int) mob.getY(), (int) mob.getZ())).is(net.minecraft.world.level.material.Fluids.WATER));
 
         // 记录实体被成功捕获
-        CreateFisheryMod.LOGGER.debug("Successfully captured entity: {}", entityId);
     }
 
     private void addExperienceNugget(MovementContext context, ServerLevel level, double x, double y, double z) {
@@ -213,9 +212,7 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
         if (expNuggetItem != null && expNuggetItem != BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace("air"))) {
             ItemStack expNugget = new ItemStack(expNuggetItem, 1);
             dropItem(context, expNugget);
-            CreateFisheryMod.LOGGER.debug("Added experience nugget at ({}, {}, {})", x, y, z);
         } else {
-            CreateFisheryMod.LOGGER.warn("Experience nugget item not found, falling back to ExperienceOrb at ({}, {}, {})", x, y, z);
             level.addFreshEntity(new net.minecraft.world.entity.ExperienceOrb(level, x, y, z, 1));
         }
     }
@@ -226,15 +223,12 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
         level.sendParticles(particleType, x, y, z, 15, 0.5, 0.5, 0.5, 0.1);
         level.playSound(null, new BlockPos((int) x, (int) y, (int) z),
                 SoundEvents.BUCKET_FILL_FISH, SoundSource.BLOCKS, 1.0F, 1.0F);
-        CreateFisheryMod.LOGGER.debug("Spawned {} particles at ({}, {}, {}), inWater: {}",
-                particleType == ParticleTypes.BUBBLE ? "BUBBLE" : "CLOUD", x, y, z, inWater);
     }
 
     protected boolean isEntityWhitelisted(EntityType<?> type) {
         ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
         boolean result = CreateFisheryCommonConfig.isEntityWhitelisted(id);
         if (id.toString().equals("minecraft:breeze")) {
-            CreateFisheryMod.LOGGER.debug("Checking if breeze is whitelisted: {}", result);
         }
         return result;
     }

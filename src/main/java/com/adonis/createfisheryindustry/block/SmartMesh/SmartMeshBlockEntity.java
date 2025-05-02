@@ -71,7 +71,6 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
                 setChanged();
                 if (level != null && !level.isClientSide()) {
                     level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-                    CreateFisheryMod.LOGGER.debug("Inventory changed in slot {}", slot);
                 }
             }
         };
@@ -145,7 +144,6 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
         ItemStack remainder = stack.copy();
         for (int i = 0; i < inventory.getSlots(); i++) {
             remainder = inventory.insertItem(i, remainder, false);
-            CreateFisheryMod.LOGGER.debug("Inserting item {} into slot {}, remainder: {}", stack.getDescriptionId(), i, remainder.getCount());
             if (remainder.isEmpty()) {
                 return true;
             }
@@ -278,7 +276,6 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
             // 检查目标方块实体类型，如果是 MeshTrap 或 SmartMesh 则跳过
             if (level.getBlockEntity(neighborPos) instanceof MeshTrapBlockEntity ||
                     level.getBlockEntity(neighborPos) instanceof SmartMeshBlockEntity) {
-                CreateFisheryMod.LOGGER.debug("Skipping export to another trap at {}", neighborPos);
                 continue;
             }
 
@@ -336,7 +333,6 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
 
     protected boolean canAcceptItem(ItemStack stack) {
         boolean canAccept = filtering.test(stack);
-        CreateFisheryMod.LOGGER.debug("Checking if item {} can be accepted: {}", stack.getDescriptionId(), canAccept);
         return canAccept;
     }
 
@@ -370,7 +366,6 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
         ItemStackHandler inv = getInventory();
         boolean isEmpty = true;
 
-        CreateFisheryMod.LOGGER.debug("Checking inventory for goggles on client: isClientSide={}", level.isClientSide);
 
         for (int i = 0; i < inv.getSlots(); i++) {
             ItemStack stack = inv.getStackInSlot(i);
@@ -380,13 +375,11 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
                         .add(Component.translatable(stack.getDescriptionId()).withStyle(ChatFormatting.GRAY))
                         .add(CreateLang.text(" x" + stack.getCount()).style(ChatFormatting.GREEN))
                         .forGoggles(tooltip, 1);
-                CreateFisheryMod.LOGGER.debug("Goggle Tooltip: Slot {} contains {} x{}", i, stack.getDescriptionId(), stack.getCount());
             }
         }
 
         if (isEmpty) {
             CreateLang.translate("gui.goggles.inventory.empty").forGoggles(tooltip, 1);
-            CreateFisheryMod.LOGGER.debug("Goggle Tooltip: Inventory is empty");
         }
 
         return true;

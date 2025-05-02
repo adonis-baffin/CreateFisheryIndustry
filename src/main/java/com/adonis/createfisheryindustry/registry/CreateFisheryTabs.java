@@ -30,6 +30,7 @@ public class CreateFisheryTabs {
             output.accept(CreateFisheryBlocks.TRAP_NOZZLE);
             output.accept(CreateFisheryBlocks.SMART_MESH);
             output.accept(CreateFisheryItems.ZINC_SHEET.get());
+            output.accept(CreateFisheryItems.WORN_HARPOON.get());
             output.accept(CreateFisheryItems.COPPER_DIVING_LEGGINGS.get());
             output.accept(CreateFisheryItems.NETHERITE_DIVING_LEGGINGS.get());
             output.accept(CreateFisheryItems.HARPOON.get());

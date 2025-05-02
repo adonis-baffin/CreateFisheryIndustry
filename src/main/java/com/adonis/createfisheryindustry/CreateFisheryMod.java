@@ -48,8 +48,6 @@ public class CreateFisheryMod {
     }
 
     public CreateFisheryMod(IEventBus bus, ModContainer modContainer) {
-
-
         // 注册 Create 基础内容
         REGISTRATE.registerEventListeners(bus);
         CreateFisheryBlocks.register();
@@ -84,7 +82,6 @@ public class CreateFisheryMod {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-
         CreateFisheryCommonConfig.onLoad();
     }
 
@@ -95,11 +92,8 @@ public class CreateFisheryMod {
     public static void clientInit(final FMLClientSetupEvent event) {}
 
     private void onServerStarting(ServerStartingEvent event) {
-
         CreateFisheryCommonConfig.refreshCache();
     }
 
-    private void onServerStopping(ServerStoppingEvent event) {
-
-    }
+    private void onServerStopping(ServerStoppingEvent event) {}
 }

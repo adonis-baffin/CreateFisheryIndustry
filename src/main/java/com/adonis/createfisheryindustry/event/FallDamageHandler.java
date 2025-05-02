@@ -18,7 +18,6 @@ public class FallDamageHandler {
             event.setCanceled(true);
             // 重置强化跳跃标志
             entity.getPersistentData().putBoolean("EnhancedJumpActive", false);
-            System.out.println("Canceled fall damage for enhanced jump for " + entity.getName().getString());
         }
     }
 }

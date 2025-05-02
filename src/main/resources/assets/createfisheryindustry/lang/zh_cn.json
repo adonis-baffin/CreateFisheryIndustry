@@ -4,6 +4,8 @@
   "block.createfisheryindustry.trap_nozzle": "气捕网",
   "block.createfisheryindustry.smart_mesh": "智能滤网",
   "item.createfisheryindustry.zinc_sheet": "锌板",
+  "item.createfisheryindustry.worn_harpoon": "破损的鱼叉",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "折戟沉沙铁未销，自将磨洗认前朝",
   "item.createfisheryindustry.copper_diving_leggings": "铜潜水护腿",
   "item.createfisheryindustry.netherite_diving_leggings": "下界合金潜水护腿",
   "item.createfisheryindustry.harpoon": "鱼叉",
@@ -30,13 +32,13 @@
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "随动态结构移动时：",
   "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "可以捕获触碰到的鱼类，或其他种类的小型生物，并收集路径上的物品。此外，还会随时间获得当前生物群系的钓鱼战利品。每当钓鱼触发或捕获生物时，获得经验颗粒。",
 
-  "block.createfisheryindustry.mesh_trap.tooltip.summary": "捕获网自动收集周边的物品，捕获鱼类或其他小型生物，并存储。",
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "自动收集周边的物品，捕获鱼类或其他小型生物，并存储",
   "block.createfisheryindustry.mesh_trap.tooltip.condition1": "右键点击时：",
   "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "取出其中的物品，一次最多一组。",
 
   "block.createfisheryindustry.trap_nozzle.tooltip.summary": "附着在鼓风机出风口，将效果分散到各个方向。",
   "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "附着在鼓风机上时：",
-  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "引导捕获的物品到特定输出。",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "自动收集周边的物品，捕获鱼类或其他小型生物，并存储",
   "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "右键点击时：",
   "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "取出其中的物品，一次最多一组。",
 

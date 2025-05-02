@@ -31,8 +31,7 @@ public class WaterJumpEventHandler {
         Vec3 motion = player.getDeltaMovement();
         player.setDeltaMovement(motion.x, 0.4, motion.z);
         jumpHandled = true;
-        // 调试日志
-        System.out.println("LivingJumpEvent: Water jump enhanced for player " + player.getName().getString());
+
     }
 
     /**
@@ -60,12 +59,10 @@ public class WaterJumpEventHandler {
             Vec3 motion = player.getDeltaMovement();
             player.setDeltaMovement(motion.x, 0.4, motion.z);
             jumpHandled = true;
-            System.out.println("EntityTickEvent.Pre: Water jump enhanced for player " + player.getName().getString());
         }
 
         // 调试日志
         if (player.isInWater() && hasLeggings) {
-            System.out.println("Debug Pre: InWater=" + player.isInWater() + ", HasLeggings=" + hasLeggings + ", LookAngleY=" + player.getLookAngle().y + ", YMotion=" + player.getDeltaMovement().y + ", IsSwimming=" + player.isSwimming() + ", JumpHandled=" + jumpHandled);
         }
     }
 
@@ -86,7 +83,6 @@ public class WaterJumpEventHandler {
         Vec3 motion = player.getDeltaMovement();
         if (motion.y < 0.3) {
             player.setDeltaMovement(motion.x, 0.4, motion.z);
-            System.out.println("EntityTickEvent.Post: Restored water jump Y velocity for player " + player.getName().getString());
         }
 
         // 重置 jumpHandled，当玩家触地或离开水
