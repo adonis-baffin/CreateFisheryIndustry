@@ -8,6 +8,7 @@
   "item.createfisheryindustry.netherite_diving_leggings": "下界合金潜水护腿",
   "item.createfisheryindustry.harpoon": "鱼叉",
   "itemGroup.createfisheryindustry.base": "机械动力：渔业",
+  "itemGroup.createfisheryindustry.fishery_tab": "机械动力：渔业",
 
   "create.gui.goggles.mesh_trap_contents": "捕获网内含：",
   "create.gui.goggles.inventory.empty": "空",

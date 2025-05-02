@@ -1,4 +1,3 @@
-
 package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
@@ -17,7 +16,7 @@ public class CreateFisheryTabs {
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FISHERY_TAB = REGISTER.register("fishery_tab",
             () -> CreativeModeTab.builder()
-                    .title(Component.translatable("Create: Fishery Industry"))
+                    .title(Component.translatable("itemGroup.createfisheryindustry.fishery_tab")) // 使用翻译键
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
                     .icon(CreateFisheryBlocks.MESH_TRAP::asStack)
                     .displayItems(new ItemsGenerator())

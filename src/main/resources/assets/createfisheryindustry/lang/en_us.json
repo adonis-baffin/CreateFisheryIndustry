@@ -7,7 +7,8 @@
   "item.createfisheryindustry.copper_diving_leggings": "Copper Diving Leggings",
   "item.createfisheryindustry.netherite_diving_leggings": "Netherite Diving Leggings",
   "item.createfisheryindustry.harpoon": "Harpoon",
-  "itemGroup.createfisheryindustry.base": "Create:Fishery Industry",
+  "itemGroup.createfisheryindustry.base": "Create: Fishery Industry",
+  "itemGroup.createfisheryindustry.fishery_tab": "Create: Fishery Industry",
 
   "create.gui.goggles.mesh_trap_contents": "Mesh Trap Contents",
   "create.gui.goggles.inventory.empty": "Empty",

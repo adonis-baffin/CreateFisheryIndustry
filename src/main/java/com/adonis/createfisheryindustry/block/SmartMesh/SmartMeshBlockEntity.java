@@ -1,6 +1,7 @@
 package com.adonis.createfisheryindustry.block.SmartMesh;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
+import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
@@ -267,9 +268,17 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
         for (Direction direction : Direction.values()) {
             BlockPos neighborPos = getBlockPos().relative(direction);
 
+            // 检查是否是传送带，如果是则跳过
             TransportedItemStackHandlerBehaviour beltBehaviour = BlockEntityBehaviour.get(level, neighborPos,
                     TransportedItemStackHandlerBehaviour.TYPE);
             if (beltBehaviour != null) {
+                continue;
+            }
+
+            // 检查目标方块实体类型，如果是 MeshTrap 或 SmartMesh 则跳过
+            if (level.getBlockEntity(neighborPos) instanceof MeshTrapBlockEntity ||
+                    level.getBlockEntity(neighborPos) instanceof SmartMeshBlockEntity) {
+                CreateFisheryMod.LOGGER.debug("Skipping export to another trap at {}", neighborPos);
                 continue;
             }
 

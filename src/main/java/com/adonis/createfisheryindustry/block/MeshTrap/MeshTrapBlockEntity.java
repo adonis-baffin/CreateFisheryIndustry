@@ -1,6 +1,7 @@
 package com.adonis.createfisheryindustry.block.MeshTrap;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
+import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.common.TrapBlockEntity;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
@@ -238,6 +239,13 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
                     TransportedItemStackHandlerBehaviour.TYPE);
             if (beltBehaviour != null) {
                 continue; // 跳过传送带
+            }
+
+            // 检查目标方块实体类型，如果是 MeshTrap 或 SmartMesh 则跳过
+            if (level.getBlockEntity(neighborPos) instanceof MeshTrapBlockEntity ||
+                    level.getBlockEntity(neighborPos) instanceof SmartMeshBlockEntity) {
+                CreateFisheryMod.LOGGER.debug("Skipping export to another trap at {}", neighborPos);
+                continue;
             }
 
             // 使用NeoForge能力系统获取相邻方块的物品处理器

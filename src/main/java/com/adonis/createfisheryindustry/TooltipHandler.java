@@ -42,7 +42,7 @@ public class TooltipHandler {
         addDescription(CreateFisheryBlocks.TRAP_NOZZLE.asItem(),
                 "tooltip.createfishery.trap_nozzle",
                 List.of(
-                        Pair.of("tooltip.createfishery.when_attached", "tooltip.createfishery.trap_nozzle.guide"),
+//                        Pair.of("tooltip.createfishery.when_attached", "tooltip.createfishery.trap_nozzle.guide"),
                         Pair.of("tooltip.createfishery.right_click", "tooltip.createfishery.trap_nozzle.extract")
                 ));
         addDescription(CreateFisheryBlocks.SMART_MESH.asItem(),
