@@ -13,6 +13,7 @@ import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
+import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -27,7 +28,6 @@ import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import org.slf4j.Logger;
@@ -37,25 +37,24 @@ public class CreateFisheryMod {
     public static final String ID = "createfisheryindustry";
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final CreateRegistrate REGISTRATE = CreateRegistrate.create(ID)
-            .defaultCreativeTab((ResourceKey<CreativeModeTab>) null);
+            .defaultCreativeTab((ResourceKey<CreativeModeTab>) null)
+            .setTooltipModifierFactory(item ->
+                    new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                            .andThen(TooltipModifier.mapNull(KineticStats.create(item)))
+            );
 
     public static ResourceLocation asResource(String path) {
         return ResourceLocation.fromNamespaceAndPath(ID, path);
     }
 
-    static {
-        REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, null)
-                .andThen(TooltipModifier.mapNull(KineticStats.create(item))));
-    }
-
     public CreateFisheryMod(IEventBus bus, ModContainer modContainer) {
-        LOGGER.info("Create Fishery Industry initializing...");
+
 
         // 注册 Create 基础内容
         REGISTRATE.registerEventListeners(bus);
         CreateFisheryBlocks.register();
         CreateFisheryBlockEntities.register(bus);
-        CreateFisheryEntityTypes.register(bus); // 添加实体类型注册
+        CreateFisheryEntityTypes.register(bus);
         CreateFisheryItems.register(bus);
         CreateFisheryTabs.register(bus);
 
@@ -69,10 +68,9 @@ public class CreateFisheryMod {
         bus.addListener(this::processIMC);
         bus.addListener(CreateFisheryMod::clientInit);
 
-        // 注册服务器和 tooltip 事件
+        // 注册服务器事件
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
-        NeoForge.EVENT_BUS.addListener(TooltipHandler::onTooltip);
     }
 
     public void registerCapabilities(RegisterCapabilitiesEvent event) {
@@ -86,10 +84,8 @@ public class CreateFisheryMod {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        LOGGER.info("Create Fishery Industry setup...");
+
         CreateFisheryCommonConfig.onLoad();
-        // 初始化 tooltip 描述
-        TooltipHandler.init();
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event) {}
@@ -99,11 +95,11 @@ public class CreateFisheryMod {
     public static void clientInit(final FMLClientSetupEvent event) {}
 
     private void onServerStarting(ServerStartingEvent event) {
-        LOGGER.info("Create Fishery Industry server starting...");
+
         CreateFisheryCommonConfig.refreshCache();
     }
 
     private void onServerStopping(ServerStoppingEvent event) {
-        LOGGER.info("Create Fishery Industry server stopping...");
+
     }
 }

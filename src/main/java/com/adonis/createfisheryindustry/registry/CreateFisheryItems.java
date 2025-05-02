@@ -6,6 +6,8 @@ import com.adonis.createfisheryindustry.item.HarpoonItem;
 import com.adonis.createfisheryindustry.item.NetheriteDivingLeggingsItem;
 import com.google.common.collect.Sets;
 import com.simibubi.create.content.equipment.armor.AllArmorMaterials;
+import com.simibubi.create.foundation.item.ItemDescription;
+import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
@@ -17,6 +19,8 @@ import com.mojang.logging.LogUtils;
 
 import java.util.LinkedHashSet;
 import java.util.function.Supplier;
+
+import static com.adonis.createfisheryindustry.CreateFisheryMod.REGISTRATE;
 
 @SuppressWarnings("unused")
 public class CreateFisheryItems {
@@ -37,21 +41,30 @@ public class CreateFisheryItems {
     public static final DeferredHolder<Item, Item> ZINC_SHEET = registerWithTab("zinc_sheet",
             () -> new Item(basicItem()));
 
-    // 铜潜水护腿
-    public static final DeferredHolder<Item, Item> COPPER_DIVING_LEGGINGS = registerWithTab("copper_diving_leggings",
-            () -> new CopperDivingLeggingsItem(
-                    AllArmorMaterials.COPPER,
-                    new Item.Properties().durability(105),
-                    ResourceLocation.fromNamespaceAndPath(CreateFisheryMod.ID, "copper_diving_leggings.png")
-            ));
 
-    // 下界合金潜水护腿
-    public static final DeferredHolder<Item, Item> NETHERITE_DIVING_LEGGINGS = registerWithTab("netherite_diving_leggings",
-            () -> new NetheriteDivingLeggingsItem(
-                    ArmorMaterials.NETHERITE,
-                    new Item.Properties().durability(555).fireResistant(), // 耐久度555，防火
-                    ResourceLocation.fromNamespaceAndPath(CreateFisheryMod.ID, "netherite_diving_leggings.png")
-            ));
+    public static final ItemEntry<CopperDivingLeggingsItem> COPPER_DIVING_LEGGINGS = REGISTRATE.item("copper_diving_leggings",
+                    p -> new CopperDivingLeggingsItem(
+                            AllArmorMaterials.COPPER,
+                            p.durability(105),
+                            ResourceLocation.fromNamespaceAndPath(CreateFisheryMod.ID, "copper_diving_leggings.png")
+                    ))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.copper_diving_leggings");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("copper_diving_leggings", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<NetheriteDivingLeggingsItem> NETHERITE_DIVING_LEGGINGS = REGISTRATE.item("netherite_diving_leggings",
+                    p -> new NetheriteDivingLeggingsItem(
+                            ArmorMaterials.NETHERITE,
+                            p.durability(555).fireResistant(),
+                            ResourceLocation.fromNamespaceAndPath(CreateFisheryMod.ID, "netherite_diving_leggings.png")
+                    ))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.netherite_diving_leggings");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("netherite_diving_leggings", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
 
     // 鱼叉
 // 鱼叉

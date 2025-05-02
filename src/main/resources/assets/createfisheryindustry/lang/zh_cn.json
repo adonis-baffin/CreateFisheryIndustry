@@ -13,34 +13,34 @@
   "create.gui.goggles.mesh_trap_contents": "捕获网内含：",
   "create.gui.goggles.inventory.empty": "空",
   "create.gui.goggles.trap_nozzle_contents": "气捕网内含：",
-  "create.gui.goggles.inventory.empty": "空",
   "create.gui.goggles.smart_mesh_contents": "智能滤网内含：",
-  "create.gui.goggles.inventory.empty": "空",
 
   "tooltip.keyShift": "Shift",
-  "tooltip.holdForDescription": "按住 $ 查看描述",
+  "tooltip.holdForDescription": "按住 [$] 查看描述",
 
-  "tooltip.createfishery.copper_leggings": "铜潜水护腿与潜水靴配合使用，在海底体验月球漫步的感觉。",
-  "tooltip.createfishery.when_worn": "穿在腿上时",
-  "tooltip.createfishery.copper_leggings.effect": "穿戴者能够在水中获得超级跳跃的能力，最多可以跨越四格的高度，并且超级跳跃在落地后也不会受到摔落伤害。",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "铜潜水护腿与潜水靴配合使用，在海底体验月球漫步的感觉。",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "穿在腿上时：",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "穿戴者能够在水中获得超级跳跃的能力，最多可以跨越四格的高度，并且超级跳跃在落地后也不会受到摔落伤害。",
 
-  "tooltip.createfishery.netherite_leggings": "下界合金潜水护腿与潜水靴配合使用，在海底或者熔岩海的海底体验月球漫步的感觉。",
-  "tooltip.createfishery.netherite_leggings.effect": "穿戴者能够在水中或者岩浆中获得超级跳跃的能力，最多可以跨越四格的高度，并且超级跳跃在落地后也不会受到摔落伤害。",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "下界合金潜水护腿与潜水靴配合使用，在海底或熔岩海底体验月球漫步的感觉。",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "穿在腿上时：",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "穿戴者能够在水中或岩浆中获得超级跳跃的能力，最多可以跨越四格的高度，并且超级跳跃在落地后也不会受到摔落伤害。",
 
-  "tooltip.createfishery.frame_trap": "捕鱼框用于动态结构上捕鱼的元件。",
-  "tooltip.createfishery.when_in_water": "随动态结构移动时",
-  "tooltip.createfishery.frame_trap.capture": "可以捕获触碰到的鱼类，或其他种类的小型生物，并收集路径上的物品。此外，还会随时间获得当前生物群系的钓鱼战利品。每当钓鱼触发或捕获生物时，获得经验颗粒。",
+  "block.createfisheryindustry.frame_trap.tooltip.summary": "用于动态结构上捕鱼的元件。",
+  "block.createfisheryindustry.frame_trap.tooltip.condition1": "随动态结构移动时：",
+  "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "可以捕获触碰到的鱼类，或其他种类的小型生物，并收集路径上的物品。此外，还会随时间获得当前生物群系的钓鱼战利品。每当钓鱼触发或捕获生物时，获得经验颗粒。",
 
-  "tooltip.createfishery.mesh_trap": "捕获网自动收集周边的物品，捕获附近的鱼类，或其他种类的小型生物，并存储在自身中。每当捕获生物时，获得经验颗粒。自身有存储物品时，会尝试自动输出到相邻的容器中。可以持动力臂对其使用来便捷存取物品。相邻的传送带上的物品也会被其自动吸取。",
-  "tooltip.createfishery.right_click": "对其右键时",
-  "tooltip.createfishery.mesh_trap.extract": "取出其中的物品，一次最多一组。",
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "捕获网自动收集周边的物品，捕获鱼类或其他小型生物，并存储。",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "右键点击时：",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "取出其中的物品，一次最多一组。",
 
-  "tooltip.createfishery.trap_nozzle": "气捕网放在鼓风机的出风口，能够将鼓风机的效果分散到各个方向。自动收集周边的物品，捕获附近的鱼类，或其他种类的小型生物，并存储在自身中。每当捕获生物时，获得经验颗粒。自身有存储物品时，会尝试自动输出到相邻的容器中。可以持动力臂对其使用来便捷存取物品。",
-  "tooltip.createfishery.when_attached": "当附着在陷阱上时",
-  "tooltip.createfishery.trap_nozzle.guide": "引导捕获的物品到特定输出。",
-  "tooltip.createfishery.trap_nozzle.extract": "取出其中的物品，一次最多一组。",
+  "block.createfisheryindustry.trap_nozzle.tooltip.summary": "附着在鼓风机出风口，将效果分散到各个方向。",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "附着在鼓风机上时：",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "引导捕获的物品到特定输出。",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "右键点击时：",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "取出其中的物品，一次最多一组。",
 
-  "tooltip.createfishery.smart_mesh": "智能滤网自动收集周边的物品，并存储在自身中。自身有存储物品时，会尝试自动输出到相邻的容器中。可以持动力臂对其使用来便捷存取物品。相邻的传送带上的物品也会被其自动吸取。可以使用物品或者过滤器对其设置过滤。",
-  "tooltip.createfishery.right_click_empty": "对其右键时",
-  "tooltip.createfishery.smart_mesh.extract": "取出其中的物品，一次最多一组。"
+  "block.createfisheryindustry.smart_mesh.tooltip.summary": "智能滤网自动收集并存储周边物品。",
+  "block.createfisheryindustry.smart_mesh.tooltip.condition1": "空手右键点击时：",
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "取出其中的物品，一次最多一组。"
 }
