@@ -36,6 +36,16 @@ public class CreateFisheryItems {
             .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("zinc_sheet", net.minecraft.core.registries.Registries.ITEM)))
             .register();
 
+    public static final ItemEntry<Item> WAXED_CARDBOARD = REGISTRATE.item("waxed_cardboard",
+                    p -> new Item(basicItem()))
+            .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("waxed_cardboard", net.minecraft.core.registries.Registries.ITEM)))
+            .register();
+
+    public static final ItemEntry<Item> WAXED_LEATHER = REGISTRATE.item("waxed_leather",
+                    p -> new Item(basicItem()))
+            .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("waxed_leather", net.minecraft.core.registries.Registries.ITEM)))
+            .register();
+
     public static final ItemEntry<Item> WORN_HARPOON = REGISTRATE.item("worn_harpoon",
                     p -> new Item(basicItem()))
             .onRegister(item -> {

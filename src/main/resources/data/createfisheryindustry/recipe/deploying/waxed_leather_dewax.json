@@ -1,0 +1,17 @@
+{
+  "type": "create:deploying",
+  "ingredients": [
+    {
+      "item": "createfisheryindustry:waxed_leather"
+    },
+    {
+      "item": "minecraft:brush"
+    }
+  ],
+  "keep_held_item": true,
+  "results": [
+    {
+      "id": "minecraft:leather"
+    }
+  ]
+}

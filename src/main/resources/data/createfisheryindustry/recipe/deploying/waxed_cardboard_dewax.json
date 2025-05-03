@@ -1,0 +1,17 @@
+{
+  "type": "create:deploying",
+  "ingredients": [
+    {
+      "item": "createfisheryindustry:waxed_cardboard"
+    },
+    {
+      "item": "minecraft:brush"
+    }
+  ],
+  "keep_held_item": true,
+  "results": [
+    {
+      "id": "create:cardboard"
+    }
+  ]
+}
