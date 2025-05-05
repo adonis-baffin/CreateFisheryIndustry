@@ -1,5 +1,6 @@
 package com.adonis.createfisheryindustry.entity;
 
+import com.adonis.createfisheryindustry.event.HarpoonPouchEventHandler;
 import com.adonis.createfisheryindustry.registry.CreateFisheryEntityTypes;
 import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
 import net.minecraft.nbt.CompoundTag;
@@ -115,7 +116,7 @@ public class HarpoonEntity extends AbstractArrow {
             if (entity.getType() == EntityType.ENDERMAN) {
                 return;
             }
-            var7 = this.level();
+            var netting = this.level();
             if (var7 instanceof ServerLevel serverlevel) {
                 EnchantmentHelper.doPostAttackEffectsWithItemSource(serverlevel, entity, damagesource, this.getWeaponItem());
             }
@@ -143,7 +144,23 @@ public class HarpoonEntity extends AbstractArrow {
 
     @Override
     protected boolean tryPickup(Player player) {
-        return super.tryPickup(player) || this.isNoPhysics() && this.ownedBy(player) && player.getInventory().add(this.getPickupItem());
+        if (this.isNoPhysics() && this.ownedBy(player)) {
+            // 忠诚附魔的鱼叉直接返回手中，不进入鱼叉袋
+            return super.tryPickup(player);
+        }
+
+        ItemStack pickupItem = this.getPickupItem();
+        if (HarpoonPouchEventHandler.tryInsertHarpoonToPouch(player, pickupItem)) {
+            this.discard();
+            return true;
+        }
+
+        // 如果鱼叉袋无法处理，尝试添加到玩家库存
+        boolean added = player.getInventory().add(pickupItem);
+        if (added) {
+            this.discard();
+        }
+        return added;
     }
 
     @Override

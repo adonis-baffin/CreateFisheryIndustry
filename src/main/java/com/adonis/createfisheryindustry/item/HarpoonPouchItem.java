@@ -1,107 +1,173 @@
 package com.adonis.createfisheryindustry.item;
 
-import com.adonis.createfisheryindustry.container.HarpoonPouchMenu;
-import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
-import net.minecraft.core.HolderLookup;
+import com.adonis.createfisheryindustry.registry.CreateFisheryComponents;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import org.apache.commons.lang3.math.Fraction;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public class HarpoonPouchItem extends Item {
-    private static final String TAG_ITEMS = "Items";
-    private static final int INVENTORY_SIZE = 9;
+    private static final int BAR_COLOR = Mth.color(0.4F, 0.4F, 1.0F);
+    private static final int TOOLTIP_MAX_WEIGHT = 4; // 最大 4 根鱼叉
 
     public HarpoonPouchItem(Properties properties) {
         super(properties);
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-
-        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
-            serverPlayer.openMenu(new SimpleMenuProvider(
-                    (windowId, playerInventory, playerEntity) ->
-                            new HarpoonPouchMenu(windowId, playerInventory, stack),
-                    Component.translatable("container.createfisheryindustry.harpoon_pouch")
-            ));
+    public void verifyComponentsAfterLoad(ItemStack stack) {
+        if (!stack.has(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get())) {
+            stack.set(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
         }
+    }
 
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    public static float getFullnessDisplay(ItemStack stack) {
+        HarpoonPouchContents contents = stack.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+        return contents.weight().floatValue();
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, tooltipContext, tooltip, flag);
-
-        // 需要 Level 来创建 PouchItemHandler
-        IItemHandler itemHandler = getItemHandler(stack, tooltipContext.level());
-        int itemCount = 0;
-
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
-            if (!itemHandler.getStackInSlot(i).isEmpty()) {
-                itemCount++;
+    public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction action, Player player) {
+        if (stack.getCount() != 1 || action != ClickAction.SECONDARY) {
+            return false;
+        }
+        HarpoonPouchContents contents = stack.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+        HarpoonPouchContents.Mutable mutableContents = new HarpoonPouchContents.Mutable(contents);
+        ItemStack slotItem = slot.getItem();
+        if (slotItem.isEmpty()) {
+            ItemStack removed = mutableContents.removeOne();
+            if (removed != null) {
+                this.playRemoveOneSound(player);
+                ItemStack remaining = slot.safeInsert(removed);
+                mutableContents.tryInsert(remaining);
+            }
+        } else if (slotItem.getItem() instanceof HarpoonItem) {
+            int inserted = mutableContents.tryTransfer(slot, player);
+            if (inserted > 0) {
+                this.playInsertSound(player);
             }
         }
-
-        tooltip.add(Component.translatable("item.createfisheryindustry.harpoon_pouch.tooltip", itemCount, INVENTORY_SIZE));
+        stack.set(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), mutableContents.toImmutable());
+        return true;
     }
 
-    public static IItemHandler getItemHandler(ItemStack stack, @Nullable Level level) {
-        // 如果 level 为 null，返回空的 ItemHandler 防止崩溃
-        if (level == null) {
-            return new ItemStackHandler(INVENTORY_SIZE);
+    @Override
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess access) {
+        if (stack.getCount() != 1 || action != ClickAction.SECONDARY || !slot.allowModification(player)) {
+            return false;
         }
-        return stack.getCapability(Capabilities.ItemHandler.ITEM);
+        HarpoonPouchContents contents = stack.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+        HarpoonPouchContents.Mutable mutableContents = new HarpoonPouchContents.Mutable(contents);
+        if (other.isEmpty()) {
+            ItemStack removed = mutableContents.removeOne();
+            if (removed != null) {
+                this.playRemoveOneSound(player);
+                access.set(removed);
+            }
+        } else if (other.getItem() instanceof HarpoonItem) {
+            int inserted = mutableContents.tryInsert(other);
+            if (inserted > 0) {
+                this.playInsertSound(player);
+            }
+        }
+        stack.set(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), mutableContents.toImmutable());
+        return true;
     }
 
-    public static class PouchItemHandler extends ItemStackHandler implements INBTSerializable<CompoundTag> {
-        private final ItemStack container;
-        private final Level level;
-
-        public PouchItemHandler(ItemStack container, Level level) {
-            super(INVENTORY_SIZE);
-            this.container = container;
-            this.level = level;
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (dropContents(stack, player)) {
+            this.playDropContentsSound(player);
+            player.awardStat(Stats.ITEM_USED.get(this));
+            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
         }
+        return InteractionResultHolder.fail(stack);
+    }
 
-        @Override
-        protected void onContentsChanged(int slot) {
-            HolderLookup.Provider provider = level.registryAccess();
-            CompoundTag tag = serializeNBT(provider);
-            container.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+    @Override
+    public boolean isBarVisible(ItemStack stack) {
+        HarpoonPouchContents contents = stack.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+        return contents.weight().compareTo(Fraction.ZERO) > 0;
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        HarpoonPouchContents contents = stack.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+        return Math.min(1 + Mth.mulAndTruncate(contents.weight(), 12), 13);
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        return BAR_COLOR;
+    }
+
+    private static boolean dropContents(ItemStack stack, Player player) {
+        HarpoonPouchContents contents = stack.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+        if (!contents.isEmpty()) {
+            stack.set(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+            if (player instanceof ServerPlayer) {
+                contents.itemsCopy().forEach(item -> player.drop(item, true));
+            }
+            return true;
         }
+        return false;
+    }
 
-
-        public CompoundTag serializeNBT() {
-            return serializeNBT(level.registryAccess());
+    @Override
+    public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
+        if (stack.has(DataComponents.HIDE_TOOLTIP) || stack.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP)) {
+            return Optional.empty();
         }
+        HarpoonPouchContents contents = stack.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+        return Optional.of(new HarpoonPouchTooltip(contents));
+    }
 
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        HarpoonPouchContents contents = stack.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+        int weight = Mth.mulAndTruncate(contents.weight(), TOOLTIP_MAX_WEIGHT);
+        tooltip.add(Component.translatable("item.createfisheryindustry.harpoon_pouch.fullness", weight, TOOLTIP_MAX_WEIGHT));
+    }
 
-        public void deserializeNBT(CompoundTag nbt) {
-            deserializeNBT(level.registryAccess(), nbt);
+    @Override
+    public void onDestroyed(ItemEntity itemEntity) {
+        HarpoonPouchContents contents = itemEntity.getItem().getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+        if (!contents.isEmpty()) {
+            itemEntity.getItem().set(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+            ItemUtils.onContainerDestroyed(itemEntity, contents.itemsCopy());
         }
+    }
 
-        @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            return stack.getItem() != CreateFisheryItems.HARPOON_POUCH.get();
-        }
+    private void playRemoveOneSound(Entity entity) {
+        entity.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
+    }
+
+    private void playInsertSound(Entity entity) {
+        entity.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
+    }
+
+    private void playDropContentsSound(Entity entity) {
+        entity.playSound(SoundEvents.BUNDLE_DROP_CONTENTS, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
     }
 }

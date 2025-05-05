@@ -7,6 +7,7 @@
   "item.createfisheryindustry.waxed_cardboard": "防水纸板",
   "item.createfisheryindustry.waxed_leather": "防水皮革",
   "item.createfisheryindustry.worn_harpoon": "破损的鱼叉",
+  "item.createfisheryindustry.harpoon_pouch": "鱼叉袋",
   "item.createfisheryindustry.worn_harpoon.tooltip.summary": "折戟沉沙铁未销，自将磨洗认前朝",
   "item.createfisheryindustry.copper_diving_leggings": "铜潜水护腿",
   "item.createfisheryindustry.netherite_diving_leggings": "下界合金潜水护腿",
@@ -20,6 +21,8 @@
   "create.gui.goggles.trap_nozzle_contents": "气捕网内含：",
   "create.gui.goggles.smart_mesh_contents": "智能滤网内含：",
 
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
   "tooltip.keyShift": "Shift",
   "tooltip.holdForDescription": "按住 [$] 查看描述",
 
@@ -30,6 +33,8 @@
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "下界合金潜水护腿与潜水靴配合使用，在海底或熔岩海底体验月球漫步的感觉。",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "穿在腿上时：",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "穿戴者能够在水中或岩浆中获得超级跳跃的能力，最多可以跨越四格的高度，并且超级跳跃在落地后也不会受到摔落伤害。",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "可以容纳4支鱼叉。在玩家投掷鱼叉后会自动补充鱼叉至主手，在玩家捡起鱼叉时会优先进入鱼叉袋",
 
   "block.createfisheryindustry.frame_trap.tooltip.summary": "用于动态结构上捕鱼的元件。",
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "随动态结构移动时：",

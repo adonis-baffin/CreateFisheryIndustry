@@ -17,10 +17,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
-import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -44,31 +41,30 @@ public class CreateFisheryMod {
     }
 
     public CreateFisheryMod(IEventBus bus, ModContainer modContainer) {
-        // 注册 Create 基础内容
+
+        // 注册 Create 模组内容
         REGISTRATE.registerEventListeners(bus);
         CreateFisheryBlocks.register();
         CreateFisheryBlockEntities.register(bus);
         CreateFisheryEntityTypes.register(bus);
         CreateFisheryItems.register(bus);
         CreateFisheryTabs.register(bus);
-        CreateFisheryMenuTypes.register(bus);
+        CreateFisheryComponents.register(bus);
 
         // 注册配置
         modContainer.registerConfig(ModConfig.Type.COMMON, CreateFisheryCommonConfig.CONFIG_SPEC);
 
         // 注册事件监听器
         bus.addListener(this::registerCapabilities);
-        bus.addListener(this::setup);
-        bus.addListener(this::enqueueIMC);
-        bus.addListener(this::processIMC);
-        bus.addListener(CreateFisheryMod::clientInit);
+        bus.addListener(this::commonSetup);
 
         // 注册服务器事件
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
     }
 
-    public void registerCapabilities(RegisterCapabilitiesEvent event) {
+    // 注册能力（如 ItemHandler）
+    private void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 CreateFisheryBlockEntities.MESH_TRAP.get(),
@@ -76,24 +72,20 @@ public class CreateFisheryMod {
         );
         TrapNozzleBlockEntity.registerCapabilities(event);
         SmartMeshBlockEntity.registerCapabilities(event);
-
-        // 注册收纳袋物品能力
         CreateFisheryItems.registerCapabilities(event);
     }
 
-    private void setup(final FMLCommonSetupEvent event) {
-        CreateFisheryCommonConfig.onLoad();
+    // 通用初始化
+    private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(CreateFisheryCommonConfig::onLoad);
     }
 
-    private void enqueueIMC(final InterModEnqueueEvent event) {}
-
-    private void processIMC(final InterModProcessEvent event) {}
-
-    public static void clientInit(final FMLClientSetupEvent event) {}
-
+    // 服务器启动
     private void onServerStarting(ServerStartingEvent event) {
         CreateFisheryCommonConfig.refreshCache();
     }
 
-    private void onServerStopping(ServerStoppingEvent event) {}
+    // 服务器停止
+    private void onServerStopping(ServerStoppingEvent event) {
+    }
 }

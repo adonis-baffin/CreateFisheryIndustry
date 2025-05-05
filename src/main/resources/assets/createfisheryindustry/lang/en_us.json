@@ -7,6 +7,7 @@
   "item.createfisheryindustry.waxed_cardboard": "Waxed Cardboard",
   "item.createfisheryindustry.waxed_leather": "Waxed Leather",
   "item.createfisheryindustry.worn_harpoon": "Worn Harpoon",
+  "item.createfisheryindustry.harpoon_pouch": "Harpoon Pouch",
   "item.createfisheryindustry.worn_harpoon.tooltip.summary": "An ancient, worn harpoon lost in the depths; polish it to restore its former gloss",
   "item.createfisheryindustry.copper_diving_leggings": "Copper Diving Leggings",
   "item.createfisheryindustry.netherite_diving_leggings": "Netherite Diving Leggings",
@@ -20,6 +21,8 @@
   "create.gui.goggles.trap_nozzle_contents": "Trap Nozzle Contents",
   "create.gui.goggles.smart_mesh_contents": "Smart Mesh Contents",
 
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
   "tooltip.keyShift": "Shift",
   "tooltip.holdForDescription": "Hold [$] for summary",
 
@@ -30,6 +33,8 @@
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Netherite Diving Leggings used with diving boots to experience a moonwalk-like feeling underwater or in lava seas.",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "When worn:",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "The wearer gains super jump ability in water or lava, up to four blocks high, with no fall damage upon landing.",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Holds up to 4 harpoons. Automatically replenishes a harpoon to the main hand after throwing and prioritizes storing picked-up harpoons in the pouch.",
 
   "block.createfisheryindustry.frame_trap.tooltip.summary": "Component for fishing on contraption.",
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "When in contraption:",
