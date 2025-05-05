@@ -14,30 +14,31 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
 
 public class HarpoonRenderer extends EntityRenderer<HarpoonEntity> {
-    public static final ResourceLocation HARPOON_TEXTURE = ResourceLocation.fromNamespaceAndPath(CreateFisheryMod.ID, "textures/entity/harpoon.png");
-    private final TridentModel harpoonModel;
+    private static final ResourceLocation HARPOON_TEXTURE = CreateFisheryMod.asResource("textures/entity/harpoon.png");
+    private final TridentModel tridentModel;
 
     public HarpoonRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.harpoonModel = new TridentModel(context.bakeLayer(ModelLayers.TRIDENT));
+        this.tridentModel = new TridentModel(context.bakeLayer(ModelLayers.TRIDENT));
     }
 
     @Override
-    public void render(HarpoonEntity entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+    public void render(HarpoonEntity entity, float entityYaw, float partialTicks, PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
         poseStack.mulPose(Axis.YP.rotationDegrees(Mth.lerp(partialTicks, entity.yRotO, entity.getYRot()) - 90.0F));
         poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(partialTicks, entity.xRotO, entity.getXRot()) + 90.0F));
-        VertexConsumer vertexConsumer = ItemRenderer.getFoilBufferDirect(buffer,
-                this.harpoonModel.renderType(this.getTextureLocation(entity)), false, entity.isFoil());
-        this.harpoonModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 0xFFFFFF);
+        VertexConsumer vertexConsumer = ItemRenderer.getFoilBufferDirect(buffer, this.tridentModel.renderType(this.getTextureLocation(entity)), false, entity.isFoil());
+        this.tridentModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }
 
+    @NotNull
     @Override
-    public ResourceLocation getTextureLocation(HarpoonEntity entity) {
+    public ResourceLocation getTextureLocation(@NotNull HarpoonEntity entity) {
         return HARPOON_TEXTURE;
     }
 }

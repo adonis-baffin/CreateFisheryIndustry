@@ -33,6 +33,7 @@ public class CreateFisheryTabs {
             output.accept(CreateFisheryItems.WAXED_CARDBOARD.get());
             output.accept(CreateFisheryItems.WAXED_LEATHER.get());
             output.accept(CreateFisheryItems.WORN_HARPOON.get());
+            output.accept(CreateFisheryItems.HARPOON_POUCH.get());
             output.accept(CreateFisheryItems.COPPER_DIVING_LEGGINGS.get());
             output.accept(CreateFisheryItems.NETHERITE_DIVING_LEGGINGS.get());
             output.accept(CreateFisheryItems.HARPOON.get());

@@ -3,11 +3,7 @@ package com.adonis.createfisheryindustry;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
-import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
-import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
-import com.adonis.createfisheryindustry.registry.CreateFisheryEntityTypes;
-import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
-import com.adonis.createfisheryindustry.registry.CreateFisheryTabs;
+import com.adonis.createfisheryindustry.registry.*;
 import com.mojang.logging.LogUtils;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.item.ItemDescription;
@@ -55,6 +51,7 @@ public class CreateFisheryMod {
         CreateFisheryEntityTypes.register(bus);
         CreateFisheryItems.register(bus);
         CreateFisheryTabs.register(bus);
+        CreateFisheryMenuTypes.register(bus);
 
         // 注册配置
         modContainer.registerConfig(ModConfig.Type.COMMON, CreateFisheryCommonConfig.CONFIG_SPEC);
@@ -79,6 +76,9 @@ public class CreateFisheryMod {
         );
         TrapNozzleBlockEntity.registerCapabilities(event);
         SmartMeshBlockEntity.registerCapabilities(event);
+
+        // 注册收纳袋物品能力
+        CreateFisheryItems.registerCapabilities(event);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
