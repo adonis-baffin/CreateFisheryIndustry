@@ -9,6 +9,7 @@ import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapMovementBehavio
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlock;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlock;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlock;
+import com.adonis.createfisheryindustry.block.SmartBeehive.SmartBeehiveBlock;
 import com.simibubi.create.AllTags;
 import com.simibubi.create.foundation.data.BlockStateGen;
 import com.simibubi.create.foundation.data.SharedProperties;
@@ -53,6 +54,18 @@ public class CreateFisheryBlocks {
                     .noOcclusion())
             .transform(axeOrPickaxe())
             .blockstate((ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models().cubeAll(ctx.getName(), prov.modLoc("block/smart_mesh"))))
+            .simpleItem()
+            .register();
+
+    public static final BlockEntry<SmartBeehiveBlock> SMART_BEEHIVE = REGISTRATE
+            .block("smart_beehive", SmartBeehiveBlock::new)
+            .initialProperties(SharedProperties::wooden)
+            .properties(prop -> prop
+                    .mapColor(DyeColor.GRAY)
+                    .sound(SoundType.NETHER_WOOD)
+                    .noOcclusion())
+            .transform(axeOrPickaxe())
+            .blockstate((ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models().cubeAll(ctx.getName(), prov.modLoc("block/smart_beehive"))))
             .simpleItem()
             .register();
 

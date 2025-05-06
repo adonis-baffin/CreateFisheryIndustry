@@ -54,5 +54,22 @@
 
   "block.createfisheryindustry.smart_mesh.tooltip.summary": "智能滤网自动收集并存储周边物品。",
   "block.createfisheryindustry.smart_mesh.tooltip.condition1": "空手右键点击时：",
-  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "取出其中的物品，一次最多一组。"
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "取出其中的物品，一次最多一组。",
+
+
+  "block.createfisheryindustry.smart_beehive": "智能蜂箱",
+  "createfisheryindustry.smart_beehive.mode": "蜂箱模式",
+  "createfisheryindustry.smart_beehive.mode.honey_fluid": "蜂蜜流体",
+  "createfisheryindustry.smart_beehive.mode.honeycomb": "蜜脾",
+  "create.createfisheryindustry.smart_beehive.mode.honey_fluid": "蜂蜜流体",
+  "create.createfisheryindustry.smart_beehive.mode.honeycomb": "蜜脾",
+  "create.createfisheryindustry.smart_beehive.full": "蜂箱已满！",
+  "create.createfisheryindustry.smart_beehive.empty": "蜂箱库存为空！",
+  "create.createfisheryindustry.smart_beehive.contents": "蜂箱内容",
+  "create.createfisheryindustry.smart_beehive.bees": "%d/%d 只蜜蜂",
+  "create.createfisheryindustry.smart_beehive.fluid": "%s：%d 毫桶",
+  "create.createfisheryindustry.smart_beehive.fluid_empty": "无流体",
+  "create.createfisheryindustry.smart_beehive.mode_label": "模式：",
+  "fluid.create.honey": "蜂蜜",
+  "gui.goggles.inventory.empty": "库存为空"
 }

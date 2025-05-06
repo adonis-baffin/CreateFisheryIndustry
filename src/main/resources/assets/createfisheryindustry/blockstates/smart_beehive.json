@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "createfisheryindustry:block/smart_beehive"
+    },
+    "facing=east": {
+      "model": "createfisheryindustry:block/smart_beehive",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "createfisheryindustry:block/smart_beehive",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "createfisheryindustry:block/smart_beehive",
+      "y": 270
+    }
+  }
+}

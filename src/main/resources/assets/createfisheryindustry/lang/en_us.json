@@ -54,5 +54,21 @@
 
   "block.createfisheryindustry.smart_mesh.tooltip.summary": "Smart Mesh automatically collects nearby items and stores them.",
   "block.createfisheryindustry.smart_mesh.tooltip.condition1": "When right-clicked with empty hand:",
-  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "Extracts items, up to one stack at a time."
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "Extracts items, up to one stack at a time.",
+
+  "block.createfisheryindustry.smart_beehive": "Smart Beehive",
+  "createfisheryindustry.smart_beehive.mode": "Beehive Mode",
+  "createfisheryindustry.smart_beehive.mode.honey_fluid": "Honey Fluid",
+  "createfisheryindustry.smart_beehive.mode.honeycomb": "Honeycomb",
+  "create.createfisheryindustry.smart_beehive.mode.honey_fluid": "Honey Fluid",
+  "create.createfisheryindustry.smart_beehive.mode.honeycomb": "Honeycomb",
+  "create.createfisheryindustry.smart_beehive.full": "Beehive is full!",
+  "create.createfisheryindustry.smart_beehive.empty": "Beehive inventory is empty!",
+  "create.createfisheryindustry.smart_beehive.contents": "Beehive Contents",
+  "create.createfisheryindustry.smart_beehive.bees": "%d/%d Bees",
+  "create.createfisheryindustry.smart_beehive.fluid": "%s: %d mB",
+  "create.createfisheryindustry.smart_beehive.fluid_empty": "No Fluid",
+  "create.createfisheryindustry.smart_beehive.mode_label": "Mode: ",
+  "fluid.create.honey": "Honey",
+  "gui.goggles.inventory.empty": "Inventory Empty"
 }

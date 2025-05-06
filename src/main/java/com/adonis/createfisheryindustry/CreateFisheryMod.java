@@ -1,5 +1,6 @@
 package com.adonis.createfisheryindustry;
 
+import com.adonis.createfisheryindustry.block.SmartBeehive.SmartBeehiveBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
@@ -10,6 +11,7 @@ import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -65,11 +67,40 @@ public class CreateFisheryMod {
 
     // 注册能力（如 ItemHandler）
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        // 注册 Mesh Trap 的 ItemHandler 能力
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 CreateFisheryBlockEntities.MESH_TRAP.get(),
                 (be, side) -> be.getCapability(Capabilities.ItemHandler.BLOCK, side)
         );
+
+        // 注册 Smart Beehive 的 ItemHandler 能力
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                CreateFisheryBlockEntities.SMART_BEEHIVE.get(),
+                (be, side) -> {
+                    if (be instanceof SmartBeehiveBlockEntity beehive) {
+                        return side == null || side == Direction.UP
+                                ? beehive.insertionHandler
+                                : beehive.extractionHandler;
+                    }
+                    return null;
+                }
+        );
+
+        // 注册 Smart Beehive 的 FluidHandler 能力
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                CreateFisheryBlockEntities.SMART_BEEHIVE.get(),
+                (be, side) -> {
+                    if (be instanceof SmartBeehiveBlockEntity beehive && (side == null || side == Direction.DOWN)) {
+                        return beehive.getFluidTank();
+                    }
+                    return null;
+                }
+        );
+
+        // 其他能力注册
         TrapNozzleBlockEntity.registerCapabilities(event);
         SmartMeshBlockEntity.registerCapabilities(event);
         CreateFisheryItems.registerCapabilities(event);
