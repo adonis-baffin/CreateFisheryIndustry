@@ -58,6 +58,7 @@
 
 
   "block.createfisheryindustry.smart_beehive": "智能蜂箱",
+  "block.createfisheryindustry.smart_beehive.tooltip.summary": "测试方块，目前功能仍未完善。该方块不属于《机械动力：渔业》的内容，将来会在新模组《机械动力：养蜂人》中发布，敬请期待。",
   "createfisheryindustry.smart_beehive.mode": "蜂箱模式",
   "createfisheryindustry.smart_beehive.mode.honey_fluid": "蜂蜜流体",
   "createfisheryindustry.smart_beehive.mode.honeycomb": "蜜脾",

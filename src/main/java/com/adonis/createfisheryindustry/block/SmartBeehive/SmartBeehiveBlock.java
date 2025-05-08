@@ -6,6 +6,8 @@ import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -38,6 +40,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.NeoForge;
@@ -79,7 +82,8 @@ public class SmartBeehiveBlock extends Block implements EntityBlock, ProperWater
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return net.minecraft.world.phys.shapes.Shapes.block();
+        // 与原版蜂箱一致的形状
+        return Shapes.create(0.125, 0.0, 0.125, 0.875, 1.0, 0.875);
     }
 
     @Override
@@ -225,7 +229,11 @@ public class SmartBeehiveBlock extends Block implements EntityBlock, ProperWater
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.getPoiManager().add(pos, net.minecraft.core.Holder.direct(CreateFisheryBlockEntities.SMART_BEEHIVE_POI.get()));
+            // 获取 PoiType 的 Holder
+            Registry<net.minecraft.world.entity.ai.village.poi.PoiType> poiRegistry = serverLevel.registryAccess().registryOrThrow(Registries.POINT_OF_INTEREST_TYPE);
+            poiRegistry.getHolder(net.minecraft.world.entity.ai.village.poi.PoiTypes.BEEHIVE).ifPresent(holder -> {
+                serverLevel.getPoiManager().add(pos, holder);
+            });
         }
     }
 

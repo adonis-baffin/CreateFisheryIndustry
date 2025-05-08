@@ -28,22 +28,12 @@ public abstract class BeeMixin {
         if (blockEntity instanceof SmartBeehiveBlockEntity smartBeehive) {
             boolean hasSpace = smartBeehive.getStored().size() < smartBeehive.getMaxOccupants();
             if (bee.getRandom().nextInt(20) == 0) {
-                LOGGER.info("检查智能蜂箱空间: bee={}, 位置={}, 有空间={}, 当前容量={}/{}",
-                        bee.getStringUUID().substring(0, 8),
-                        hivePos,
-                        hasSpace,
-                        smartBeehive.getStored().size(),
-                        smartBeehive.getMaxOccupants());
             }
             cir.setReturnValue(hasSpace);
         } else if (blockEntity instanceof BeehiveBlockEntity beehive) {
             cir.setReturnValue(!beehive.isFull());
         } else {
             if (bee.getRandom().nextInt(20) == 0) {
-                LOGGER.info("检查到无效蜂箱: bee={}, 位置={}, 方块实体类型={}",
-                        bee.getStringUUID().substring(0, 8),
-                        hivePos,
-                        blockEntity != null ? blockEntity.getClass().getSimpleName() : "null");
             }
             cir.setReturnValue(false);
         }
@@ -69,33 +59,27 @@ public abstract class BeeMixin {
         boolean isValid = blockEntity instanceof BeehiveBlockEntity || blockEntity instanceof SmartBeehiveBlockEntity;
 
         if (bee.getRandom().nextInt(40) == 0) {
-            LOGGER.info("检查蜂箱有效性: bee={}, 位置={}, 距离²={}, 有效={}, 方块实体类型={}",
-                    bee.getStringUUID().substring(0, 8),
-                    this.hivePos,
-                    distanceSqr,
-                    isValid,
-                    blockEntity != null ? blockEntity.getClass().getSimpleName() : "null");
         }
 
         cir.setReturnValue(isValid);
     }
 
-    // 新增：强制蜜蜂前往蜂箱的辅助方法
+    // 修改 wantsToEnterHive，增加进入智能蜂箱的概率
     @Inject(method = "wantsToEnterHive()Z", at = @At("HEAD"), cancellable = true)
     private void injectWantsToEnterHive(CallbackInfoReturnable<Boolean> cir) {
         Bee bee = (Bee) (Object) this;
-
-        // 检查蜂箱是否是智能蜂箱
         if (this.hivePos != null) {
             BlockEntity blockEntity = bee.level().getBlockEntity(this.hivePos);
             if (blockEntity instanceof SmartBeehiveBlockEntity) {
-                // 对于智能蜂箱，增加蜜蜂想要进入的概率
-                boolean wantsToEnter = bee.hasNectar() || bee.level().isNight() || bee.level().isRaining() ||
-                        bee.getHealth() < bee.getMaxHealth() || bee.getRandom().nextFloat() < 0.1f;
+                // 增加进入概率，模仿原版逻辑
+                boolean wantsToEnter = bee.hasNectar() ||
+                        bee.level().isNight() ||
+                        bee.level().isRaining() ||
+                        bee.hasSavedFlowerPos() ||
+                        bee.getHealth() < bee.getMaxHealth() ||
+                        bee.getRandom().nextFloat() < 0.3f;
 
                 if (bee.getRandom().nextInt(40) == 0) {
-                    LOGGER.info("检查蜜蜂是否想要进入智能蜂箱: bee={}, 想要进入={}, hasNectar={}",
-                            bee.getStringUUID().substring(0, 8), wantsToEnter, bee.hasNectar());
                 }
 
                 cir.setReturnValue(wantsToEnter);

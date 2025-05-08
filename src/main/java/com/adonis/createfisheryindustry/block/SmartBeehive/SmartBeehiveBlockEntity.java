@@ -23,7 +23,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -35,10 +34,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -161,46 +160,71 @@ public class SmartBeehiveBlockEntity extends SmartBlockEntity implements IHaveGo
     }
 
     public void addOccupant(Entity occupant) {
-        if (stored.size() < MAX_OCCUPANTS) {
-            occupant.stopRiding();
-            occupant.ejectPassengers();
+        if (stored.size() >= MAX_OCCUPANTS) {
+            return;
+        }
 
-            boolean hasNectar = false;
-            if (occupant instanceof Bee bee) {
-                hasNectar = bee.hasNectar();
+        // 检查入口是否被阻挡
+        Direction direction = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+        BlockPos entrancePos = worldPosition.relative(direction);
+        boolean isEntranceBlocked = !level.getBlockState(entrancePos).getCollisionShape(level, entrancePos).isEmpty();
+        if (isEntranceBlocked) {
+            return;
+        }
+
+        occupant.stopRiding();
+        occupant.ejectPassengers();
+
+        boolean hasNectar = false;
+        if (occupant instanceof Bee bee) {
+            hasNectar = bee.hasNectar();
+            if (bee.hasSavedFlowerPos() && (!hasSavedFlowerPos() || level.random.nextBoolean())) {
+                savedFlowerPos = bee.getSavedFlowerPos();
             }
-
-            storeBee(Occupant.of(occupant));
-
-            if (level != null) {
-                if (occupant instanceof Bee bee && bee.hasSavedFlowerPos() && (!hasSavedFlowerPos() || level.random.nextBoolean())) {
-                    savedFlowerPos = bee.getSavedFlowerPos();
-                }
-                level.playSound(null, worldPosition, SoundEvents.BEEHIVE_ENTER, SoundSource.BLOCKS, 1.0F, 1.0F);
-                level.gameEvent(GameEvent.BLOCK_CHANGE, worldPosition, GameEvent.Context.of(occupant, getBlockState()));
-
-                // 添加详细日志
-                CreateFisheryMod.LOGGER.info("蜜蜂成功进入智能蜂箱! 位置={}, 蜜蜂ID={}, HasNectar={}, 当前容量={}/{}",
-                        worldPosition,
-                        occupant.getStringUUID().substring(0, 8),
-                        hasNectar,
-                        stored.size(),
-                        MAX_OCCUPANTS);
+            // 立即处理蜂蜜
+            if (hasNectar) {
+                processHoneyDelivery();
             }
+        }
 
-            occupant.discard();
-            setChanged();
-        } else {
-            CreateFisheryMod.LOGGER.warn("智能蜂箱已满，无法添加蜜蜂: 位置={}, 蜜蜂ID={}",
-                    worldPosition,
-                    occupant.getStringUUID().substring(0, 8));
+        // 存储蜜蜂
+        Occupant occupantData = Occupant.of(occupant);
+        storeBee(occupantData);
+
+        if (level != null) {
+            level.playSound(null, worldPosition, SoundEvents.BEEHIVE_ENTER, SoundSource.BLOCKS, 1.0F, 1.0F);
+            level.gameEvent(GameEvent.BLOCK_CHANGE, worldPosition, GameEvent.Context.of(occupant, getBlockState()));
+        }
+
+        occupant.discard();
+        setChanged();
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
 
-
-
     private void storeBee(Occupant occupant) {
         stored.add(new BeeData(occupant));
+    }
+
+    private void processHoneyDelivery() {
+        if (mode.get() == ProcessingMode.HONEY_FLUID) {
+            FluidStack honeyFluid = new FluidStack(com.simibubi.create.AllFluids.HONEY.get(), 50);
+            int filled = fluidTank.get().fill(honeyFluid, IFluidHandler.FluidAction.EXECUTE);
+        } else {
+            if (level.random.nextFloat() < 0.6F) {
+                ItemStack honeycomb = new ItemStack(Items.HONEYCOMB, 1);
+                boolean inserted = false;
+                for (int i = 0; i < inventory.getSlots(); i++) {
+                    ItemStack slotStack = inventory.getStackInSlot(i);
+                    if (slotStack.isEmpty() || (ItemStack.isSameItem(slotStack, honeycomb) && slotStack.getCount() < slotStack.getMaxStackSize())) {
+                        inventory.insertItem(i, honeycomb, false);
+                        inserted = true;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     public boolean isEmpty() {
@@ -208,15 +232,15 @@ public class SmartBeehiveBlockEntity extends SmartBlockEntity implements IHaveGo
     }
 
     public boolean isFull() {
-        return stored.size() == MAX_OCCUPANTS;
+        return stored.size() >= MAX_OCCUPANTS;
     }
 
     public void resetHoneyLevel() {
-        level.setBlock(worldPosition, getBlockState().setValue(SmartBeehiveBlock.HONEY_LEVEL, 0), 3);
+        // 无需 HONEY_LEVEL，保留空方法以兼容可能的外部调用
     }
 
     private static void tickOccupants(Level level, BlockPos pos, BlockState state, List<BeeData> data, BlockPos savedFlowerPos, SmartBeehiveBlockEntity be) {
-        boolean flag = false;
+        boolean changed = false;
         var iterator = data.iterator();
 
         while (iterator.hasNext()) {
@@ -224,25 +248,31 @@ public class SmartBeehiveBlockEntity extends SmartBlockEntity implements IHaveGo
             if (beeData.tick()) {
                 BeeReleaseStatus status = beeData.hasNectar() ? BeeReleaseStatus.HONEY_DELIVERED : BeeReleaseStatus.BEE_RELEASED;
                 if (releaseOccupant(level, pos, state, beeData.toOccupant(), null, status, savedFlowerPos, be)) {
-                    flag = true;
+                    changed = true;
                     iterator.remove();
+                } else {
                 }
             }
         }
 
-        if (flag) {
+        if (changed) {
             be.setChanged();
+            if (level instanceof ServerLevel serverLevel) {
+                serverLevel.sendBlockUpdated(pos, state, state, 3);
+            }
         }
     }
 
     private static boolean releaseOccupant(Level level, BlockPos pos, BlockState state, Occupant occupant, List<Entity> storedInHives, BeeReleaseStatus releaseStatus, BlockPos storedFlowerPos, SmartBeehiveBlockEntity be) {
-        if ((level.isNight() || level.isRaining()) && releaseStatus != BeeReleaseStatus.EMERGENCY) {
-            return false;
-        }
+        // 移除夜晚/下雨限制，允许随时释放
+        // if ((level.isNight() || level.isRaining()) && releaseStatus != BeeReleaseStatus.EMERGENCY) {
+        //     return false;
+        // }
 
-        BlockPos blockpos = pos.above();
-        boolean flag = !level.getBlockState(blockpos).getCollisionShape(level, blockpos).isEmpty();
-        if (flag && releaseStatus != BeeReleaseStatus.EMERGENCY) {
+        Direction direction = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        BlockPos frontPos = pos.relative(direction);
+        boolean isBlocked = !level.getBlockState(frontPos).getCollisionShape(level, frontPos).isEmpty();
+        if (isBlocked && releaseStatus != BeeReleaseStatus.EMERGENCY) {
             return false;
         }
 
@@ -253,55 +283,23 @@ public class SmartBeehiveBlockEntity extends SmartBlockEntity implements IHaveGo
                     bee.setSavedFlowerPos(storedFlowerPos);
                 }
 
-                if (releaseStatus == BeeReleaseStatus.HONEY_DELIVERED) {
-                    be.processHoneyDelivery(state);
-                    if (state.is(BlockTags.BEEHIVES, p -> p.hasProperty(SmartBeehiveBlock.HONEY_LEVEL))) {
-                        int i = state.getValue(SmartBeehiveBlock.HONEY_LEVEL);
-                        if (i < SmartBeehiveBlock.MAX_HONEY_LEVELS) {
-                            int j = level.random.nextInt(100) == 0 ? 2 : 1;
-                            if (i + j > SmartBeehiveBlock.MAX_HONEY_LEVELS) {
-                                j--;
-                            }
-                            level.setBlockAndUpdate(pos, state.setValue(SmartBeehiveBlock.HONEY_LEVEL, i + j));
-                        }
-                    }
-                }
-
                 if (storedInHives != null) {
                     storedInHives.add(bee);
                 }
 
                 float f = entity.getBbWidth();
-                double d3 = flag ? 0.0 : 0.55 + (f / 2.0F);
-                double d0 = pos.getX() + 0.5;
-                double d1 = pos.getY() + 0.5 - (entity.getBbHeight() / 2.0F);
-                double d2 = pos.getZ() + 0.5;
+                double d0 = pos.getX() + 0.5 + (isBlocked ? 0.0 : 0.55 + f / 2.0) * direction.getStepX();
+                double d1 = pos.getY() + 0.5 - (entity.getBbHeight() / 2.0);
+                double d2 = pos.getZ() + 0.5 + (isBlocked ? 0.0 : 0.55 + f / 2.0) * direction.getStepZ();
                 entity.moveTo(d0, d1, d2, entity.getYRot(), entity.getXRot());
             }
 
             level.playSound(null, pos, SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0F, 1.0F);
             level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(entity, level.getBlockState(pos)));
-            return level.addFreshEntity(entity);
+            boolean added = level.addFreshEntity(entity);
+            return added;
         }
         return false;
-    }
-
-    private void processHoneyDelivery(BlockState state) {
-        if (mode.get() == ProcessingMode.HONEY_FLUID) {
-            FluidStack honeyFluid = new FluidStack(com.simibubi.create.AllFluids.HONEY.get(), 50);
-            fluidTank.get().fill(honeyFluid, IFluidHandler.FluidAction.EXECUTE);
-        } else {
-            if (level.random.nextFloat() < 0.6F) {
-                ItemStack honeycomb = new ItemStack(Items.HONEYCOMB, 1);
-                for (int i = 0; i < inventory.getSlots(); i++) {
-                    ItemStack slotStack = inventory.getStackInSlot(i);
-                    if (slotStack.isEmpty() || (ItemStack.isSameItem(slotStack, honeycomb) && slotStack.getCount() < slotStack.getMaxStackSize())) {
-                        inventory.insertItem(i, honeycomb, false);
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     protected void tryExportFluid(ServerLevel level) {
@@ -344,6 +342,9 @@ public class SmartBeehiveBlockEntity extends SmartBlockEntity implements IHaveGo
         stored.removeIf(beeData -> releaseOccupant(level, worldPosition, state, beeData.toOccupant(), list, releaseStatus, savedFlowerPos, this));
         if (!list.isEmpty()) {
             setChanged();
+            if (level instanceof ServerLevel serverLevel) {
+                serverLevel.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
         }
     }
 
@@ -404,6 +405,8 @@ public class SmartBeehiveBlockEntity extends SmartBlockEntity implements IHaveGo
         compound.put("FluidTank", fluidTank.get().writeToNBT(registries, new CompoundTag()));
         compound.putInt("ProcessingTicks", processingTicks);
         compound.putInt("FluidExportTicks", fluidExportTicks);
+
+        // 序列化蜜蜂数据
         ListTag bees = new ListTag();
         for (BeeData bee : stored) {
             CompoundTag beeTag = new CompoundTag();
@@ -411,6 +414,7 @@ public class SmartBeehiveBlockEntity extends SmartBlockEntity implements IHaveGo
             bees.add(beeTag);
         }
         compound.put("Bees", bees);
+
         if (hasSavedFlowerPos()) {
             compound.put("FlowerPos", NbtUtils.writeBlockPos(savedFlowerPos));
         }
@@ -423,13 +427,18 @@ public class SmartBeehiveBlockEntity extends SmartBlockEntity implements IHaveGo
         fluidTank.get().readFromNBT(registries, compound.getCompound("FluidTank"));
         processingTicks = compound.getInt("ProcessingTicks");
         fluidExportTicks = compound.getInt("FluidExportTicks");
+
+        // 读取蜜蜂数据
         stored.clear();
         if (compound.contains("Bees")) {
-            ListTag beeList = compound.getCompound("Bees").getList("List", 10);
-            for (int i = 0; i < beeList.size(); i++) {
-                storeBee(new Occupant(beeList.getCompound(i), registries));
+            ListTag bees = compound.getList("Bees", CompoundTag.TAG_COMPOUND);
+            for (int i = 0; i < bees.size(); i++) {
+                CompoundTag beeTag = bees.getCompound(i);
+                Occupant occupant = new Occupant(beeTag, registries);
+                stored.add(new BeeData(occupant));
             }
         }
+
         savedFlowerPos = compound.contains("FlowerPos") ? NbtUtils.readBlockPos(compound, "FlowerPos").orElse(null) : null;
     }
 

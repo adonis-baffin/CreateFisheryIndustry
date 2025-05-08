@@ -11,7 +11,8 @@
     "PlayerWaterSprintMixin",
     "BeeMixin",
     "BeeEnterHiveGoalMixin",
-    "BeeGoToHiveGoalMixin"
+    "BeeGoToHiveGoalMixin",
+    "BeeLocateHiveGoalMixin"
   ],
   "client": [],
   "injectors": {
