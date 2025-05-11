@@ -23,7 +23,8 @@ import java.util.List;
 public class PneumaticHarpoonGunItemInHandTickProcedure {
     private static final Logger LOGGER = LoggerFactory.getLogger(PneumaticHarpoonGunItemInHandTickProcedure.class);
     private static final double TRACTION_SPEED = 0.5;
-    private static final float AIR_CONSUMPTION_RATE = 0.2f; // 每刻 0.2 单位
+    private static final float AIR_CONSUMPTION_RATE_ENTITY = 0.05f; // 命中实体时每刻0.05单位
+    private static final float AIR_CONSUMPTION_RATE_BLOCK = 0.1f;  // 命中方块时每刻0.1单位
     private static final double MIN_DISTANCE_SQR = 2.0;
 
     public static void execute(LevelAccessor world, double x, double y, double z, Entity entity, ItemStack itemstack) {
@@ -45,22 +46,19 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
         if (!world.isClientSide()) {
             List<ItemStack> backtanks = BacktankUtil.getAllWithAir(player);
             int totalAir = backtanks.stream().map(BacktankUtil::getAir).reduce(0, Integer::sum);
-            LOGGER.debug("Harpoon air check for player {}: totalAir={}, required={}",
-                    player.getName().getString(), totalAir, AIR_CONSUMPTION_RATE);
+            LOGGER.debug("Harpoon air check for player {}: totalAir={}", player.getName().getString(), totalAir);
 
-            // 累积气体消耗，每 5 刻消耗 1 单位（平均每刻 0.2 单位）
+            // 确定气体消耗率
+            float airConsumptionRate = customData.copyTag().contains("tagHookedEntityId") ? AIR_CONSUMPTION_RATE_ENTITY : AIR_CONSUMPTION_RATE_BLOCK;
             float currAccumulatedAir = customData.copyTag().getFloat("AccumulatedAirConsumption");
-            final float newAccumulatedAir = currAccumulatedAir + AIR_CONSUMPTION_RATE;
+            final float newAccumulatedAir = currAccumulatedAir + airConsumptionRate;
 
             if (newAccumulatedAir >= 1.0f && !backtanks.isEmpty()) {
                 BacktankUtil.consumeAir(player, backtanks.get(0), 1);
-                // 在lambda表达式外更新累积值，并单独存储最终值
                 final float finalAccumulatedAir = newAccumulatedAir - 1.0f;
                 CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> tag.putFloat("AccumulatedAirConsumption", finalAccumulatedAir));
-                LOGGER.info("Harpoon air consumed for player {}: amount=1, remaining={}",
-                        player.getName().getString(), totalAir - 1);
+                LOGGER.info("Harpoon air consumed for player {}: amount=1, remaining={}", player.getName().getString(), totalAir - 1);
             } else {
-                // 如果没有消耗完整的1单位空气，只更新累积值
                 CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> tag.putFloat("AccumulatedAirConsumption", newAccumulatedAir));
             }
 
@@ -89,9 +87,9 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                             player.getName().getString(), distanceSqr);
                     if (distanceSqr > MIN_DISTANCE_SQR) {
                         double distance = Math.sqrt(distanceSqr);
+                        Vec3 playerPos = player.position().add(0, player.getBbHeight() * 0.5, 0);
                         Vec3 targetPos = target.position().add(0, target.getBbHeight() * 0.5, 0);
-                        Vec3 pull = targetPos.subtract(player.position().add(0, player.getBbHeight() * 0.5, 0))
-                                .scale(TRACTION_SPEED / distance);
+                        Vec3 pull = playerPos.subtract(targetPos).scale(TRACTION_SPEED / distance); // 修正方向：拉向玩家
                         target.setDeltaMovement(target.getDeltaMovement().multiply(0.8, 0.8, 0.8).add(pull));
                         target.hurtMarked = true;
                         playTractionSound(world, player);

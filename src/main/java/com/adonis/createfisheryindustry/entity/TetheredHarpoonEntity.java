@@ -196,6 +196,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                     tag.remove("xPostion");
                     tag.remove("yPostion");
                     tag.remove("zPostion");
+                    tag.remove("AccumulatedAirConsumption");
                 });
                 LOGGER.info("Harpoon retrieving for player {}, tagHooked set to false", owner.getName().getString());
             }
@@ -220,7 +221,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         if (!this.level().isClientSide) {
             Entity target = result.getEntity();
             if (target instanceof LivingEntity living) {
-                // 造成 14 点伤害
                 living.hurt(this.damageSources().trident(this, owner != null ? owner : this), 14.0F);
                 this.setHitEntity(living, this.tickCount);
                 this.playSound(SoundEvents.TRIDENT_HIT, 1.0F, 1.0F);
@@ -228,7 +228,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                         target.getType().toString(), owner != null ? owner.getName().getString() : "null", result.getLocation());
             }
         }
-        // 继续飞行，不停止
     }
 
     @Override
@@ -317,6 +316,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                     this.setDeltaMovement(Vec3.ZERO);
                     LOGGER.debug("Harpoon following entity {} for player {} at pos {}",
                             hitEntity.getType().toString(), owner != null ? owner.getName().getString() : "null", targetPos);
+
                     if (tickCount - hitTick <= 4 && !hitEntity.isAlive()) {
                         pullLootToPlayer(hitEntity);
                         this.startRetrieving();
