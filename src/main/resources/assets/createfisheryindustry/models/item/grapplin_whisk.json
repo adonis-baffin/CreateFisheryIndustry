@@ -1,0 +1,7 @@
+{
+  "parent": "create_sa:custom/grapplin_whisk_handle",
+  "textures": {
+    "2": "create_sa:block/grapplin_whisk_handle",
+    "particle": "create_sa:item/fan_component"
+  }
+}

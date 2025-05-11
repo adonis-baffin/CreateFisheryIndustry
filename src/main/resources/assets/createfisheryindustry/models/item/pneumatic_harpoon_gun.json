@@ -1,0 +1,7 @@
+{
+  "parent": "createfisheryindustry:custom/pneumatic_harpoon_gun_handle",
+  "textures": {
+    "2": "createfisheryindustry:block/pneumatic_harpoon_gun_handle",
+    "particle": "createfisheryindustry:item/fan_component"
+  }
+}

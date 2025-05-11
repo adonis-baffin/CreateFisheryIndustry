@@ -43,7 +43,6 @@ public class CreateFisheryMod {
     }
 
     public CreateFisheryMod(IEventBus bus, ModContainer modContainer) {
-
         // 注册 Create 模组内容
         REGISTRATE.registerEventListeners(bus);
         CreateFisheryBlocks.register();
@@ -108,7 +107,10 @@ public class CreateFisheryMod {
 
     // 通用初始化
     private void commonSetup(FMLCommonSetupEvent event) {
-        event.enqueueWork(CreateFisheryCommonConfig::onLoad);
+        event.enqueueWork(() -> {
+            LOGGER.info("Performing common setup for CreateFisheryIndustry");
+            CreateFisheryCommonConfig.onLoad();
+        });
     }
 
     // 服务器启动

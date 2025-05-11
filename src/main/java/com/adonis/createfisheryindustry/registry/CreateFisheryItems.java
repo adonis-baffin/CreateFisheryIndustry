@@ -7,6 +7,7 @@ import com.adonis.createfisheryindustry.item.CopperDivingLeggingsItem;
 import com.adonis.createfisheryindustry.item.HarpoonItem;
 import com.adonis.createfisheryindustry.item.HarpoonPouchItem;
 import com.adonis.createfisheryindustry.item.NetheriteDivingLeggingsItem;
+import com.adonis.createfisheryindustry.item.PneumaticHarpoonGunItem; // 新增导入
 import com.google.common.collect.Sets;
 import com.simibubi.create.content.equipment.armor.AllArmorMaterials;
 import com.simibubi.create.foundation.item.ItemDescription;
@@ -14,6 +15,7 @@ import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -39,6 +41,12 @@ public class CreateFisheryItems {
     public static final ItemEntry<Item> ZINC_SHEET = REGISTRATE.item("zinc_sheet",
                     p -> new Item(basicItem()))
             .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("zinc_sheet", net.minecraft.core.registries.Registries.ITEM)))
+            .register();
+
+    // 新增：链条
+    public static final ItemEntry<Item> CHAINS = REGISTRATE.item("chains",
+                    p -> new Item(basicItem()))
+            .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("chains", net.minecraft.core.registries.Registries.ITEM)))
             .register();
 
     public static final ItemEntry<Item> WAXED_CARDBOARD = REGISTRATE.item("waxed_cardboard",
@@ -96,6 +104,17 @@ public class CreateFisheryItems {
             })
             .register();
 
+    // 新增：气动鱼叉枪
+    public static final ItemEntry<PneumaticHarpoonGunItem> PNEUMATIC_HARPOON_GUN = REGISTRATE.item("pneumatic_harpoon_gun",
+                    p -> new PneumaticHarpoonGunItem(new Item.Properties().stacksTo(1).rarity(Rarity.COMMON)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.pneumatic_harpoon_gun");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("pneumatic_harpoon_gun", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+
+
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
@@ -104,7 +123,6 @@ public class CreateFisheryItems {
         );
         TrapNozzleBlockEntity.registerCapabilities(event);
         SmartMeshBlockEntity.registerCapabilities(event);
-        // 移除 HARPOON_POUCH 的 ItemHandler 能力绑定
     }
 
     public static void register(IEventBus bus) {

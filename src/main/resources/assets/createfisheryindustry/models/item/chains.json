@@ -1,0 +1,7 @@
+{
+  "parent": "createfisheryindustry:custom/chains",
+  "textures": {
+    "3": "createfisheryindustry:block/chains",
+    "particle": "createfisheryindustry:item/zinc_handle"
+  }
+}
