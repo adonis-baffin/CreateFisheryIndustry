@@ -9,6 +9,7 @@ import com.adonis.createfisheryindustry.item.ClientHarpoonPouchTooltip;
 import com.adonis.createfisheryindustry.item.HarpoonItem;
 import com.adonis.createfisheryindustry.item.HarpoonPouchItem;
 import com.adonis.createfisheryindustry.item.HarpoonPouchTooltip;
+import com.adonis.createfisheryindustry.procedures.PneumaticHarpoonGunChainsLineProcedure;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
 import com.adonis.createfisheryindustry.registry.CreateFisheryEntityTypes;
@@ -43,6 +44,7 @@ public class ClientSetup {
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.TRAP_NOZZLE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_MESH.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_BEEHIVE.get(), RenderType.cutout());
+            PneumaticHarpoonGunChainsLineProcedure.register();
 
             // 注册方块实体渲染器
             BlockEntityRenderers.register(CreateFisheryBlockEntities.SMART_MESH.get(), SmartMeshRenderer::new);

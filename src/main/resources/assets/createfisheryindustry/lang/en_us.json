@@ -8,6 +8,8 @@
   "item.createfisheryindustry.waxed_leather": "Waxed Leather",
   "item.createfisheryindustry.worn_harpoon": "Worn Harpoon",
   "item.createfisheryindustry.harpoon_pouch": "Harpoon Pouch",
+  "item.createfisheryindustry.pneumatic_harpoon_gun": "Pneumatic Harpoon Gun",
+
   "item.createfisheryindustry.worn_harpoon.tooltip.summary": "An ancient, worn harpoon lost in the depths; polish it to restore its former gloss",
   "item.createfisheryindustry.copper_diving_leggings": "Copper Diving Leggings",
   "item.createfisheryindustry.netherite_diving_leggings": "Netherite Diving Leggings",
@@ -35,6 +37,8 @@
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "The wearer gains super jump ability in water or lava, up to four blocks high, with no fall damage upon landing.",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Holds up to 4 harpoons. Automatically replenishes a harpoon to the main hand after throwing and prioritizes storing picked-up harpoons in the pouch.",
+
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "由压缩空气驱动，可以发射一支鱼叉，命中实体后将实体拉至身边，命中方块后将自身拉向方块",
 
   "block.createfisheryindustry.frame_trap.tooltip.summary": "Component for fishing on contraption.",
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "When in contraption:",

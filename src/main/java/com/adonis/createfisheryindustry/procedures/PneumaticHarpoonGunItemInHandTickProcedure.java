@@ -22,31 +22,26 @@ import java.util.List;
 
 public class PneumaticHarpoonGunItemInHandTickProcedure {
     private static final Logger LOGGER = LoggerFactory.getLogger(PneumaticHarpoonGunItemInHandTickProcedure.class);
-    private static final double TRACTION_SPEED = 0.5;
-    private static final float AIR_CONSUMPTION_RATE_ENTITY = 0.05f; // 命中实体时每刻0.05单位
-    private static final float AIR_CONSUMPTION_RATE_BLOCK = 0.1f;  // 命中方块时每刻0.1单位
-    private static final double MIN_DISTANCE_SQR = 2.0;
+    private static final double TRACTION_SPEED = 0.5; // 牵引速度
+    private static final float AIR_CONSUMPTION_RATE_ENTITY = 0.05f; // 命中实体时每刻气体消耗
+    private static final float AIR_CONSUMPTION_RATE_BLOCK = 0.1f;  // 命中方块时每刻气体消耗
+    private static final double MIN_DISTANCE_SQR = 2.0; // 最小牵引距离平方
 
     public static void execute(LevelAccessor world, double x, double y, double z, Entity entity, ItemStack itemstack) {
         if (!(entity instanceof Player player)) {
-            LOGGER.warn("Harpoon traction check failed: entity is not a player");
             return;
         }
 
         CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         boolean tagHooked = customData.copyTag().getBoolean("tagHooked");
-        LOGGER.debug("Harpoon traction check for player {}: tagHooked={}, customData={}",
-                player.getName().getString(), tagHooked, customData.copyTag().toString());
 
         if (!tagHooked) {
-            LOGGER.debug("Harpoon traction skipped for player {}: tagHooked is false", player.getName().getString());
             return;
         }
 
         if (!world.isClientSide()) {
             List<ItemStack> backtanks = BacktankUtil.getAllWithAir(player);
             int totalAir = backtanks.stream().map(BacktankUtil::getAir).reduce(0, Integer::sum);
-            LOGGER.debug("Harpoon air check for player {}: totalAir={}", player.getName().getString(), totalAir);
 
             // 确定气体消耗率
             float airConsumptionRate = customData.copyTag().contains("tagHookedEntityId") ? AIR_CONSUMPTION_RATE_ENTITY : AIR_CONSUMPTION_RATE_BLOCK;
@@ -57,7 +52,6 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                 BacktankUtil.consumeAir(player, backtanks.get(0), 1);
                 final float finalAccumulatedAir = newAccumulatedAir - 1.0f;
                 CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> tag.putFloat("AccumulatedAirConsumption", finalAccumulatedAir));
-                LOGGER.info("Harpoon air consumed for player {}: amount=1, remaining={}", player.getName().getString(), totalAir - 1);
             } else {
                 CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> tag.putFloat("AccumulatedAirConsumption", newAccumulatedAir));
             }
@@ -73,7 +67,7 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                 });
                 world.getEntitiesOfClass(TetheredHarpoonEntity.class, player.getBoundingBox().inflate(100), e -> e.getOwner() == player)
                         .forEach(TetheredHarpoonEntity::startRetrieving);
-                LOGGER.info("Harpoon reset tagHooked for player {}: no air or backtanks", player.getName().getString());
+                LOGGER.debug("Insufficient air, retrieving harpoon for player: {}", player.getName().getString());
                 return;
             }
 
@@ -83,18 +77,15 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                 Entity target = ((Level) world).getEntity(hookedEntityId);
                 if (target != null && target.isAlive()) {
                     double distanceSqr = player.distanceToSqr(target);
-                    LOGGER.debug("Harpoon traction to entity for player {}: distanceSqr={}",
-                            player.getName().getString(), distanceSqr);
                     if (distanceSqr > MIN_DISTANCE_SQR) {
                         double distance = Math.sqrt(distanceSqr);
                         Vec3 playerPos = player.position().add(0, player.getBbHeight() * 0.5, 0);
                         Vec3 targetPos = target.position().add(0, target.getBbHeight() * 0.5, 0);
-                        Vec3 pull = playerPos.subtract(targetPos).scale(TRACTION_SPEED / distance); // 修正方向：拉向玩家
+                        Vec3 pull = playerPos.subtract(targetPos).scale(TRACTION_SPEED / distance); // 拉向玩家
                         target.setDeltaMovement(target.getDeltaMovement().multiply(0.8, 0.8, 0.8).add(pull));
                         target.hurtMarked = true;
                         playTractionSound(world, player);
-                        LOGGER.info("Harpoon traction to entity {} for player {}: motion={}, newDelta={}",
-                                target.getType().toString(), player.getName().getString(), pull, target.getDeltaMovement());
+                        LOGGER.debug("Pulling entity {} to player: {}", target, player.getName().getString());
                     } else {
                         CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> {
                             tag.putBoolean("tagHooked", false);
@@ -103,7 +94,7 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                         });
                         world.getEntitiesOfClass(TetheredHarpoonEntity.class, player.getBoundingBox().inflate(100), e -> e.getOwner() == player)
                                 .forEach(TetheredHarpoonEntity::startRetrieving);
-                        LOGGER.info("Harpoon reset tagHooked for player {}: reached entity", player.getName().getString());
+                        LOGGER.debug("Entity too close, retrieving harpoon for player: {}", player.getName().getString());
                     }
                 } else {
                     CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> {
@@ -113,7 +104,7 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                     });
                     world.getEntitiesOfClass(TetheredHarpoonEntity.class, player.getBoundingBox().inflate(100), e -> e.getOwner() == player)
                             .forEach(TetheredHarpoonEntity::startRetrieving);
-                    LOGGER.info("Harpoon reset tagHooked for player {}: entity dead or removed", player.getName().getString());
+                    LOGGER.debug("Hooked entity invalid, retrieving harpoon for player: {}", player.getName().getString());
                 }
                 return;
             }
@@ -124,13 +115,9 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                 double yPos = customData.copyTag().getDouble("yPostion");
                 double zPos = customData.copyTag().getDouble("zPostion");
                 BlockPos blockPos = BlockPos.containing(xPos, yPos, zPos);
-                LOGGER.debug("Harpoon block pos for player {}: xPos={}, yPos={}, zPos={}, blockPos={}",
-                        player.getName().getString(), xPos, yPos, zPos, blockPos);
 
                 if (!world.isEmptyBlock(blockPos)) {
                     double distanceSqr = player.distanceToSqr(xPos, yPos, zPos);
-                    LOGGER.debug("Harpoon traction to block for player {}: distanceSqr={}",
-                            player.getName().getString(), distanceSqr);
                     if (distanceSqr > MIN_DISTANCE_SQR) {
                         double distance = Math.sqrt(distanceSqr);
                         Vec3 pull = new Vec3(xPos - player.getX(), yPos - player.getY(), zPos - player.getZ())
@@ -141,8 +128,7 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                             player.fallDistance = 0.0F;
                         }
                         playTractionSound(world, player);
-                        LOGGER.info("Harpoon traction to block for player {}: motion={}, newDelta={}",
-                                player.getName().getString(), pull, player.getDeltaMovement());
+                        LOGGER.debug("Pulling player {} to block: {}", player.getName().getString(), blockPos);
                     } else {
                         CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> {
                             tag.putBoolean("tagHooked", false);
@@ -153,7 +139,7 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                         });
                         world.getEntitiesOfClass(TetheredHarpoonEntity.class, player.getBoundingBox().inflate(100), e -> e.getOwner() == player)
                                 .forEach(TetheredHarpoonEntity::startRetrieving);
-                        LOGGER.info("Harpoon reset tagHooked for player {}: reached block", player.getName().getString());
+                        LOGGER.debug("Player too close to block, retrieving harpoon for player: {}", player.getName().getString());
                     }
                 } else {
                     CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> {
@@ -164,8 +150,10 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
                         tag.remove("AccumulatedAirConsumption");
                     });
                     world.getEntitiesOfClass(TetheredHarpoonEntity.class, player.getBoundingBox().inflate(100), e -> e.getOwner() == player)
+
+
                             .forEach(TetheredHarpoonEntity::startRetrieving);
-                    LOGGER.info("Harpoon reset tagHooked for player {}: block gone", player.getName().getString());
+                    LOGGER.debug("Anchored block invalid, retrieving harpoon for player: {}", player.getName().getString());
                 }
             }
         }
@@ -176,7 +164,6 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
                     BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("item.armor.equip_chain")),
                     SoundSource.PLAYERS, 0.25F, 0.5F);
-            LOGGER.debug("Harpoon traction sound played for player {}", player.getName().getString());
         }
     }
 }

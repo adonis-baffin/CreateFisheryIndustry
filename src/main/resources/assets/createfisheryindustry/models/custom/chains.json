@@ -1,33 +1,36 @@
 {
-  "credit": "Made with Blockbench",
-  "parent": "chains",
-  "elements": [
-    {
-      "from": [6.5, 8, 3],
-      "to": [9.5, 8.1, 9],
-      "rotation": {"angle": -45, "axis": "z", "origin": [8, 8, 8]},
-      "faces": {
-        "up": {"uv": [3, 6, 0, 0], "texture": "#3"},
-        "down": {"uv": [3, 6, 0, 0], "texture": "#3"}
-      }
-    },
-    {
-      "from": [7.9, 6.5, 7],
-      "to": [8, 9.5, 13],
-      "rotation": {"angle": -45, "axis": "z", "origin": [8, 8, 8]},
-      "faces": {
-        "east": {"uv": [4, 0, 10, 3], "texture": "#3"},
-        "west": {"uv": [4, 0, 10, 3], "texture": "#3"}
-      }
-    }
-  ],
-  "groups": [
-    {
-      "name": "bone",
-      "origin": [0, 0, 0],
-      "color": 0,
-      "boneType": "",
-      "children": [0, 1]
-    }
-  ]
+	"credit": "Made with Blockbench",
+	"parent": "chains",
+	"textures": {
+		"1": "createfisheryindustry:block/chains",
+		"particle": "createfisheryindustry:block/chains"
+	},
+	"elements": [
+		{
+			"from": [6.5, 8, 3],
+			"to": [9.5, 8.1, 9],
+			"rotation": {"angle": -45, "axis": "z", "origin": [8, 8, 8]},
+			"faces": {
+				"up": {"uv": [3, 6, 0, 0], "texture": "#1"},
+				"down": {"uv": [3, 6, 0, 0], "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.9, 6.5, 7],
+			"to": [8, 9.5, 13],
+			"rotation": {"angle": -45, "axis": "z", "origin": [8, 8, 8]},
+			"faces": {
+				"east": {"uv": [4, 0, 10, 3], "texture": "#1"},
+				"west": {"uv": [4, 0, 10, 3], "texture": "#1"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "bone",
+			"origin": [0, 0, 0],
+			"color": 0,
+			"children": [0, 1]
+		}
+	]
 }
