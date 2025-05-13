@@ -41,8 +41,9 @@
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "可以容纳4支鱼叉。在玩家投掷鱼叉后会自动补充鱼叉至主手，在玩家捡起鱼叉时会优先进入鱼叉袋",
 
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "由压缩空气驱动，可以发射一支鱼叉，命中实体后将实体拉至身边，命中方块后将自身拉向方块",
   "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "右键使用时：",
-  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "由压缩空气驱动，可以发射一支鱼叉，命中实体后将实体拉至身边，命中方块后将自身拉向方块",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "发射鱼叉，再次右键收回",
 
   "block.createfisheryindustry.frame_trap.tooltip.summary": "用于动态结构上捕鱼的元件。",
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "随动态结构移动时：",

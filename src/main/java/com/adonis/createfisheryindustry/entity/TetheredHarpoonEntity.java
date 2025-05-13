@@ -257,13 +257,11 @@ public class TetheredHarpoonEntity extends AbstractArrow {
 
     public void pullLootToPlayer(Entity deadEntity) {
         if (!(getOwner() instanceof Player player) || !(level() instanceof ServerLevel serverLevel) || !(deadEntity instanceof Mob mob)) {
-            LOGGER.debug("Failed to pull loot: invalid owner, level, or entity. Owner: {}, Level: {}, Entity: {}", getOwner(), level(), deadEntity);
             return;
         }
 
         var lootTableKey = mob.getLootTable();
         if (lootTableKey == null) {
-            LOGGER.debug("No loot table for entity: {}", deadEntity);
             return;
         }
 
@@ -294,7 +292,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             drop.setDeltaMovement(dx * 0.2, dy * 0.2 + Math.sqrt(distance) * 0.1, dz * 0.2); // 初始速度
             drop.setPickUpDelay(10);
             level().addFreshEntity(drop);
-            LOGGER.debug("Spawned loot item: {} at {}, tethered to player: {}", item, drop.position(), player.getName().getString());
         }
 
         int xp = ((LivingEntity) deadEntity).getExperienceReward(serverLevel, this);
@@ -311,9 +308,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
             orb.setDeltaMovement(dx * 0.2, dy * 0.2 + Math.sqrt(distance) * 0.1, dz * 0.2); // 初始速度
             level().addFreshEntity(orb);
-            LOGGER.debug("Spawned experience orb: {} XP at {}, tethered to player: {}", xp, orb.position(), player.getName().getString());
         }
-        LOGGER.debug("Pulled loot from entity: {} to player: {}", deadEntity, player.getName().getString());
     }
 
     @Override
@@ -332,14 +327,11 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                     this.setPos(targetPos);
                     this.setDeltaMovement(Vec3.ZERO);
                     this.deathDelayTicks = 0; // 重置延迟计数
-                    LOGGER.debug("Harpoon attached to living entity: {}", hitEntity);
                 } else {
                     // 实体死亡或无效，延迟收回
                     if (deathDelayTicks < MAX_DEATH_DELAY && hitEntity != null) {
                         this.deathDelayTicks++;
-                        LOGGER.debug("Entity {} is dead or invalid, delaying retrieve for tick {}/{}", hitEntity, deathDelayTicks, MAX_DEATH_DELAY);
                     } else {
-                        LOGGER.debug("Retrieve triggered for entity: {}, delay ticks: {}", hitEntity, deathDelayTicks);
                         this.startRetrieving();
                     }
                 }

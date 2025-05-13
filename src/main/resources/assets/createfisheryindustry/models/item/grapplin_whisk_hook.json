@@ -86,7 +86,6 @@
 			"name": "grapplin_whisk_hook",
 			"origin": [8, 6, -2.5],
 			"color": 0,
-			"boneType": "",
 			"children": [0, 1, 2]
 		}
 	]

@@ -41,8 +41,9 @@
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Holds up to 4 harpoons. Automatically replenishes a harpoon to the main hand after throwing and prioritizes storing picked-up harpoons in the pouch.",
 
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "Powered by compressed air. Shoots a harpoon that pulls hit entities toward you or pulls you toward blocks.",
   "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1":"When right-clicked:",
-  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1":"Powered by compressed air. Shoots a harpoon that pulls hit entities toward you or pulls you toward blocks.",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1":"Shoots harpoon, right click again to draws it back",
 
   "block.createfisheryindustry.frame_trap.tooltip.summary": "Component for fishing on contraption.",
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "When in contraption:",

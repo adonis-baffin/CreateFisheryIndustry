@@ -22,7 +22,7 @@
       "item": "createfisheryindustry:harpoon"
     },
     "G": {
-      "tag": "c:strings"
+      "item": "minecraft:chain"
     }
   },
   "pattern": [

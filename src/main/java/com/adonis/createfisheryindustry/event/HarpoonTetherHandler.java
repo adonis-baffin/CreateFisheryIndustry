@@ -42,7 +42,6 @@ public class HarpoonTetherHandler {
                     tag.remove("HarpoonTethered");
                     tag.remove("TetherPlayerId");
                     tag.remove("TetherEndTime");
-                    LOGGER.debug("Stopped tethering for entity: {} (timeout or invalid player)", entity);
                     return;
                 }
 
@@ -59,7 +58,6 @@ public class HarpoonTetherHandler {
                     tag.remove("HarpoonTethered");
                     tag.remove("TetherPlayerId");
                     tag.remove("TetherEndTime");
-                    LOGGER.debug("Stopped tethering for entity: {} (reached player at {})", entity, playerPos);
                     return;
                 }
 
@@ -70,7 +68,6 @@ public class HarpoonTetherHandler {
                         dz * TETHER_SPEED
                 );
                 entity.setDeltaMovement(motion);
-                LOGGER.debug("Tethering entity: {} to player: {} at {}, motion: {}", entity, player.getName().getString(), playerPos, motion);
             }
         }
     }
