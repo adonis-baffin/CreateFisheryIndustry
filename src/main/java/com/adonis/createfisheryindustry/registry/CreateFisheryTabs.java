@@ -31,6 +31,7 @@ public class CreateFisheryTabs {
             output.accept(CreateFisheryBlocks.SMART_MESH);
             output.accept(CreateFisheryBlocks.SMART_BEEHIVE);
             output.accept(CreateFisheryItems.ZINC_SHEET.get());
+            output.accept(CreateFisheryItems.PNEUMATIC_MECHANISM.get());
             output.accept(CreateFisheryItems.WAXED_CARDBOARD.get());
             output.accept(CreateFisheryItems.WAXED_LEATHER.get());
             output.accept(CreateFisheryItems.WORN_HARPOON.get());

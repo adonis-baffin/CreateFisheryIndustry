@@ -4,12 +4,15 @@
   "block.createfisheryindustry.trap_nozzle": "气捕网",
   "block.createfisheryindustry.smart_mesh": "智能滤网",
   "item.createfisheryindustry.zinc_sheet": "锌板",
+  "item.createfisheryindustry.pneumatic_mechanism": "气动构件",
+  "item.createfisheryindustry.incomplete_pneumatic_mechanism": "未完成的气动构件",
   "item.createfisheryindustry.waxed_cardboard": "防水纸板",
   "item.createfisheryindustry.waxed_leather": "防水皮革",
   "item.createfisheryindustry.worn_harpoon": "破损的鱼叉",
   "item.createfisheryindustry.harpoon_pouch": "鱼叉袋",
   "item.createfisheryindustry.pneumatic_harpoon_gun": "气动鱼叉枪",
 
+  "item.createfisheryindustry.waxed_cardboard.tooltip.summary": "测试物品，目前无用途。将来会在新模组《机械动力：世界工厂》中发布，敬请期待。",
   "item.createfisheryindustry.worn_harpoon.tooltip.summary": "折戟沉沙铁未销，自将磨洗认前朝",
   "item.createfisheryindustry.copper_diving_leggings": "铜潜水护腿",
   "item.createfisheryindustry.netherite_diving_leggings": "下界合金潜水护腿",
@@ -38,7 +41,8 @@
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "可以容纳4支鱼叉。在玩家投掷鱼叉后会自动补充鱼叉至主手，在玩家捡起鱼叉时会优先进入鱼叉袋",
 
-  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "由压缩空气驱动，可以发射一支鱼叉，命中实体后将实体拉至身边，命中方块后将自身拉向方块",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "右键使用时：",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "由压缩空气驱动，可以发射一支鱼叉，命中实体后将实体拉至身边，命中方块后将自身拉向方块",
 
   "block.createfisheryindustry.frame_trap.tooltip.summary": "用于动态结构上捕鱼的元件。",
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "随动态结构移动时：",

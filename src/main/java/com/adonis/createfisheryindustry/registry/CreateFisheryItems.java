@@ -43,6 +43,16 @@ public class CreateFisheryItems {
             .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("zinc_sheet", net.minecraft.core.registries.Registries.ITEM)))
             .register();
 
+    public static final ItemEntry<Item> INCOMPLETE_PNEUMATIC_MECHANISM = REGISTRATE.item("incomplete_pneumatic_mechanism",
+                    p -> new Item(basicItem()))
+            .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("incomplete_pneumatic_mechanism", net.minecraft.core.registries.Registries.ITEM)))
+            .register();
+
+    public static final ItemEntry<Item> PNEUMATIC_MECHANISM = REGISTRATE.item("pneumatic_mechanism",
+                    p -> new Item(basicItem()))
+            .onRegister(item -> CREATIVE_TAB_ITEMS.add(REGISTRATE.get("pneumatic_mechanism", net.minecraft.core.registries.Registries.ITEM)))
+            .register();
+
     // 新增：链条
     public static final ItemEntry<Item> CHAINS = REGISTRATE.item("chains",
                     p -> new Item(basicItem()))

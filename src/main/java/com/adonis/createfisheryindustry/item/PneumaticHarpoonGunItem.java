@@ -12,7 +12,9 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -35,11 +37,11 @@ import java.util.function.Consumer;
 
 public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
     private static final Logger LOGGER = LoggerFactory.getLogger(PneumaticHarpoonGunItem.class);
-    private static final int LAUNCH_AIR_CONSUMPTION = 10; // 发射消耗的气体
+    private static final int LAUNCH_AIR_CONSUMPTION = 5; // 发射消耗
     private static final int COOLDOWN_TICKS = 10; // 0.5秒冷却（10刻）
 
     public PneumaticHarpoonGunItem(Properties properties) {
-        super(properties.stacksTo(1).rarity(Rarity.COMMON));
+        super(properties.stacksTo(1).rarity(Rarity.UNCOMMON));
     }
 
     @Override
@@ -48,16 +50,12 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
         if (entity instanceof Player player && (selected || player.getOffhandItem() == itemstack)) {
             PneumaticHarpoonGunItemInHandTickProcedure.execute(world, player.getX(), player.getY(), player.getZ(), player, itemstack);
 
-            // 清理过期的冷却时间
+            // 检查并清理过期的冷却时间
             CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
             if (customData.copyTag().contains("CooldownEndTick")) {
                 long cooldownEndTick = customData.copyTag().getLong("CooldownEndTick");
                 if (world.getGameTime() >= cooldownEndTick) {
-                    CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> {
-                        tag.remove("CooldownEndTick");
-                        LOGGER.debug("Cleared cooldown for player: {}, game time: {}",
-                                player.getName().getString(), world.getGameTime());
-                    });
+                    CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> tag.remove("CooldownEndTick"));
                 }
             }
         }
@@ -66,26 +64,26 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
-
-        // 冷却检查（服务器和客户端）
-        CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
-        if (customData.copyTag().contains("CooldownEndTick")) {
-            long cooldownEndTick = customData.copyTag().getLong("CooldownEndTick");
-            if (world.getGameTime() < cooldownEndTick) {
-                LOGGER.debug("Harpoon gun on cooldown for player: {}, remaining ticks: {}",
-                        player.getName().getString(), cooldownEndTick - world.getGameTime());
-                return InteractionResultHolder.pass(itemstack);
-            }
-        }
-
         if (!world.isClientSide()) {
             List<ItemStack> backtanks = BacktankUtil.getAllWithAir(player);
             int totalAir = backtanks.stream().map(BacktankUtil::getAir).reduce(0, Integer::sum);
+            CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
             boolean tagHooked = customData.copyTag().getBoolean("tagHooked");
 
+            // 检查冷却时间
+            if (customData.copyTag().contains("CooldownEndTick")) {
+                long cooldownEndTick = customData.copyTag().getLong("CooldownEndTick");
+                if (world.getGameTime() < cooldownEndTick) {
+                    return InteractionResultHolder.pass(itemstack);
+                }
+            }
+
             // 检查是否存在活跃的鱼叉实体
-            List<TetheredHarpoonEntity> activeHarpoons = world.getEntitiesOfClass(TetheredHarpoonEntity.class,
-                    player.getBoundingBox().inflate(50), e -> e.getOwner() == player && !e.isRetrieving());
+            List<TetheredHarpoonEntity> activeHarpoons = world.getEntitiesOfClass(
+                    TetheredHarpoonEntity.class,
+                    player.getBoundingBox().inflate(100),
+                    e -> e.getOwner() == player && !e.isRetrieving()
+            );
             if (!activeHarpoons.isEmpty() || tagHooked) {
                 // 收回鱼叉并设置冷却
                 activeHarpoons.forEach(TetheredHarpoonEntity::startRetrieving);
@@ -96,20 +94,21 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
                     tag.remove("yPostion");
                     tag.remove("zPostion");
                     tag.remove("AccumulatedAirConsumption");
-                    tag.putLong("CooldownEndTick", world.getGameTime() + COOLDOWN_TICKS); // 设置0.5秒冷却
+                    tag.putLong("CooldownEndTick", world.getGameTime() + COOLDOWN_TICKS);
                 });
                 player.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("item.armor.equip_chain")), 1.0F, 1.0F);
-                LOGGER.debug("Harpoon retrieved by player: {}, cooldown set to: {}",
-                        player.getName().getString(), world.getGameTime() + COOLDOWN_TICKS);
                 return InteractionResultHolder.sidedSuccess(itemstack, false);
             }
 
-            // 发射新鱼叉（不设置冷却）
+            // 若气体不足，显示提示并阻止发射
             if (totalAir < LAUNCH_AIR_CONSUMPTION || backtanks.isEmpty()) {
-                LOGGER.debug("Insufficient air or no backtanks for player: {}", player.getName().getString());
+                if (player instanceof ServerPlayer sp) {
+                    sp.displayClientMessage(Component.literal("Insufficient air to shoot"), true);
+                }
                 return InteractionResultHolder.fail(itemstack);
             }
 
+            // 发射新鱼叉
             BacktankUtil.consumeAir(player, backtanks.get(0), LAUNCH_AIR_CONSUMPTION);
             Vec3 eyePos = player.getEyePosition(1.0F);
             Vec3 lookVec = player.getViewVector(1.0F);
@@ -117,17 +116,17 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
             harpoon.shoot(lookVec, 2.0F);
             world.addFreshEntity(harpoon);
 
-            // 初始化累积气体消耗
             CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> {
                 tag.putFloat("AccumulatedAirConsumption", 0.0F);
                 tag.putBoolean("tagHooked", true);
             });
 
             player.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("entity.arrow.shoot")), 1.0F, 1.0F);
-            LOGGER.debug("Harpoon launched by player: {}", player.getName().getString());
         }
+
         return InteractionResultHolder.sidedSuccess(itemstack, world.isClientSide());
     }
+
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
@@ -136,7 +135,8 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
             return false;
         }
         List<ItemStack> backtanks = BacktankUtil.getAllWithAir(player);
-        return !backtanks.isEmpty();
+        boolean visible = !backtanks.isEmpty();
+        return visible;
     }
 
     @Override
@@ -156,7 +156,8 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
 
     @Override
     public int getBarColor(ItemStack stack) {
-        return 0xFFFFFF;
+        int color = 0xFFFFFF;
+        return color;
     }
 
     @Nullable

@@ -41,6 +41,11 @@ public class HarpoonEntity extends AbstractArrow {
         this.entityData.set(ID_FOIL, pickupItemStack.hasFoil());
     }
 
+    @Override
+    public ItemStack getPickupItem() {
+        return super.getPickupItem(); // 调用 AbstractArrow 的 getPickupItem()
+    }
+
     public HarpoonEntity(Level level, double x, double y, double z, ItemStack pickupItemStack) {
         super(CreateFisheryEntityTypes.HARPOON.get(), x, y, z, level, pickupItemStack, pickupItemStack);
         this.entityData.set(ID_LOYALTY, this.getLoyaltyFromItem(pickupItemStack));

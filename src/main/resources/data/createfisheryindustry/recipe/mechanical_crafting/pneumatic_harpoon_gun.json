@@ -1,0 +1,38 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": false,
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "createfisheryindustry:pneumatic_mechanism"
+    },
+    "B": {
+      "tag": "c:ingots/zinc"
+    },
+    "C": {
+      "tag": "c:plates/zinc"
+    },
+    "D": {
+      "item": "create:andesite_alloy"
+    },
+    "E": {
+      "item": "minecraft:tripwire_hook"
+    },
+    "F": {
+      "item": "createfisheryindustry:harpoon"
+    },
+    "G": {
+      "tag": "c:strings"
+    }
+  },
+  "pattern": [
+    " C   ",
+    "BABGF",
+    " E   ",
+    " D   "
+  ],
+  "result": {
+    "count": 1,
+    "id": "createfisheryindustry:pneumatic_harpoon_gun"
+  }
+}

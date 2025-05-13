@@ -10,13 +10,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -45,7 +42,6 @@ public class PneumaticHarpoonGunChainsLineProcedure {
             return;
         }
 
-
         for (Player player : level.players()) {
             // 检查玩家是否持有鱼叉枪
             ItemStack stack = player.getMainHandItem().getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get() ? player.getMainHandItem() : player.getOffhandItem();
@@ -59,32 +55,20 @@ public class PneumaticHarpoonGunChainsLineProcedure {
                 continue;
             }
 
-            // 获取活跃的鱼叉实体
+            // 获取活跃的鱼叉实体（未被收回）
             List<TetheredHarpoonEntity> hooks = level.getEntitiesOfClass(TetheredHarpoonEntity.class,
                     player.getBoundingBox().inflate(100),
-                    hook -> hook.getOwner() == player && (hook.isAnchored() || hook.getHitEntity() != null));
+                    hook -> hook.getOwner() == player && !hook.isRetrieving());
             if (hooks.isEmpty()) {
                 continue;
             }
 
             TetheredHarpoonEntity hook = hooks.get(0);
 
-            double targetX, targetY, targetZ;
-            CustomData customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
-
-            // 根据鱼叉状态确定目标位置
-            if (hook.isAnchored()) {
-                targetX = customData.copyTag().getDouble("xPostion");
-                targetY = customData.copyTag().getDouble("yPostion");
-                targetZ = customData.copyTag().getDouble("zPostion");
-            } else if (hook.getHitEntity() != null) {
-                Entity hitEntity = hook.getHitEntity();
-                targetX = hitEntity.getX();
-                targetY = hitEntity.getY() + hitEntity.getBbHeight() * 0.5;
-                targetZ = hitEntity.getZ();
-            } else {
-                continue;
-            }
+            // 使用鱼叉实体的实际位置作为目标点
+            double targetX = hook.getX();
+            double targetY = hook.getY();
+            double targetZ = hook.getZ();
 
             // 计算起点（玩家手部）
             double startX = player.getX();

@@ -7,6 +7,7 @@ import com.adonis.createfisheryindustry.registry.CreateFisheryComponents;
 import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -83,7 +84,7 @@ public class HarpoonPouchEventHandler {
         replenishTasks.add(new ReplenishTask(player.getUUID(), 1));
     }
 
-    // 服务器tick事件处理延迟任务 - 使用Post事件替代原来的Phase.END
+    // 服务器tick事件处理延迟任务
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         List<ReplenishTask> tasksToRemove = new ArrayList<>();
@@ -114,6 +115,9 @@ public class HarpoonPouchEventHandler {
                                 if (player instanceof ServerPlayer serverPlayer) {
                                     serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(
                                             serverPlayer.containerMenu.containerId, serverPlayer.containerMenu.incrementStateId(), i, pouch));
+                                    // 显示剩余鱼叉数量
+                                    int totalHarpoons = countTotalHarpoons(player);
+                                    serverPlayer.displayClientMessage(Component.literal("Remaining Harpoons:" + totalHarpoons), true);
                                 }
                                 break;
                             } else {
@@ -126,6 +130,26 @@ public class HarpoonPouchEventHandler {
             }
         }
         replenishTasks.removeAll(tasksToRemove);
+    }
+
+    // 统计玩家背包中所有鱼叉袋的鱼叉数量总和
+    private static int countTotalHarpoons(Player player) {
+        int totalHarpoons = 0;
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack pouch = player.getInventory().getItem(i);
+            if (pouch.getItem() == CreateFisheryItems.HARPOON_POUCH.get()) {
+                if (!CreateFisheryComponents.HARPOON_POUCH_CONTENTS.isBound()) {
+                    continue;
+                }
+                HarpoonPouchContents contents = pouch.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+                for (ItemStack stack : contents.items()) {
+                    if (stack.getItem() == CreateFisheryItems.HARPOON.get()) {
+                        totalHarpoons += stack.getCount();
+                    }
+                }
+            }
+        }
+        return totalHarpoons;
     }
 
     private static void playInsertSound(Player player) {
@@ -175,6 +199,9 @@ public class HarpoonPouchEventHandler {
                     if (player instanceof ServerPlayer serverPlayer) {
                         serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(
                                 serverPlayer.containerMenu.containerId, serverPlayer.containerMenu.incrementStateId(), i, pouch));
+                        // 显示剩余鱼叉数量
+                        int totalHarpoons = countTotalHarpoons(player);
+                        serverPlayer.displayClientMessage(Component.literal("Remaining Harpoons:" + totalHarpoons), true);
                     }
 
                     handled = true;
@@ -187,6 +214,11 @@ public class HarpoonPouchEventHandler {
 
         if (!stack.isEmpty() && handled) {
             if (player.getInventory().add(stack)) {
+                if (player instanceof ServerPlayer serverPlayer) {
+                    // 显示剩余鱼叉数量
+                    int totalHarpoons = countTotalHarpoons(player);
+                    serverPlayer.displayClientMessage(Component.literal("Remaining Harpoons: " + totalHarpoons), true);
+                }
                 return true;
             }
         }

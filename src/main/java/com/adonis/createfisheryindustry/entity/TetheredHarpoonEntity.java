@@ -46,6 +46,10 @@ public class TetheredHarpoonEntity extends AbstractArrow {
     private Entity hitEntity = null;
     private int hitTick = 0;
     private int ignoreCollisionTicks = 5;
+    private int deathDelayTicks = 0; // 实体死亡后的延迟计数
+    private static final int MAX_DEATH_DELAY = 10; // 延迟 10 tick
+    private Entity lastHitEntity = null; // 缓存最近命中的实体
+    private Player lastHitPlayer = null; // 缓存最近命中的玩家
     public HarpoonState currentState = HarpoonState.FLYING;
 
     private static final EntityDataAccessor<Boolean> DATA_ANCHORED = SynchedEntityData.defineId(TetheredHarpoonEntity.class, EntityDataSerializers.BOOLEAN);
@@ -66,7 +70,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         this.owner = owner;
         this.setPos(position);
         this.setOwner(owner);
-        LOGGER.debug("Created harpoon entity for player: {}, position: {}", owner.getName().getString(), position);
     }
 
     @Override
@@ -121,12 +124,15 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                 });
             }
         }
-        LOGGER.debug("Harpoon anchored at: {} for player: {}", pos, owner.getName().getString());
+        LOGGER.debug("Harpoon anchored at: {}", pos);
     }
 
     public void setHitEntity(Entity entity, int tick) {
         this.hitEntity = entity;
         this.hitTick = tick;
+        this.deathDelayTicks = 0; // 重置死亡延迟
+        this.lastHitEntity = entity; // 缓存命中实体
+        this.lastHitPlayer = this.owner; // 缓存命中玩家
         this.getEntityData().set(DATA_HOOKED_ENTITY, entity != null ? entity.getId() + 1 : 0);
         this.currentState = entity != null ? HarpoonState.HOOKED_IN_ENTITY : HarpoonState.FLYING;
         if (!this.level().isClientSide && this.owner != null) {
@@ -141,7 +147,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                 });
             }
         }
-        LOGGER.debug("Harpoon hooked entity: {} for player: {}", entity, owner.getName().getString());
+        LOGGER.debug("Harpoon hooked entity: {}", entity);
     }
 
     private ItemStack getHarpoonGunFromPlayer(Player player) {
@@ -161,6 +167,14 @@ public class TetheredHarpoonEntity extends AbstractArrow {
 
     public int getHitTick() {
         return this.hitTick;
+    }
+
+    public Entity getLastHitEntity() {
+        return this.lastHitEntity;
+    }
+
+    public Player getLastHitPlayer() {
+        return this.lastHitPlayer;
     }
 
     public void startRetrieving() {
@@ -186,7 +200,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             }
         }
         this.discard();
-        LOGGER.debug("Harpoon retrieving for player: {}", owner != null ? owner.getName().getString() : "unknown");
+        LOGGER.debug("Harpoon retrieving");
     }
 
     public void shoot(Vec3 direction, float speed) {
@@ -204,8 +218,13 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         if (!this.level().isClientSide) {
             Entity target = result.getEntity();
             if (target instanceof LivingEntity living) {
-                living.hurt(this.damageSources().trident(this, owner != null ? owner : this), 14.0F);
+                // 先设置状态，确保事件触发前状态正确
                 this.setHitEntity(living, this.tickCount);
+                // 再造成伤害
+                living.hurt(this.damageSources().trident(this, owner != null ? owner : this), 7.0F); // 降低伤害
+                if (owner instanceof Player player) {
+                    living.setLastHurtByPlayer(player); // 记录玩家为击杀者
+                }
                 this.playSound(SoundEvents.TRIDENT_HIT, 1.0F, 1.0F);
             }
         }
@@ -236,13 +255,15 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         }
     }
 
-    private void pullLootToPlayer(Entity deadEntity) {
+    public void pullLootToPlayer(Entity deadEntity) {
         if (!(getOwner() instanceof Player player) || !(level() instanceof ServerLevel serverLevel) || !(deadEntity instanceof Mob mob)) {
+            LOGGER.debug("Failed to pull loot: invalid owner, level, or entity. Owner: {}, Level: {}, Entity: {}", getOwner(), level(), deadEntity);
             return;
         }
 
         var lootTableKey = mob.getLootTable();
         if (lootTableKey == null) {
+            LOGGER.debug("No loot table for entity: {}", deadEntity);
             return;
         }
 
@@ -258,16 +279,39 @@ public class TetheredHarpoonEntity extends AbstractArrow {
 
         LootParams params = paramsBuilder.create(LootContextParamSets.ENTITY);
         LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(lootTableKey);
+        long tetherEndTime = serverLevel.getGameTime() + 200; // 10秒后结束牵引（20 tick/秒 * 10秒）
         for (ItemStack item : lootTable.getRandomItems(params)) {
             ItemEntity drop = new ItemEntity(level(), deadEntity.getX(), deadEntity.getY(), deadEntity.getZ(), item);
-            Vec3 motion = player.position().add(0, 1, 0).subtract(drop.position()).normalize().scale(0.25);
-            drop.setDeltaMovement(motion);
+            // 添加牵引标记
+            CompoundTag tag = drop.getPersistentData();
+            tag.putBoolean("HarpoonTethered", true);
+            tag.putInt("TetherPlayerId", player.getId());
+            tag.putLong("TetherEndTime", tetherEndTime);
+            double dx = player.getX() - drop.getX();
+            double dy = player.getY() - drop.getY();
+            double dz = player.getZ() - drop.getZ();
+            double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            drop.setDeltaMovement(dx * 0.2, dy * 0.2 + Math.sqrt(distance) * 0.1, dz * 0.2); // 初始速度
+            drop.setPickUpDelay(10);
             level().addFreshEntity(drop);
+            LOGGER.debug("Spawned loot item: {} at {}, tethered to player: {}", item, drop.position(), player.getName().getString());
         }
 
         int xp = ((LivingEntity) deadEntity).getExperienceReward(serverLevel, this);
         if (xp > 0) {
-            level().addFreshEntity(new ExperienceOrb(level(), player.getX(), player.getY(), player.getZ(), xp));
+            ExperienceOrb orb = new ExperienceOrb(level(), deadEntity.getX(), deadEntity.getY(), deadEntity.getZ(), xp);
+            // 添加牵引标记
+            CompoundTag tag = orb.getPersistentData();
+            tag.putBoolean("HarpoonTethered", true);
+            tag.putInt("TetherPlayerId", player.getId());
+            tag.putLong("TetherEndTime", tetherEndTime);
+            double dx = player.getX() - orb.getX();
+            double dy = player.getY() - orb.getY();
+            double dz = player.getZ() - orb.getZ();
+            double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            orb.setDeltaMovement(dx * 0.2, dy * 0.2 + Math.sqrt(distance) * 0.1, dz * 0.2); // 初始速度
+            level().addFreshEntity(orb);
+            LOGGER.debug("Spawned experience orb: {} XP at {}, tethered to player: {}", xp, orb.position(), player.getName().getString());
         }
         LOGGER.debug("Pulled loot from entity: {} to player: {}", deadEntity, player.getName().getString());
     }
@@ -279,7 +323,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         if (!level().isClientSide) {
             if (retrieving) {
                 this.discard();
-                LOGGER.debug("Harpoon discarded for player: {}", owner != null ? owner.getName().getString() : "unknown");
                 return;
             }
 
@@ -288,16 +331,17 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                     Vec3 targetPos = hitEntity.position().add(0, hitEntity.getBbHeight() * 0.5, 0);
                     this.setPos(targetPos);
                     this.setDeltaMovement(Vec3.ZERO);
-
-                    if (tickCount - hitTick <= 4 && !hitEntity.isAlive()) {
-                        pullLootToPlayer(hitEntity);
+                    this.deathDelayTicks = 0; // 重置延迟计数
+                    LOGGER.debug("Harpoon attached to living entity: {}", hitEntity);
+                } else {
+                    // 实体死亡或无效，延迟收回
+                    if (deathDelayTicks < MAX_DEATH_DELAY && hitEntity != null) {
+                        this.deathDelayTicks++;
+                        LOGGER.debug("Entity {} is dead or invalid, delaying retrieve for tick {}/{}", hitEntity, deathDelayTicks, MAX_DEATH_DELAY);
+                    } else {
+                        LOGGER.debug("Retrieve triggered for entity: {}, delay ticks: {}", hitEntity, deathDelayTicks);
                         this.startRetrieving();
                     }
-                } else {
-                    if (hitEntity != null && !hitEntity.isAlive()) {
-                        pullLootToPlayer(hitEntity);
-                    }
-                    this.startRetrieving();
                 }
                 return;
             }
@@ -368,6 +412,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         int hookedId = compound.getInt("HookedEntity");
         if (hookedId > 0 && this.level() instanceof ServerLevel serverLevel) {
             this.hitEntity = serverLevel.getEntity(hookedId);
+            this.lastHitEntity = this.hitEntity; // 恢复缓存
             this.currentState = this.hitEntity != null ? HarpoonState.HOOKED_IN_ENTITY : HarpoonState.FLYING;
         }
     }
