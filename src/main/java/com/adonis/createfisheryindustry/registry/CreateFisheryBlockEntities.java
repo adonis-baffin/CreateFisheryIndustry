@@ -5,6 +5,7 @@ import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartBeehive.SmartBeehiveBlockEntity;
+import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -15,15 +16,12 @@ import com.google.common.collect.ImmutableSet;
 
 public class CreateFisheryBlockEntities {
 
-    // 方块实体注册
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, CreateFisheryMod.ID);
 
-    // POI 类型注册
     public static final DeferredRegister<PoiType> POI_TYPES =
             DeferredRegister.create(Registries.POINT_OF_INTEREST_TYPE, CreateFisheryMod.ID);
 
-    // 方块实体
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeshTrapBlockEntity>> MESH_TRAP =
             BLOCK_ENTITIES.register("mesh_trap", () ->
                     BlockEntityType.Builder.of(MeshTrapBlockEntity::new, CreateFisheryBlocks.MESH_TRAP.get()).build(null));
@@ -43,13 +41,19 @@ public class CreateFisheryBlockEntities {
                             CreateFisheryBlocks.TRAP_NOZZLE.get()
                     ).build(null));
 
-    // POI 类型
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MechanicalPeelerBlockEntity>> MECHANICAL_PEELER =
+            BLOCK_ENTITIES.register("mechanical_peeler", () ->
+                    BlockEntityType.Builder.of(
+                            (pos, state) -> new MechanicalPeelerBlockEntity(CreateFisheryBlockEntities.MECHANICAL_PEELER.get(), pos, state),
+                            CreateFisheryBlocks.MECHANICAL_PEELER.get()
+                    ).build(null));
+
     public static final DeferredHolder<PoiType, PoiType> SMART_BEEHIVE_POI =
             POI_TYPES.register("smart_beehive", () ->
                     new PoiType(
                             ImmutableSet.of(CreateFisheryBlocks.SMART_BEEHIVE.get().defaultBlockState()),
-                            1, // ticket count
-                            32 // search distance
+                            1,
+                            32
                     ));
 
     public static void register(IEventBus bus) {

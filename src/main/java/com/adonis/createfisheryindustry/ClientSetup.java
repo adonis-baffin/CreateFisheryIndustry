@@ -1,9 +1,11 @@
 package com.adonis.createfisheryindustry;
 
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshRenderer;
+import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonRenderer;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonISTER;
 import com.adonis.createfisheryindustry.client.renderer.TetheredHarpoonRenderer;
+import com.adonis.createfisheryindustry.client.renderer.MechanicalPeelerRenderer;
 import com.adonis.createfisheryindustry.client.renderer.PneumaticHarpoonGunItemRenderer;
 import com.adonis.createfisheryindustry.item.ClientHarpoonPouchTooltip;
 import com.adonis.createfisheryindustry.item.HarpoonItem;
@@ -29,8 +31,6 @@ import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @EventBusSubscriber(modid = CreateFisheryMod.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup {
@@ -44,10 +44,14 @@ public class ClientSetup {
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.TRAP_NOZZLE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_MESH.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_BEEHIVE.get(), RenderType.cutout());
-            PneumaticHarpoonGunChainsLineProcedure.register();
+            ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.MECHANICAL_PEELER.get(), RenderType.cutoutMipped());
+
+            // 初始化部分模型
+            CreateFisheryPartialModels.init();
 
             // 注册方块实体渲染器
             BlockEntityRenderers.register(CreateFisheryBlockEntities.SMART_MESH.get(), SmartMeshRenderer::new);
+            BlockEntityRenderers.register(CreateFisheryBlockEntities.MECHANICAL_PEELER.get(), MechanicalPeelerRenderer::new);
 
             // 注册实体渲染器
             EntityRenderers.register(CreateFisheryEntityTypes.HARPOON.get(), HarpoonRenderer::new);
@@ -61,6 +65,8 @@ public class ClientSetup {
                     ResourceLocation.fromNamespaceAndPath("createfisheryindustry", "filled"),
                     (stack, level, entity, seed) -> HarpoonPouchItem.getFullnessDisplay(stack)
             );
+
+            PneumaticHarpoonGunChainsLineProcedure.register();
         });
     }
 
@@ -76,7 +82,6 @@ public class ClientSetup {
 
     @SubscribeEvent
     public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
-        // 注册鱼叉渲染器
         event.registerItem(new IClientItemExtensions() {
             @Override
             public BlockEntityWithoutLevelRenderer getCustomRenderer() {

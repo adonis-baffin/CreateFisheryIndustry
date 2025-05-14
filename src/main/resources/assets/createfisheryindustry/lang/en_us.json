@@ -26,6 +26,10 @@
   "create.gui.goggles.trap_nozzle_contents": "Trap Nozzle Contents",
   "create.gui.goggles.smart_mesh_contents": "Smart Mesh Contents",
 
+  "block.createfisheryindustry.mechanical_peeler": "Mechanical Peeler",
+  "create.gui.goggles.mechanical_peeler_contents": "Peeler Byproducts",
+  "gui.goggles.inventory.empty": "Empty",
+
   "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
 
   "tooltip.keyShift": "Shift",

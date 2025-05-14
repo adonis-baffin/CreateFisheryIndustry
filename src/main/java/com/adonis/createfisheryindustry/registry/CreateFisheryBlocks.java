@@ -1,21 +1,27 @@
 package com.adonis.createfisheryindustry.registry;
 
-import static com.adonis.createfisheryindustry.CreateFisheryMod.REGISTRATE;
-import static com.simibubi.create.foundation.data.TagGen.axeOrPickaxe;
-
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapBlock;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapMovementBehaviour;
+import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerGenerator;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlock;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlock;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlock;
 import com.adonis.createfisheryindustry.block.SmartBeehive.SmartBeehiveBlock;
+import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlock;
+import com.adonis.createfisheryindustry.config.CreateFisheryConfig;
+import com.adonis.createfisheryindustry.config.CreateFisheryStressConfig;
 import com.simibubi.create.AllTags;
 import com.simibubi.create.foundation.data.BlockStateGen;
 import com.simibubi.create.foundation.data.SharedProperties;
+import com.simibubi.create.infrastructure.config.CStress;
 import com.tterrag.registrate.util.entry.BlockEntry;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.SoundType;
+
+import static com.adonis.createfisheryindustry.CreateFisheryMod.REGISTRATE;
+import static com.simibubi.create.foundation.data.TagGen.axeOrPickaxe;
 
 public class CreateFisheryBlocks {
     public static final BlockEntry<FrameTrapBlock> FRAME_TRAP = REGISTRATE
@@ -78,6 +84,19 @@ public class CreateFisheryBlocks {
                     .noOcclusion())
             .transform(axeOrPickaxe())
             .blockstate((ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models().cubeAll(ctx.getName(), prov.modLoc("block/trap_nozzle"))))
+            .simpleItem()
+            .register();
+
+    public static final BlockEntry<MechanicalPeelerBlock> MECHANICAL_PEELER = REGISTRATE
+            .block("mechanical_peeler", MechanicalPeelerBlock::new)
+            .initialProperties(SharedProperties::copperMetal)
+            .properties(prop -> prop
+                    .mapColor(DyeColor.GRAY)
+                    .sound(SoundType.METAL)
+                    .noOcclusion())
+            .transform(CreateFisheryStressConfig.setImpact(4.0))
+            .blockstate(new MechanicalPeelerGenerator()::generate)
+            .addLayer(() -> RenderType::cutoutMipped)
             .simpleItem()
             .register();
 
