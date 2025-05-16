@@ -5,8 +5,6 @@ import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonRenderer;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonISTER;
 import com.adonis.createfisheryindustry.client.renderer.TetheredHarpoonRenderer;
-import com.adonis.createfisheryindustry.client.renderer.MechanicalPeelerRenderer;
-import com.adonis.createfisheryindustry.client.renderer.PneumaticHarpoonGunItemRenderer;
 import com.adonis.createfisheryindustry.item.ClientHarpoonPouchTooltip;
 import com.adonis.createfisheryindustry.item.HarpoonItem;
 import com.adonis.createfisheryindustry.item.HarpoonPouchItem;
@@ -38,31 +36,24 @@ public class ClientSetup {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            // 设置方块的渲染层
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.FRAME_TRAP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.MESH_TRAP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.TRAP_NOZZLE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_MESH.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_BEEHIVE.get(), RenderType.cutout());
-            ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.MECHANICAL_PEELER.get(), RenderType.cutoutMipped());
 
-            // 初始化部分模型
             CreateFisheryPartialModels.init();
 
-            // 注册方块实体渲染器
             BlockEntityRenderers.register(CreateFisheryBlockEntities.SMART_MESH.get(), SmartMeshRenderer::new);
-            BlockEntityRenderers.register(CreateFisheryBlockEntities.MECHANICAL_PEELER.get(), MechanicalPeelerRenderer::new);
 
-            // 注册实体渲染器
             EntityRenderers.register(CreateFisheryEntityTypes.HARPOON.get(), HarpoonRenderer::new);
             EntityRenderers.register(CreateFisheryEntityTypes.TETHERED_HARPOON.get(), TetheredHarpoonRenderer::new);
 
-            // 注册物品属性
             HarpoonItem.registerItemProperties(CreateFisheryItems.HARPOON);
 
             ItemProperties.register(
                     CreateFisheryItems.HARPOON_POUCH.get(),
-                    ResourceLocation.fromNamespaceAndPath("createfisheryindustry", "filled"),
+                    ResourceLocation.fromNamespaceAndPath(CreateFisheryMod.ID, "filled"),
                     (stack, level, entity, seed) -> HarpoonPouchItem.getFullnessDisplay(stack)
             );
 

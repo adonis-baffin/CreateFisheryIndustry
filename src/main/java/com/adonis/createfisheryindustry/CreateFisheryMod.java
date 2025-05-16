@@ -9,7 +9,6 @@ import com.adonis.createfisheryindustry.config.CreateFisheryConfig;
 import com.adonis.createfisheryindustry.recipe.CreateFisheryRecipeTypes;
 import com.adonis.createfisheryindustry.registry.*;
 import com.mojang.logging.LogUtils;
-import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
@@ -38,9 +37,8 @@ import org.slf4j.Logger;
 public class CreateFisheryMod {
     public static final String ID = "createfisheryindustry";
     public static final Logger LOGGER = LogUtils.getLogger();
-    public static final CreateRegistrate REGISTRATE = CreateRegistrate.create(ID)
-            .defaultCreativeTab((ResourceKey<CreativeModeTab>) null)
-            .setTooltipModifierFactory(item ->
+    public static final CFIRegistrate REGISTRATE = CFIRegistrate.create(ID)
+            .setTooltipModifier(item ->
                     new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
                             .andThen(TooltipModifier.mapNull(KineticStats.create(item)))
             );
@@ -53,6 +51,7 @@ public class CreateFisheryMod {
     }
 
     public CreateFisheryMod(IEventBus bus, ModContainer modContainer) {
+        LOGGER.info("Initializing CFIRegistrate: " + REGISTRATE);
         REGISTRATE.registerEventListeners(bus);
         CreateFisheryBlocks.register();
         CreateFisheryBlockEntities.register(bus);
@@ -65,68 +64,19 @@ public class CreateFisheryMod {
         TYPES.register(bus);
         CreateFisheryRecipeTypes.register(SERIALIZERS, TYPES);
 
-        // 注册配置
         modContainer.registerConfig(ModConfig.Type.COMMON, CreateFisheryCommonConfig.CONFIG_SPEC);
         new CreateFisheryConfig(modContainer);
 
-        bus.addListener(this::registerCapabilities);
         bus.addListener(this::commonSetup);
         bus.addListener(this::onConfigLoad);
         bus.addListener(this::onConfigReload);
+        bus.register(CreateFisheryBlockEntities.class); // 注册事件监听
 
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
     }
 
-    private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                CreateFisheryBlockEntities.MESH_TRAP.get(),
-                (be, side) -> be.getCapability(Capabilities.ItemHandler.BLOCK, side)
-        );
-
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                CreateFisheryBlockEntities.SMART_BEEHIVE.get(),
-                (be, side) -> {
-                    if (be instanceof SmartBeehiveBlockEntity beehive) {
-                        return side == null || side == Direction.UP
-                                ? beehive.insertionHandler
-                                : beehive.extractionHandler;
-                    }
-                    return null;
-                }
-        );
-
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                CreateFisheryBlockEntities.SMART_BEEHIVE.get(),
-                (be, side) -> {
-                    if (be instanceof SmartBeehiveBlockEntity beehive && (side == null || side == Direction.DOWN)) {
-                        return beehive.getFluidTank();
-                    }
-                    return null;
-                }
-        );
-
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                CreateFisheryBlockEntities.MECHANICAL_PEELER.get(),
-                (be, side) -> {
-                    if (be instanceof MechanicalPeelerBlockEntity peeler) {
-                        return peeler.getItemHandler(side);
-                    }
-                    return null;
-                }
-        );
-
-        TrapNozzleBlockEntity.registerCapabilities(event);
-        SmartMeshBlockEntity.registerCapabilities(event);
-        CreateFisheryItems.registerCapabilities(event);
-    }
-
     private void commonSetup(FMLCommonSetupEvent event) {
-        // 无需配置加载逻辑
     }
 
     private void onConfigLoad(ModConfigEvent.Loading event) {

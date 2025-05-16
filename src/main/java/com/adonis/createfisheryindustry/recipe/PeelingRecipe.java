@@ -3,14 +3,11 @@ package com.adonis.createfisheryindustry.recipe;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
 import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
 import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
 import com.simibubi.create.foundation.utility.CreateLang;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+// import net.minecraft.resources.ResourceLocation; // Removed builder
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
@@ -18,21 +15,27 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implements IAssemblyRecipe {
-    public PeelingRecipe(ProcessingRecipeBuilder.ProcessingRecipeParams params) {
+
+    protected final PeelingRecipeParams peelingParams; // Store our specific params
+
+    public PeelingRecipe(PeelingRecipeParams params) {
+        // Pass the IRecipeTypeInfo and the params (which extends ProcessingRecipeParams) to super.
+        // The `params.id` field (inherited from ProcessingRecipeParams) should be the PLACEHOLDER_ID here.
+        // ProcessingRecipe's constructor will use this for its `this.id` field, and then `validate` will use it.
+        // The true Recipe ID (from file path) is managed by RecipeHolder.
         super(CreateFisheryRecipeTypes.PEELING, params);
+        this.peelingParams = params;
     }
 
-    public static Builder builder(ResourceLocation id) {
-        return new Builder(id);
-    }
+    // Removed: public static PeelingRecipeBuilder.Builder builder(ResourceLocation id)
 
+    // ... (rest of the methods: getMaxInputCount, matches, etc. remain the same) ...
     @Override
     protected int getMaxInputCount() {
         return 1;
@@ -50,7 +53,8 @@ public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implement
 
     @Override
     public boolean matches(SingleRecipeInput input, Level level) {
-        return ingredients.getFirst().test(input.item());
+        if (getIngredients().isEmpty()) return false;
+        return getIngredients().getFirst().test(input.item());
     }
 
     @Override
@@ -72,11 +76,5 @@ public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implement
     @Override
     public Supplier<Supplier<SequencedAssemblySubCategory>> getJEISubCategory() {
         return () -> SequencedAssemblySubCategory.AssemblyCutting::new;
-    }
-
-    public static class Builder extends ProcessingRecipeBuilder<PeelingRecipe> {
-        protected Builder(ResourceLocation id) {
-            super(PeelingRecipe::new, id);
-        }
     }
 }

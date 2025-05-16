@@ -1,9 +1,8 @@
 {
-	"credit": "Made with Blockbench",
+	"credit": "Model generated using MrCrayfish's Model Creator (https://mrcrayfish.com/tools?id=mc)",
 	"parent": "create:block/block",
 	"textures": {
 		"slit": "create:block/mechanical_saw_top_no_slot",
-		"stonecutter_saw": "block/stonecutter_saw",
 		"particle": "create:block/gearbox_top",
 		"gearbox_top": "create:block/gearbox_top",
 		"encased_belt": "create:block/encased_chain_drive",
@@ -51,20 +50,11 @@
 		{
 			"name": "Inner",
 			"from": [0, 2, 2],
-			"to": [16, 14, 11],
+			"to": [16, 14, 11.025],
 			"faces": {
 				"east": {"uv": [2, 6, 14, 15], "rotation": 90, "texture": "#andesite_casing_short"},
 				"south": {"uv": [0, 2, 16, 14], "texture": "#slit"},
 				"west": {"uv": [2, 6, 14, 15], "rotation": 270, "texture": "#andesite_casing_short"}
-			}
-		},
-		{
-			"name": "Blade",
-			"from": [1, 8, 11],
-			"to": [15, 8.062, 18],
-			"faces": {
-				"up": {"uv": [1, 9, 15, 16], "rotation": 180, "texture": "#stonecutter_saw"},
-				"down": {"uv": [1, 9, 15, 16], "texture": "#stonecutter_saw"}
 			}
 		},
 		{
@@ -80,18 +70,11 @@
 		},
 		{
 			"name": "Back",
-			"from": [2, 2, 1],
-			"to": [14, 14, 2],
+			"from": [2, 2, 0.95],
+			"to": [14, 14, 1.95],
 			"faces": {
 				"north": {"uv": [2, 2, 14, 14], "texture": "#gearbox"}
 			}
 		}
-	],
-	"display": {
-		"fixed": {
-			"rotation": [0, 180, 0],
-			"translation": [0, 0, -1.5],
-			"scale": [0.5, 0.5, 0.5]
-		}
-	}
+	]
 }

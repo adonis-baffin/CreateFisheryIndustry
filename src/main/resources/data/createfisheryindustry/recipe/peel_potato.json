@@ -1,0 +1,14 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "minecraft:potato"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:apple"
+    }
+  ],
+  "processingTime": 100
+}
