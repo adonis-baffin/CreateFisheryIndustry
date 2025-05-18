@@ -4,6 +4,9 @@ import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.AllShapes;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
+import net.createmod.catnip.placement.IPlacementHelper;
+import net.createmod.catnip.placement.PlacementHelpers;
+import net.createmod.catnip.placement.PlacementOffset;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +17,7 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -33,22 +37,19 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
+import java.util.List;
+import java.util.function.Predicate;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implements IBE<MechanicalPeelerBlockEntity> {
     public static final BooleanProperty FLIPPED = BooleanProperty.create("flipped");
+    private static final int placementHelperId = PlacementHelpers.register(new PlacementHelper());
 
     public MechanicalPeelerBlock(Properties properties) {
         super(properties);
-        // Default state should make it behave like Saw when placed (FACING=UP typically)
-        // DirectionalKineticBlock's default FACING might be NORTH.
-        // SawBlock relies on super.getStateForPlacement to set FACING correctly for "in front" placement.
-        // We ensure FLIPPED is handled like SawBlock for vertical placements.
         registerDefaultState(this.stateDefinition.any()
-                .setValue(FACING, Direction.UP) // Explicitly default to UP
-                .setValue(AXIS_ALONG_FIRST_COORDINATE, true) // DAKB default, matches Saw logic
+                .setValue(FACING, Direction.UP)
+                .setValue(AXIS_ALONG_FIRST_COORDINATE, true)
                 .setValue(FLIPPED, false));
     }
 
@@ -59,26 +60,15 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        // Start with DAKB's placement logic
         BlockState stateForPlacement = super.getStateForPlacement(context);
         Direction facing = stateForPlacement.getValue(FACING);
-
-        // If DAKB decided it should be vertical, apply SawBlock's FLIPPED logic
         if (facing.getAxis() == Axis.Y) {
             return stateForPlacement.setValue(FLIPPED, context.getHorizontalDirection()
                     .getAxisDirection() == AxisDirection.POSITIVE);
         }
-
-        // If DAKB decided it should be horizontal, SawBlock doesn't modify FLIPPED here.
-        // The key is that super.getStateForPlacement() should result in FACING=UP
-        // when player places it on the ground in front of them, similar to how Saw works.
-        // If it results in FACING towards player, then DAKB's logic for "looking at horizontal face" is kicking in.
-        // To force UP like saw for "in front" placement on ground:
-        // Player usually looks slightly down. If context.getClickedFace() is UP, DAKB should set FACING to UP.
         return stateForPlacement;
     }
 
-    // Rotation and Mirror logic (copied from SawBlock, should be fine)
     @Override
     public BlockState getRotatedBlockState(BlockState originalState, Direction targetedFace) {
         BlockState newState = super.getRotatedBlockState(originalState, targetedFace);
@@ -119,7 +109,6 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
         return newState;
     }
-    // End Rotation and Mirror logic
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
@@ -128,6 +117,14 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        IPlacementHelper placementHelper = PlacementHelpers.get(placementHelperId);
+        if (!player.isShiftKeyDown() && player.mayBuild()) {
+            if (placementHelper.matchesItem(stack) && placementHelper.getOffset(player, level, state, pos, hitResult)
+                    .placeInWorld(level, (BlockItem) stack.getItem(), player, hand, hitResult)
+                    .consumesAction())
+                return ItemInteractionResult.SUCCESS;
+        }
+
         if (player.isSpectator() || !stack.isEmpty())
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (state.getValue(FACING) != Direction.UP)
@@ -170,29 +167,19 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
         return PushReaction.NORMAL;
     }
 
-    // Copied from SawBlock to ensure consistency
     public static boolean isHorizontal(BlockState state) {
-        return state.getValue(FACING)
-                .getAxis()
-                .isHorizontal();
+        return state.getValue(FACING).getAxis().isHorizontal();
     }
 
     @Override
     public Axis getRotationAxis(BlockState state) {
-        // If horizontal, animation axis is FACING axis.
-        // If vertical, animation axis is from super (DAKB: AXIS_ALONG_FIRST_COORDINATE ? Z : X)
-        return isHorizontal(state) ? state.getValue(FACING)
-                .getAxis() : super.getRotationAxis(state);
+        return isHorizontal(state) ? state.getValue(FACING).getAxis() : super.getRotationAxis(state);
     }
 
     @Override
     public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-        // If horizontal, shaft connects opposite to FACING.
-        // If vertical, from super (DAKB logic based on FACING and AXIS_ALONG_FIRST_COORDINATE)
-        return isHorizontal(state) ? face == state.getValue(FACING)
-                .getOpposite() : super.hasShaftTowards(world, pos, state, face);
+        return isHorizontal(state) ? face == state.getValue(FACING).getOpposite() : super.hasShaftTowards(world, pos, state, face);
     }
-    // End SawBlock copied methods
 
     @Override
     public Class<MechanicalPeelerBlockEntity> getBlockEntityClass() {
@@ -207,5 +194,33 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
     @Override
     protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
         return false;
+    }
+
+    private static class PlacementHelper implements IPlacementHelper {
+        @Override
+        public Predicate<ItemStack> getItemPredicate() {
+            return stack -> stack.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof MechanicalPeelerBlock;
+        }
+
+        @Override
+        public Predicate<BlockState> getStatePredicate() {
+            return state -> state.getBlock() instanceof MechanicalPeelerBlock;
+        }
+
+        @Override
+        public PlacementOffset getOffset(Player player, Level world, BlockState state, BlockPos pos, BlockHitResult ray) {
+            List<Direction> directions = IPlacementHelper.orderedByDistanceExceptAxis(pos, ray.getLocation(),
+                    state.getValue(FACING).getAxis(),
+                    dir -> world.getBlockState(pos.relative(dir)).canBeReplaced());
+
+            if (directions.isEmpty())
+                return PlacementOffset.fail();
+            else {
+                return PlacementOffset.success(pos.relative(directions.get(0)),
+                        s -> s.setValue(FACING, state.getValue(FACING))
+                                .setValue(AXIS_ALONG_FIRST_COORDINATE, state.getValue(AXIS_ALONG_FIRST_COORDINATE))
+                                .setValue(FLIPPED, state.getValue(FLIPPED)));
+            }
+        }
     }
 }

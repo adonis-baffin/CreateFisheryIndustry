@@ -2,11 +2,12 @@ package com.adonis.createfisheryindustry.recipe;
 
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
 import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
+import com.simibubi.create.content.processing.recipe.ProcessingOutput; // Keep this
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
 import com.simibubi.create.foundation.utility.CreateLang;
 import net.minecraft.network.chat.Component;
-// import net.minecraft.resources.ResourceLocation; // Removed builder
+import net.minecraft.world.item.ItemStack; // For getResultItem() if needed
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.ItemLike;
@@ -15,27 +16,61 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
 public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implements IAssemblyRecipe {
 
-    protected final PeelingRecipeParams peelingParams; // Store our specific params
+    protected final PeelingRecipeParams peelingParams;
 
     public PeelingRecipe(PeelingRecipeParams params) {
-        // Pass the IRecipeTypeInfo and the params (which extends ProcessingRecipeParams) to super.
-        // The `params.id` field (inherited from ProcessingRecipeParams) should be the PLACEHOLDER_ID here.
-        // ProcessingRecipe's constructor will use this for its `this.id` field, and then `validate` will use it.
-        // The true Recipe ID (from file path) is managed by RecipeHolder.
         super(CreateFisheryRecipeTypes.PEELING, params);
         this.peelingParams = params;
     }
 
-    // Removed: public static PeelingRecipeBuilder.Builder builder(ResourceLocation id)
+    // --- New methods to distinguish outputs ---
+    public List<ProcessingOutput> getPrimaryResults() {
+        if (results.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // Assuming the first result is the primary one that flows out
+        return List.of(results.getFirst());
+    }
 
-    // ... (rest of the methods: getMaxInputCount, matches, etc. remain the same) ...
+    public List<ProcessingOutput> getSecondaryResults() {
+        if (results.size() <= 1) {
+            return Collections.emptyList();
+        }
+        // The rest are secondary and go into the machine's inventory
+        return results.stream().skip(1).collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the primary output item stack if it exists.
+     * This is typically what would be "ejected" or flow out.
+     */
+    public ItemStack getPrimaryOutputStack() {
+        List<ProcessingOutput> primary = getPrimaryResults();
+        return primary.isEmpty() ? ItemStack.EMPTY : primary.getFirst().getStack();
+    }
+
+    /**
+     * Gets a list of secondary output item stacks.
+     * These are typically what would be stored in the machine.
+     */
+    public List<ItemStack> getSecondaryOutputStacks() {
+        return getSecondaryResults().stream()
+                .map(ProcessingOutput::getStack)
+                .filter(stack -> !stack.isEmpty())
+                .collect(Collectors.toList());
+    }
+    // --- End of new methods ---
+
+
     @Override
     protected int getMaxInputCount() {
         return 1;
@@ -43,7 +78,9 @@ public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implement
 
     @Override
     protected int getMaxOutputCount() {
-        return 4;
+        // This should reflect the total number of possible distinct outputs (primary + secondary)
+        // If primary is 1 and secondary can be up to 3, then total is 4.
+        return 4; // Adjust if you have more potential secondary outputs
     }
 
     @Override
@@ -75,6 +112,7 @@ public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implement
 
     @Override
     public Supplier<Supplier<SequencedAssemblySubCategory>> getJEISubCategory() {
+        // Keeping this as cutting for now, but you might want a custom one
         return () -> SequencedAssemblySubCategory.AssemblyCutting::new;
     }
 }

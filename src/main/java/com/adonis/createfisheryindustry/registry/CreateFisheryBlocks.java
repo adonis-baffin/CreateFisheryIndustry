@@ -4,6 +4,7 @@ import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapBlock;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapMovementBehaviour;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerGenerator;
+import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerMovementBehaviour;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlock;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlock;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlock;
@@ -21,6 +22,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.SoundType;
 
 import static com.adonis.createfisheryindustry.CreateFisheryMod.REGISTRATE;
+import static com.simibubi.create.api.behaviour.movement.MovementBehaviour.movementBehaviour;
+import static com.simibubi.create.foundation.data.ModelGen.customItemModel;
 import static com.simibubi.create.foundation.data.TagGen.axeOrPickaxe;
 
 public class CreateFisheryBlocks {
@@ -97,7 +100,10 @@ public class CreateFisheryBlocks {
             .transform(CreateFisheryStressConfig.setImpact(4.0))
             .blockstate(new MechanicalPeelerGenerator()::generate)
             .addLayer(() -> RenderType::cutoutMipped)
-            .simpleItem()
+            .onRegister(movementBehaviour(new MechanicalPeelerMovementBehaviour()))
+            .item()
+            .tag(AllTags.AllItemTags.CONTRAPTION_CONTROLLED.tag)
+            .transform(customItemModel())
             .register();
 
     public static void register() {}

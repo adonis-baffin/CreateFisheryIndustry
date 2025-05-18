@@ -25,53 +25,30 @@ public class MechanicalPeelerVisual extends KineticBlockEntityVisual<MechanicalP
         super(context, blockEntity, partialTick);
         InstancerProvider instancerProvider = context.instancerProvider();
         rotatingModel = shaftInstance(instancerProvider, blockState)
-                .setPosition(getVisualPosition()); // Set initial position from BE's position
-        updateRotatingModelState(); // Apply initial speed, offset, and animation axis
+                .setup(blockEntity)
+                .setPosition(getVisualPosition());
+        rotatingModel.setChanged();
     }
 
     public static RotatingInstance shaftInstance(InstancerProvider instancerProvider, BlockState state) {
-        Direction facing = state.getValue(BlockStateProperties.FACING); // Overall facing of the block
+        Direction facing = state.getValue(BlockStateProperties.FACING);
         RotatingInstance instance;
 
-        if (facing.getAxis().isHorizontal()) { // Block is placed horizontally
-            Direction shaftConnectionSide = facing.getOpposite(); // Shaft connects to the back
+        if (facing.getAxis().isHorizontal()) {
+            Direction align = facing.getOpposite();
             instance = instancerProvider.instancer(AllInstanceTypes.ROTATING, Models.partial(AllPartialModels.SHAFT_HALF))
-                    .createInstance();
-
-            // Set the static (non-animated) orientation of the SHAFT_HALF model.
-            // SHAFT_HALF model's default "front" or "connection end" is usually its local +Z.
-            // We rotate this local +Z to align with the `shaftConnectionSide`.
-            instance.rotateTo(0, 0, 1, // From local +Z
-                    shaftConnectionSide.getStepX(), // To world direction X
-                    shaftConnectionSide.getStepY(), // To world direction Y
-                    shaftConnectionSide.getStepZ());// To world direction Z
-
-            // The animation (rotation) of the shaft will be around the block's FACING axis.
-            instance.setRotationAxis(facing.getAxis());
-
-        } else { // Block is placed vertically (FACING is UP or DOWN)
+                    .createInstance()
+                    .rotateTo(0, 0, 1, align.getStepX(), align.getStepY(), align.getStepZ());
+        } else {
             instance = instancerProvider.instancer(AllInstanceTypes.ROTATING, Models.partial(AllPartialModels.SHAFT))
-                    .createInstance();
-
-            // 1. Determine the visual orientation of the SHAFT model (which way it "lies").
-            //    This is based on AXIS_ALONG_FIRST_COORDINATE.
-            //    If true, SHAFT model should visually lie along X. If false, along Z.
-            //    `rotateToFace` rotates the model's local Y (its length) to align with the given world axis.
-            Axis visualShaftOrientationAxis = state.getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE) ? Axis.X : Axis.Z;
-            instance.rotateToFace(visualShaftOrientationAxis);
-
-            // 2. The animation axis is determined by the block's getRotationAxis() method.
-            //    For vertical DAKB: if AXIS_ALONG_FIRST_COORDINATE is true, animation is around Z. If false, around X.
-            //    This is set in updateRotatingModelState() via rotatingModel.setup() logic or direct setRotationAxis.
-            //    No need to set it here again as updateRotatingModelState will be called.
+                    .createInstance()
+                    .rotateToFace(state.getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE) ? Axis.X : Axis.Z);
         }
         return instance;
     }
 
     private void updateRotatingModelState() {
-        // This axis is the actual axis of kinetic rotation for the animation.
         Axis currentAnimationAxis = KineticBlockEntityVisual.rotationAxis(blockState);
-
         rotatingModel.setRotationAxis(currentAnimationAxis)
                 .setRotationalSpeed(blockEntity.getSpeed() * RotatingInstance.SPEED_MULTIPLIER)
                 .setRotationOffset(
@@ -82,6 +59,7 @@ public class MechanicalPeelerVisual extends KineticBlockEntityVisual<MechanicalP
         if (KineticDebugger.isActive()) {
             rotatingModel.setColor(blockEntity);
         }
+        rotatingModel.setChanged();
     }
 
     @Override

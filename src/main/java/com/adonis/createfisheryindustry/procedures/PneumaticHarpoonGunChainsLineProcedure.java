@@ -21,9 +21,12 @@ import net.neoforged.neoforge.common.NeoForge;
 import com.mojang.math.Axis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.List;
 
+@OnlyIn(Dist.CLIENT) // <--- 这是添加的注解
 public class PneumaticHarpoonGunChainsLineProcedure {
     private static final Logger LOGGER = LoggerFactory.getLogger(PneumaticHarpoonGunChainsLineProcedure.class);
 
@@ -91,31 +94,34 @@ public class PneumaticHarpoonGunChainsLineProcedure {
             double camZ = minecraft.gameRenderer.getMainCamera().getPosition().z;
             poseStack.translate(-camX, -camY, -camZ);
 
-            for (int i = 0; i < chainCount; i++) {
-                float t = (float) i / (chainCount - 1);
-                float x = (float) Mth.lerp(t, startX, targetX);
-                float y = (float) Mth.lerp(t, startY, targetY);
-                float z = (float) Mth.lerp(t, startZ, targetZ);
+            if (chainCount > 1) { // 避免除以零，并且至少需要两个点来形成线段
+                for (int i = 0; i < chainCount; i++) {
+                    float t = (float) i / (chainCount - 1);
+                    float x = (float) Mth.lerp(t, startX, targetX);
+                    float y = (float) Mth.lerp(t, startY, targetY);
+                    float z = (float) Mth.lerp(t, startZ, targetZ);
 
-                // 计算光照
-                BlockPos pos = BlockPos.containing(x, y, z);
-                int light = LevelRenderer.getLightColor(level, pos);
+                    // 计算光照
+                    BlockPos pos = BlockPos.containing(x, y, z);
+                    int light = LevelRenderer.getLightColor(level, pos);
 
-                poseStack.pushPose();
-                poseStack.translate(x, y, z);
-                // 旋转链条使其朝向连线方向
-                Vec3 direction = new Vec3(targetX - startX, targetY - startY, targetZ - startZ).normalize();
-                float yaw = (float) Math.toDegrees(Math.atan2(direction.x, direction.z));
-                float pitch = (float) Math.toDegrees(Math.asin(-direction.y));
-                poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
-                poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
-                poseStack.scale(0.5f, 0.5f, 0.5f); // 缩小链条模型
-                itemRenderer.renderStatic(chains, ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, poseStack, buffer, level, 0);
-                poseStack.popPose();
+                    poseStack.pushPose();
+                    poseStack.translate(x, y, z);
+                    // 旋转链条使其朝向连线方向
+                    Vec3 direction = new Vec3(targetX - startX, targetY - startY, targetZ - startZ).normalize();
+                    float yaw = (float) Math.toDegrees(Math.atan2(direction.x, direction.z));
+                    float pitch = (float) Math.toDegrees(Math.asin(-direction.y));
+                    poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
+                    poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
+                    poseStack.scale(0.5f, 0.5f, 0.5f); // 缩小链条模型
+                    itemRenderer.renderStatic(chains, ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, poseStack, buffer, level, 0);
+                    poseStack.popPose();
+                }
             }
 
             poseStack.popPose();
-            buffer.endBatch();
+            buffer.endBatch(); // 确保在循环外调用，或者如果每个玩家独立渲染，则在玩家循环外
         }
+
     }
 }
