@@ -4,6 +4,7 @@ import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.AllShapes;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
+import com.simibubi.create.foundation.item.ItemHelper; // Keep for potential future use or if other methods are called
 import net.createmod.catnip.placement.IPlacementHelper;
 import net.createmod.catnip.placement.PlacementHelpers;
 import net.createmod.catnip.placement.PlacementOffset;
@@ -125,21 +126,37 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
                 return ItemInteractionResult.SUCCESS;
         }
 
-        if (player.isSpectator() || !stack.isEmpty())
+        if (player.isSpectator() || !stack.isEmpty()) // Allow placing items if hand is not empty
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (state.getValue(FACING) != Direction.UP)
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
+        // If hand is empty, try to retrieve items
         return onBlockEntityUseItemOn(level, pos, be -> {
-            for (int i = 0; i < be.inventory.getSlots(); i++) {
-                ItemStack heldItemStack = be.inventory.getStackInSlot(i);
-                if (!level.isClientSide && !heldItemStack.isEmpty()) {
-                    player.getInventory().placeItemBackInInventory(heldItemStack);
+            boolean itemsRetrieved = false;
+            // Retrieve from input inventory
+            ItemStack inputStack = be.inputInventory.getStackInSlot(MechanicalPeelerBlockEntity.INPUT_SLOT);
+            if (!inputStack.isEmpty()) {
+                if (!level.isClientSide) player.getInventory().placeItemBackInInventory(inputStack);
+                be.inputInventory.setStackInSlot(MechanicalPeelerBlockEntity.INPUT_SLOT, ItemStack.EMPTY);
+                itemsRetrieved = true;
+            }
+
+            // Retrieve from output inventory (temp primary and secondaries)
+            for (int i = 0; i < be.outputInventory.getSlots(); i++) {
+                ItemStack outputStack = be.outputInventory.getStackInSlot(i);
+                if (!outputStack.isEmpty()) {
+                    if (!level.isClientSide) player.getInventory().placeItemBackInInventory(outputStack);
+                    be.outputInventory.setStackInSlot(i, ItemStack.EMPTY);
+                    itemsRetrieved = true;
                 }
             }
-            be.inventory.clear();
-            be.notifyUpdate();
-            return ItemInteractionResult.SUCCESS;
+
+            if (itemsRetrieved) {
+                be.notifyUpdate(); // Updates BE state which might include visual changes or comparator output
+                return ItemInteractionResult.SUCCESS;
+            }
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION; // No items to retrieve
         });
     }
 
@@ -151,14 +168,29 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
         if (entityIn.level().isClientSide)
             return;
 
-        BlockPos pos = entityIn.blockPosition();
-        Level level = entityIn.level();
-        if (level == null) return;
+        BlockPos pos = entityIn.blockPosition(); // Use the entity's current block position
+        Level level = entityIn.level(); // Get level from entity
+        if (level == null) return; // Should not happen if entity is valid
 
-        withBlockEntityDo(level, pos, be -> {
+        // The MechanicalPeelerBlock is at entityIn.blockPosition() if the item landed on it.
+        // If it landed *next* to it and should be picked up, pos needs to be the BE's pos.
+        // Assuming the item entity is AT the peeler's position (or directly above it and fell on).
+        BlockState blockStateAtEntity = level.getBlockState(pos);
+        if (blockStateAtEntity.getBlock() != this) { // Check if the entity is on THIS block type
+            // If entity is above, check block below
+            BlockPos belowEntity = pos.below();
+            if (level.getBlockState(belowEntity).getBlock() == this) {
+                pos = belowEntity;
+            } else {
+                return; // Entity is not on or directly above a MechanicalPeelerBlock
+            }
+        }
+
+
+        withBlockEntityDo(level, pos, be -> { // 'pos' is now confirmed or adjusted to be the Peeler's position
             if (be.getSpeed() == 0)
                 return;
-            be.insertItem(itemEntity);
+            be.insertItem(itemEntity); // insertItem logic in BE will handle putting it in inputInventory
         });
     }
 

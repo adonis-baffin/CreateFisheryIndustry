@@ -2,13 +2,22 @@
   "type": "createfisheryindustry:peeling",
   "ingredients": [
     {
-      "item": "minecraft:potato"
+      "item": "minecraft:cod"
     }
   ],
   "results": [
     {
-      "id": "minecraft:apple"
+      "id": "minecraft:salmon",
+      "count": 1
+    },
+    {
+      "id": "minecraft:bone_meal",
+      "chance": 0.25
+    },
+    {
+      "id": "minecraft:string",
+      "chance": 0.1
     }
   ],
-  "processingTime": 100
+  "processingTime": 150
 }

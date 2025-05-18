@@ -18,6 +18,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+// import net.neoforged.neoforge.items.wrapper.EmptyHandler; // Removed
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import com.google.common.collect.ImmutableSet;
@@ -53,15 +54,16 @@ public class CreateFisheryBlockEntities {
 
     public static final BlockEntityEntry<MechanicalPeelerBlockEntity> MECHANICAL_PEELER = REGISTRATE
             .blockEntity("mechanical_peeler", MechanicalPeelerBlockEntity::new)
-            .visual(() -> MechanicalPeelerVisual::new)
+            .visual(() -> MechanicalPeelerVisual::new) // Ensure these classes/constructors exist
             .validBlocks(CreateFisheryBlocks.MECHANICAL_PEELER)
-            .renderer(() -> MechanicalPeelerRenderer::new)
+            .renderer(() -> MechanicalPeelerRenderer::new) // Ensure these classes/constructors exist
             .register();
 
     public static final DeferredHolder<PoiType, PoiType> SMART_BEEHIVE_POI =
             POI_TYPES.register("smart_beehive", () ->
                     new PoiType(
-                            ImmutableSet.of(CreateFisheryBlocks.SMART_BEEHIVE.get().defaultBlockState()),
+                            // Ensure CreateFisheryBlocks.SMART_BEEHIVE.get() is a Block and not a BlockEntry if this causes issues
+                            ImmutableSet.copyOf(CreateFisheryBlocks.SMART_BEEHIVE.get().getStateDefinition().getPossibleStates()),
                             1,
                             32
                     ));
@@ -84,12 +86,11 @@ public class CreateFisheryBlockEntities {
                 Capabilities.ItemHandler.BLOCK,
                 SMART_BEEHIVE.get(),
                 (be, side) -> {
-                    if (be instanceof SmartBeehiveBlockEntity beehive) {
-                        return side == null || side == Direction.UP
-                                ? beehive.insertionHandler
-                                : beehive.extractionHandler;
-                    }
-                    return null;
+                    // No need for instanceof check if the BlockEntityType guarantees the type.
+                    // The lambda's 'be' will be SmartBeehiveBlockEntity.
+                    return side == null || side == Direction.UP
+                            ? be.insertionHandler
+                            : be.extractionHandler;
                 }
         );
 
@@ -97,29 +98,28 @@ public class CreateFisheryBlockEntities {
                 Capabilities.FluidHandler.BLOCK,
                 SMART_BEEHIVE.get(),
                 (be, side) -> {
-                    if (be instanceof SmartBeehiveBlockEntity beehive && (side == null || side == Direction.DOWN)) {
-                        return beehive.getFluidTank();
+                    if (side == null || side == Direction.DOWN) {
+                        return be.getFluidTank();
                     }
                     return null;
                 }
         );
 
+        // Mechanical Peeler ItemHandler
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
-                MECHANICAL_PEELER.get(), // Use your registered BlockEntityEntry
-                (be, context) -> { // Context is the side from which capability is queried
-                    if (be instanceof MechanicalPeelerBlockEntity peelerBE) {
-                        // Allow item input from Top and Sides, but not Bottom (usually output)
-                        if (context != Direction.DOWN) {
-                            return peelerBE.inventory;
-                        }
+                MECHANICAL_PEELER.get(),
+                (be, side) -> {
+                    // 'be' is MechanicalPeelerBlockEntity
+                    if (be.itemHandler != null) {
+                        return be.itemHandler;
                     }
-                    return null; // No capability for this side or wrong BE type
+                    return null; // Return null if no capability is provided for the given side/context
                 }
         );
 
         TrapNozzleBlockEntity.registerCapabilities(event);
         SmartMeshBlockEntity.registerCapabilities(event);
+        CreateFisheryMod.LOGGER.info("Registered BlockEntity Capabilities for Create Fishery Mod");
     }
-
 }

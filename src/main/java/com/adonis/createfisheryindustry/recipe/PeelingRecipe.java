@@ -1,13 +1,14 @@
 package com.adonis.createfisheryindustry.recipe;
 
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
+import com.google.common.collect.ImmutableList;
 import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
-import com.simibubi.create.content.processing.recipe.ProcessingOutput; // Keep this
+import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
 import com.simibubi.create.foundation.utility.CreateLang;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack; // For getResultItem() if needed
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.ItemLike;
@@ -16,59 +17,50 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
 public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implements IAssemblyRecipe {
 
-    protected final PeelingRecipeParams peelingParams;
+    protected final PeelingRecipeParams params; // Store the specific params instance
 
     public PeelingRecipe(PeelingRecipeParams params) {
         super(CreateFisheryRecipeTypes.PEELING, params);
-        this.peelingParams = params;
+        this.params = params; // Assign to the field
     }
 
-    // --- New methods to distinguish outputs ---
-    public List<ProcessingOutput> getPrimaryResults() {
-        if (results.isEmpty()) {
-            return Collections.emptyList();
+    // Getter for the serializer to access the specific params instance
+    public PeelingRecipeParams getParams() {
+        return this.params;
+    }
+
+    public ItemStack getPrimaryOutput() {
+        if (getRollableResults().isEmpty()) { // getRollableResults() is from ProcessingRecipe
+            return ItemStack.EMPTY;
         }
-        // Assuming the first result is the primary one that flows out
-        return List.of(results.getFirst());
+        return getRollableResults().getFirst().getStack();
     }
 
-    public List<ProcessingOutput> getSecondaryResults() {
-        if (results.size() <= 1) {
-            return Collections.emptyList();
+    public List<ProcessingOutput> getSecondaryOutputs() {
+        if (getRollableResults().size() <= 1) {
+            return ImmutableList.of();
         }
-        // The rest are secondary and go into the machine's inventory
-        return results.stream().skip(1).collect(Collectors.toList());
+        return ImmutableList.copyOf(getRollableResults().subList(1, getRollableResults().size()));
     }
 
-    /**
-     * Gets the primary output item stack if it exists.
-     * This is typically what would be "ejected" or flow out.
-     */
-    public ItemStack getPrimaryOutputStack() {
-        List<ProcessingOutput> primary = getPrimaryResults();
-        return primary.isEmpty() ? ItemStack.EMPTY : primary.getFirst().getStack();
+    // This method is to roll results for a specific list of outputs,
+    // e.g., only secondary outputs. It calls the protected method from ProcessingRecipe.
+    public List<ItemStack> rollResultsFor(List<ProcessingOutput> specificOutputs) {
+        return super.rollResults(specificOutputs); // Call the version from ProcessingRecipe that takes List<ProcessingOutput>
     }
 
-    /**
-     * Gets a list of secondary output item stacks.
-     * These are typically what would be stored in the machine.
-     */
-    public List<ItemStack> getSecondaryOutputStacks() {
-        return getSecondaryResults().stream()
-                .map(ProcessingOutput::getStack)
-                .filter(stack -> !stack.isEmpty())
-                .collect(Collectors.toList());
+    // Default rollResults uses the main results list of the recipe
+    @Override
+    public List<ItemStack> rollResults() {
+        return super.rollResults(); // This uses this.getRollableResults() (which is this.results from ProcessingRecipe)
     }
-    // --- End of new methods ---
 
 
     @Override
@@ -78,9 +70,8 @@ public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implement
 
     @Override
     protected int getMaxOutputCount() {
-        // This should reflect the total number of possible distinct outputs (primary + secondary)
-        // If primary is 1 and secondary can be up to 3, then total is 4.
-        return 4; // Adjust if you have more potential secondary outputs
+        // This refers to the size of the 'results' list in ProcessingRecipeParams
+        return 1 + 8; // Example: 1 primary + up to 8 secondary
     }
 
     @Override
@@ -112,7 +103,6 @@ public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implement
 
     @Override
     public Supplier<Supplier<SequencedAssemblySubCategory>> getJEISubCategory() {
-        // Keeping this as cutting for now, but you might want a custom one
         return () -> SequencedAssemblySubCategory.AssemblyCutting::new;
     }
 }

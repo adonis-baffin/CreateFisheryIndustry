@@ -84,5 +84,15 @@
   "create.createfisheryindustry.smart_beehive.fluid_empty": "No Fluid",
   "create.createfisheryindustry.smart_beehive.mode_label": "Mode: ",
   "fluid.create.honey": "Honey",
-  "gui.goggles.inventory.empty": "Inventory Empty"
+
+
+
+
+  "recipe.createfisheryindustry.peeling": "Peeling",
+
+  "gui.goggles.kinetic_stats": "Kinetic Stats",
+  "create.gui.goggles.speed": "Speed: %s RPM",
+  "create.gui.goggles.peeler_input": "Input:",
+  "create.gui.goggles.peeler_outputs": "Stored Outputs:"
+
 }
