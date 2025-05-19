@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 100,
+  "experience": 0.1,
+  "ingredient": {
+    "item": "createfisheryindustry:cod_steak"
+  },
+  "result": {
+    "count": 1,
+    "id": "createfisheryindustry:cooked_cod_steak"
+  }
+}

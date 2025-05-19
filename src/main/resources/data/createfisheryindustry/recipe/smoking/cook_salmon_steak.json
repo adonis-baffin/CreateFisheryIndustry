@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 100,
+  "experience": 0.1,
+  "ingredient": {
+    "item": "createfisheryindustry:salmon_steak"
+  },
+  "result": {
+    "count": 1,
+    "id": "createfisheryindustry:cooked_salmon_steak"
+  }
+}

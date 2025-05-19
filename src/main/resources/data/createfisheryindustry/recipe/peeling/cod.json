@@ -12,7 +12,7 @@
     },
     {
       "id": "createfisheryindustry:fish_skin",
-      "chance": 1
+      "chance": 0.75
     }
   ],
   "processingTime": 20
