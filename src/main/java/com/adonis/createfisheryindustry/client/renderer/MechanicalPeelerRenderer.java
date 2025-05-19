@@ -35,12 +35,12 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
     @Override
     protected void renderSafe(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
         renderBlade(be, ms, buffer, light);
-        renderItems(be, partialTicks, ms, buffer, light, overlay); // Pass partialTicks here
+        renderItems(be, partialTicks, ms, buffer, light, overlay);
 
-        if (VisualizationManager.supportsVisualization(be.getLevel())) // Check if be.getLevel() is null
+        if (VisualizationManager.supportsVisualization(be.getLevel()))
             return;
 
-        renderShaft(be, ms, buffer, light, overlay); // Pass overlay here as per original, though renderRotatingBuffer might not use it
+        renderShaft(be, ms, buffer, light, overlay);
     }
 
     protected void renderBlade(MechanicalPeelerBlockEntity be, PoseStack ms, MultiBufferSource buffer, int light) {
@@ -66,12 +66,8 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
     }
 
     protected void renderShaft(MechanicalPeelerBlockEntity be, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
-        // KineticBlockEntityRenderer.renderRotatingBuffer typically takes 5 arguments
-        // (be, model, ms, vertexConsumer, light)
-        // If your version of Create or Catnip has an overload with overlay, keep it.
-        // Otherwise, remove overlay. Let's assume the 5-argument version for now.
         KineticBlockEntityRenderer.renderRotatingBuffer(be, getRotatedShaftModel(be), ms,
-                buffer.getBuffer(RenderType.solid()), light); // Removed overlay
+                buffer.getBuffer(RenderType.solid()), light);
     }
 
     protected void renderItems(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
@@ -88,7 +84,7 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
 
         if (!outputTempPrimaryEmpty) {
             animatedStack = be.outputInventory.getStackInSlot(MechanicalPeelerBlockEntity.OUTPUT_INV_PRIMARY_SLOT_TEMP);
-            duration = be.inputInventory.recipeDuration; // Use input's timer for ejection of primary
+            duration = be.inputInventory.recipeDuration;
             remainingTime = be.inputInventory.remainingTime;
             appliedRecipe = true;
         } else if (!inputEmpty) {
@@ -97,13 +93,10 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
             remainingTime = be.inputInventory.remainingTime;
             appliedRecipe = be.inputInventory.appliedRecipe;
         } else {
-            // If no primary item to animate, just render secondaries
-            renderSecondaryOutputs(be, partialTicks, ms, buffer, light, overlay); // Corrected: pass partialTicks
             return;
         }
 
         if (animatedStack.isEmpty()) {
-            renderSecondaryOutputs(be, partialTicks, ms, buffer, light, overlay); // Corrected: pass partialTicks
             return;
         }
 
@@ -137,49 +130,6 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
         itemRenderer.render(animatedStack, ItemDisplayContext.FIXED, false, ms, buffer, light, overlay, modelWithOverrides);
         ms.popPose();
 
-        ms.popPose();
-
-        renderSecondaryOutputs(be, partialTicks, ms, buffer, light, overlay); // Corrected: pass partialTicks
-    }
-
-    protected void renderSecondaryOutputs(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
-        boolean alongZ = !be.getBlockState().getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE);
-        int outputsPresent = 0;
-        for (int i = 1; i < be.outputInventory.getSlots(); i++) {
-            if (!be.outputInventory.getStackInSlot(i).isEmpty()) {
-                outputsPresent++;
-            }
-        }
-        if (outputsPresent == 0) return;
-
-        ms.pushPose();
-        if (alongZ) ms.mulPose(Axis.YP.rotationDegrees(90));
-
-        float secondaryBaseX = (outputsPresent > 1) ? 0.15f : 0.5f;
-        float secondarySpacing = (outputsPresent > 1 && outputsPresent -1 != 0) ? 0.35f / (outputsPresent -1) : 0f;
-
-        ms.translate(0, 0, 0.5f); // Z-offset for secondary items
-        if (alongZ) ms.translate(-1, 0, 0);
-
-        int renderedCount = 0;
-        for (int i = 1; i < be.outputInventory.getSlots(); i++) {
-            ItemStack stack = be.outputInventory.getStackInSlot(i);
-            if (stack.isEmpty()) continue;
-
-            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-            BakedModel model = itemRenderer.getModel(stack, be.getLevel(), null, 0);
-            boolean isBlockItem = model.isGui3d();
-
-            ms.pushPose();
-            ms.translate(secondaryBaseX + (renderedCount * secondarySpacing), isBlockItem ? .925f : 13f / 16f, 0);
-            TransformStack.of(ms).nudge(be.getBlockPos().getX() + i*5 + be.getBlockPos().getZ());
-
-            ms.scale(.4f, .4f, .4f);
-            if (!isBlockItem) ms.mulPose(Axis.XP.rotationDegrees(90));
-            itemRenderer.render(stack, ItemDisplayContext.FIXED, false, ms, buffer, light, overlay, model);
-            ms.popPose();
-            renderedCount++;
-        }
         ms.popPose();
     }
 

@@ -1,12 +1,12 @@
 package com.adonis.createfisheryindustry.block.MechanicalPeeler;
 
+import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.simibubi.create.compat.jei.category.animations.AnimatedKinetics;
-import net.createmod.catnip.gui.element.GuiGameElement;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class AnimatedMechanicalPeeler extends AnimatedKinetics {
 
@@ -14,20 +14,27 @@ public class AnimatedMechanicalPeeler extends AnimatedKinetics {
     public void draw(GuiGraphics graphics, int xOffset, int yOffset) {
         PoseStack matrixStack = graphics.pose();
         matrixStack.pushPose();
-        matrixStack.translate(xOffset, yOffset, 0); // Basic translation
-        matrixStack.translate(10, 20, 0); // Fine-tune position within the 177x90 box
-                                                // This places the peeler visually centered-ish.
-                                                // You'll need to adjust these based on your JEI category size and element placement.
+        matrixStack.translate(xOffset, yOffset, 0);
+        matrixStack.translate(0, 0, 200);
+        matrixStack.translate(2, 22, 0);
+        matrixStack.mulPose(Axis.XP.rotationDegrees(-15.5f));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(22.5f + 90));
+        int scale = 27;
 
-        // Get the default state of your Mechanical Peeler, facing UP
-        BlockState defaultState = CreateFisheryBlocks.MECHANICAL_PEELER.get()
-                .defaultBlockState()
-                .setValue(com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlock.FACING, Direction.UP);
+        blockElement(shaft(Direction.Axis.X))
+                .rotateBlock(-getCurrentAngle(), 0, 0)
+                .scale(scale)
+                .render(graphics);
 
+        blockElement(CreateFisheryBlocks.MECHANICAL_PEELER.getDefaultState()
+                .setValue(MechanicalPeelerBlock.FACING, Direction.UP))
+                .rotateBlock(0, 0, 0)
+                .scale(scale)
+                .render(graphics);
 
-        GuiGameElement.of(defaultState)
-                .scale(24) // Adjust scale as needed
-                .lighting(AnimatedKinetics.DEFAULT_LIGHTING)
+        blockElement(CreateFisheryPartialModels.PEELER_BLADE_VERTICAL_ACTIVE)
+                .rotateBlock(0, -90, -90)
+                .scale(scale)
                 .render(graphics);
 
         matrixStack.popPose();

@@ -86,6 +86,13 @@
   "fluid.create.honey": "Honey",
 
 
+  "item.createfisheryindustry.chains": "Chains",
+  "item.createfisheryindustry.fish_skin": "Fish Skin",
+  "item.createfisheryindustry.roasted_fish_skin": "Roasted Fish Skin",
+  "item.createfisheryindustry.cod_steak": "Cod Steak",
+  "item.createfisheryindustry.salmon_steak": "Salmon Steak",
+  "item.createfisheryindustry.cooked_cod_steak": "Cooked Cod Steak",
+  "item.createfisheryindustry.cooked_salmon_steak": "Cooked Salmon Steak",
 
 
   "recipe.createfisheryindustry.peeling": "Peeling",
@@ -93,6 +100,7 @@
   "gui.goggles.kinetic_stats": "Kinetic Stats",
   "create.gui.goggles.speed": "Speed: %s RPM",
   "create.gui.goggles.peeler_input": "Input:",
-  "create.gui.goggles.peeler_outputs": "Stored Outputs:"
+  "create.gui.goggles.peeler_outputs": "Stored Outputs:",
+  "create.gui.goggles.peeler_stored_outputs": "Stored Outputs:"
 
 }

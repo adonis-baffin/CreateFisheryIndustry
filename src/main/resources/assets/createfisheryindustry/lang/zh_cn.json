@@ -81,5 +81,12 @@
   "create.createfisheryindustry.smart_beehive.fluid_empty": "无流体",
   "create.createfisheryindustry.smart_beehive.mode_label": "模式：",
   "fluid.create.honey": "蜂蜜",
-  "gui.goggles.inventory.empty": "库存为空"
+  "gui.goggles.inventory.empty": "库存为空",
+
+  "item.createfisheryindustry.fish_skin": "鱼皮",
+  "item.createfisheryindustry.roasted_fish_skin": "烤鱼皮",
+  "item.createfisheryindustry.cod_steak": "鳕鱼排",
+  "item.createfisheryindustry.salmon_steak": "鲑鱼排",
+  "item.createfisheryindustry.cooked_cod_steak": "熟鳕鱼排",
+  "item.createfisheryindustry.cooked_salmon_steak": "熟鲑鱼排"
 }

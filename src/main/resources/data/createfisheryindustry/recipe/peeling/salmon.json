@@ -1,0 +1,19 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "minecraft:salmon"
+    }
+  ],
+  "results": [
+    {
+      "id": "createfisheryindustry:salmon_steak",
+      "count": 1
+    },
+    {
+      "id": "createfisheryindustry:fish_skin",
+      "chance": 1
+    }
+  ],
+  "processingTime": 20
+}
