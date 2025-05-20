@@ -8,11 +8,7 @@
     "AllArmInteractionPointTypesMixin",
     "BlockMovementChecksMixin",
     "DivingBootsItemMixin",
-    "PlayerWaterSprintMixin",
-    "BeeMixin",
-    "BeeEnterHiveGoalMixin",
-    "BeeGoToHiveGoalMixin",
-    "BeeLocateHiveGoalMixin"
+    "PlayerWaterSprintMixin"
   ],
   "client": [],
   "injectors": {

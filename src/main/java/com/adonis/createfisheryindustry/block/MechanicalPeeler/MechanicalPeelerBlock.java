@@ -4,11 +4,9 @@ import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.AllShapes;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
-import com.simibubi.create.foundation.item.ItemHelper; // Keep for potential future use or if other methods are called
 import net.createmod.catnip.placement.IPlacementHelper;
 import net.createmod.catnip.placement.PlacementHelpers;
 import net.createmod.catnip.placement.PlacementOffset;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -16,6 +14,9 @@ import net.minecraft.core.Direction.AxisDirection;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.Turtle;
+import net.minecraft.world.entity.animal.armadillo.Armadillo;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -33,9 +34,11 @@ import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.Vec3; // 确保导入
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -113,6 +116,7 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        // 假设这是一个标准的12像素高的外壳形状
         return AllShapes.CASING_12PX.get(state.getValue(FACING));
     }
 
@@ -126,15 +130,13 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
                 return ItemInteractionResult.SUCCESS;
         }
 
-        if (player.isSpectator() || !stack.isEmpty()) // Allow placing items if hand is not empty
+        if (player.isSpectator() || !stack.isEmpty())
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if (state.getValue(FACING) != Direction.UP)
+        if (state.getValue(FACING) != Direction.UP) // 假设只有朝上时才能手动交互库存
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
-        // If hand is empty, try to retrieve items
         return onBlockEntityUseItemOn(level, pos, be -> {
             boolean itemsRetrieved = false;
-            // Retrieve from input inventory
             ItemStack inputStack = be.inputInventory.getStackInSlot(MechanicalPeelerBlockEntity.INPUT_SLOT);
             if (!inputStack.isEmpty()) {
                 if (!level.isClientSide) player.getInventory().placeItemBackInInventory(inputStack);
@@ -142,7 +144,6 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
                 itemsRetrieved = true;
             }
 
-            // Retrieve from output inventory (temp primary and secondaries)
             for (int i = 0; i < be.outputInventory.getSlots(); i++) {
                 ItemStack outputStack = be.outputInventory.getStackInSlot(i);
                 if (!outputStack.isEmpty()) {
@@ -153,10 +154,10 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
             }
 
             if (itemsRetrieved) {
-                be.notifyUpdate(); // Updates BE state which might include visual changes or comparator output
+                be.notifyUpdate();
                 return ItemInteractionResult.SUCCESS;
             }
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION; // No items to retrieve
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         });
     }
 
@@ -168,31 +169,95 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
         if (entityIn.level().isClientSide)
             return;
 
-        BlockPos pos = entityIn.blockPosition(); // Use the entity's current block position
-        Level level = entityIn.level(); // Get level from entity
-        if (level == null) return; // Should not happen if entity is valid
+        BlockPos pos = entityIn.blockPosition();
+        Level level = entityIn.level();
+        if (level == null) return;
 
-        // The MechanicalPeelerBlock is at entityIn.blockPosition() if the item landed on it.
-        // If it landed *next* to it and should be picked up, pos needs to be the BE's pos.
-        // Assuming the item entity is AT the peeler's position (or directly above it and fell on).
         BlockState blockStateAtEntity = level.getBlockState(pos);
-        if (blockStateAtEntity.getBlock() != this) { // Check if the entity is on THIS block type
-            // If entity is above, check block below
+        if (blockStateAtEntity.getBlock() != this) {
             BlockPos belowEntity = pos.below();
             if (level.getBlockState(belowEntity).getBlock() == this) {
                 pos = belowEntity;
             } else {
-                return; // Entity is not on or directly above a MechanicalPeelerBlock
+                return;
             }
         }
 
-
-        withBlockEntityDo(level, pos, be -> { // 'pos' is now confirmed or adjusted to be the Peeler's position
+        withBlockEntityDo(level, pos, be -> {
             if (be.getSpeed() == 0)
                 return;
-            be.insertItem(itemEntity); // insertItem logic in BE will handle putting it in inputInventory
+            be.insertItem(itemEntity);
         });
     }
+
+    @Override
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+        if (level.isClientSide) {
+            return;
+        }
+
+        Direction facing = state.getValue(FACING);
+        // 定义一个基础的交互区域，稍后会根据朝向调整
+        // 这个AABB是相对于方块自身坐标的，(0,0,0)是方块的角
+        // 实际的交互区域会根据方块的朝向和位置进行变换
+        // 例如，如果朝上，我们检测方块上方；如果朝前，我们检测方块前方。
+
+        // 获取交互区域的偏移量和大小，可以定义为常量
+        final double interactionDepth = 0.6; // 交互区域从方块表面向外延伸的深度
+        final double interactionWidth = 0.8; // 交互区域的宽度 (X/Z)
+        final double interactionHeight = 0.8; // 交互区域的高度 (Y，或平行于轴的另外两个方向)
+        final double offsetFromSurface = 0.1; // 交互区域从方块表面开始的微小偏移
+
+        Vec3 min = Vec3.ZERO;
+        Vec3 max = Vec3.ZERO;
+
+        // 根据朝向定义交互区域的AABB
+        // AABB的坐标是相对于方块原点 (pos) 的
+        switch (facing) {
+            case UP:
+                min = new Vec3((1 - interactionWidth) / 2, 1 + offsetFromSurface, (1 - interactionHeight) / 2);
+                max = new Vec3((1 + interactionWidth) / 2, 1 + offsetFromSurface + interactionDepth, (1 + interactionHeight) / 2);
+                break;
+            case DOWN:
+                min = new Vec3((1 - interactionWidth) / 2, -offsetFromSurface - interactionDepth, (1 - interactionHeight) / 2);
+                max = new Vec3((1 + interactionWidth) / 2, -offsetFromSurface, (1 + interactionHeight) / 2);
+                break;
+            case NORTH:
+                min = new Vec3((1 - interactionWidth) / 2, (1 - interactionHeight) / 2, -offsetFromSurface - interactionDepth);
+                max = new Vec3((1 + interactionWidth) / 2, (1 + interactionHeight) / 2, -offsetFromSurface);
+                break;
+            case SOUTH:
+                min = new Vec3((1 - interactionWidth) / 2, (1 - interactionHeight) / 2, 1 + offsetFromSurface);
+                max = new Vec3((1 + interactionWidth) / 2, (1 + interactionHeight) / 2, 1 + offsetFromSurface + interactionDepth);
+                break;
+            case WEST:
+                min = new Vec3(-offsetFromSurface - interactionDepth, (1 - interactionHeight) / 2, (1 - interactionWidth) / 2);
+                max = new Vec3(-offsetFromSurface, (1 + interactionHeight) / 2, (1 + interactionWidth) / 2);
+                break;
+            case EAST:
+                min = new Vec3(1 + offsetFromSurface, (1 - interactionHeight) / 2, (1 - interactionWidth) / 2);
+                max = new Vec3(1 + offsetFromSurface + interactionDepth, (1 + interactionHeight) / 2, (1 + interactionWidth) / 2);
+                break;
+        }
+
+        AABB interactionZone = new AABB(min.x, min.y, min.z, max.x, max.y, max.z).move(pos);
+
+        // 获取与该区域碰撞的实体
+        List<Entity> entities = level.getEntitiesOfClass(Entity.class, interactionZone,
+                (e) -> e.isAlive() && (e instanceof Sheep || e instanceof Armadillo || e instanceof Turtle));
+
+        if (!entities.isEmpty()) {
+            withBlockEntityDo(level, pos, be -> {
+                if (be.getSpeed() != 0) { // 移除be.canProcess()的显式调用，让BE内部判断
+                    for (Entity e : entities) {
+                        be.processEntity(e); // 让BE处理每个实体
+                    }
+                }
+            });
+        }
+        // super.entityInside(state, level, pos, entity); // 通常不需要，除非基类有特定逻辑
+    }
+
 
     @Override
     public PushReaction getPistonPushReaction(BlockState state) {

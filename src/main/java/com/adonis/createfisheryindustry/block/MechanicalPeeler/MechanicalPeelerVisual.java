@@ -13,7 +13,7 @@ import dev.engine_room.flywheel.lib.model.Models;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+// 移除 BlockStateProperties.FACING 的导入，我们将使用 MechanicalPeelerBlock.FACING
 
 import java.util.function.Consumer;
 
@@ -23,52 +23,57 @@ public class MechanicalPeelerVisual extends KineticBlockEntityVisual<MechanicalP
 
     public MechanicalPeelerVisual(VisualizationContext context, MechanicalPeelerBlockEntity blockEntity, float partialTick) {
         super(context, blockEntity, partialTick);
-        InstancerProvider instancerProvider = context.instancerProvider();
-        rotatingModel = shaftInstance(instancerProvider, blockState)
-                .setup(blockEntity)
-                .setPosition(getVisualPosition());
+        // instancerProvider() 是父类 KineticBlockEntityVisual 提供的
+        rotatingModel = shaftInstance(instancerProvider(), blockState)
+                .setup(blockEntity) // setup 会处理速度、颜色（如果调试开启）、旋转偏移等
+                .setPosition(getVisualPosition()); // 设置在世界中的位置
         rotatingModel.setChanged();
     }
 
+    // 与 SawVisual.shaft 方法保持高度一致
     public static RotatingInstance shaftInstance(InstancerProvider instancerProvider, BlockState state) {
-        Direction facing = state.getValue(BlockStateProperties.FACING);
-        RotatingInstance instance;
+        // 使用 MechanicalPeelerBlock 中定义的 FACING 和 AXIS_ALONG_FIRST_COORDINATE 属性
+        Direction facing = state.getValue(MechanicalPeelerBlock.FACING);
+        Direction.Axis facingAxis = facing.getAxis();
 
-        if (facing.getAxis().isHorizontal()) {
-            Direction align = facing.getOpposite();
-            instance = instancerProvider.instancer(AllInstanceTypes.ROTATING, Models.partial(AllPartialModels.SHAFT_HALF))
+        if (facingAxis.isHorizontal()) {
+            Direction align = facing.getOpposite(); // 轴应该与facing相反
+            return instancerProvider.instancer(AllInstanceTypes.ROTATING, Models.partial(AllPartialModels.SHAFT_HALF))
                     .createInstance()
+                    // rotateTo(angle, axisX, axisY, axisZ) - Saw这里用的是(0,0,1)作为参考轴旋转到align
+                    // 这通常意味着SHAFT_HALF模型默认是沿着某个特定方向（比如Z轴），然后通过这个旋转对齐
                     .rotateTo(0, 0, 1, align.getStepX(), align.getStepY(), align.getStepZ());
-        } else {
-            instance = instancerProvider.instancer(AllInstanceTypes.ROTATING, Models.partial(AllPartialModels.SHAFT))
+        } else { // 垂直方向 (UP or DOWN)
+            return instancerProvider.instancer(AllInstanceTypes.ROTATING, Models.partial(AllPartialModels.SHAFT))
                     .createInstance()
+                    // AXIS_ALONG_FIRST_COORDINATE 决定了垂直轴是沿X轴还是Z轴
                     .rotateToFace(state.getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE) ? Axis.X : Axis.Z);
         }
-        return instance;
     }
 
+    // 这个方法在原版SawVisual中没有，但在你的代码中有，保持它以更新旋转状态
+    // KineticBlockEntityVisual 的 update 方法会调用 setupSources，其中会处理速度等
+    // SawVisual 的 update 直接调用 rotatingModel.setup(blockEntity).setChanged();
+    // 我们的 rotatingModel.setup(blockEntity) 已经在构造函数和 update 中调用
     private void updateRotatingModelState() {
-        Axis currentAnimationAxis = KineticBlockEntityVisual.rotationAxis(blockState);
-        rotatingModel.setRotationAxis(currentAnimationAxis)
-                .setRotationalSpeed(blockEntity.getSpeed() * RotatingInstance.SPEED_MULTIPLIER)
-                .setRotationOffset(
-                        KineticBlockEntityVisual.rotationOffset(blockState, currentAnimationAxis, blockEntity.getBlockPos()) +
-                                blockEntity.getRotationAngleOffset(currentAnimationAxis)
-                );
+        // setup(blockEntity) 已经包含了速度、颜色和旋转偏移的设置
+        // rotatingModel.setup(blockEntity); // 可以在 update 中再次调用以确保所有状态最新
 
-        if (KineticDebugger.isActive()) {
-            rotatingModel.setColor(blockEntity);
-        }
-        rotatingModel.setChanged();
+        // 如果 KineticDebugger.isActive()，setup 会处理颜色
+        // rotatingModel.setChanged(); // setup 内部通常会调用 setChanged
     }
 
     @Override
     public void update(float pt) {
-        updateRotatingModelState();
+        // 与 SawVisual 一致，直接调用 setup，它会处理速度、旋转偏移、颜色等
+        rotatingModel.setup(blockEntity)
+                .setChanged();
+        // updateRotatingModelState(); // 这个方法的内容现在由 rotatingModel.setup(blockEntity) 覆盖
     }
 
     @Override
     public void updateLight(float partialTick) {
+        // relight 是 KineticBlockEntityVisual 的方法，用于重新计算光照
         relight(rotatingModel);
     }
 

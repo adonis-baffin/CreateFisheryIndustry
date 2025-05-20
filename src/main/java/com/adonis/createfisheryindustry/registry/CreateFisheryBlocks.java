@@ -11,6 +11,7 @@ import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlock;
 import com.adonis.createfisheryindustry.block.SmartBeehive.SmartBeehiveBlock;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlock;
 import com.adonis.createfisheryindustry.config.CreateFisheryConfig;
+
 import com.adonis.createfisheryindustry.config.CreateFisheryStressConfig;
 import com.simibubi.create.AllTags;
 import com.simibubi.create.foundation.data.BlockStateGen;
@@ -97,7 +98,7 @@ public class CreateFisheryBlocks {
                     .mapColor(DyeColor.GRAY)
                     .sound(SoundType.METAL)
                     .noOcclusion())
-            .transform(CreateFisheryStressConfig.setImpact(4.0))
+            .transform(CreateFisheryMod.STRESS_CONFIG.setImpact(4.0)) // 假设 STRESS_CONFIG 在主类中是
             .blockstate(new MechanicalPeelerGenerator()::generate)
             .addLayer(() -> RenderType::cutoutMipped)
             .onRegister(movementBehaviour(new MechanicalPeelerMovementBehaviour()))

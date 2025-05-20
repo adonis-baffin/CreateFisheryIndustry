@@ -1,5 +1,6 @@
 package com.adonis.createfisheryindustry.block.MechanicalPeeler;
 
+import com.adonis.createfisheryindustry.CreateFisheryMod; // 用于 LOGGER
 import com.adonis.createfisheryindustry.recipe.CreateFisheryRecipeTypes;
 import com.adonis.createfisheryindustry.recipe.PeelingRecipe;
 import com.simibubi.create.AllSoundEvents;
@@ -22,17 +23,27 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity; // Shearable 需要 LivingEntity
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.Turtle;
+import net.minecraft.world.entity.animal.armadillo.Armadillo;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DyeColor; // 仍可能用于判断羊的颜色，但不再直接用于获取羊毛物品
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,13 +52,17 @@ import net.minecraft.world.phys.Vec3;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.IShearable; // 导入 IShearable 接口
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -55,20 +70,23 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements IHaveGoggleInformation {
 
     public ProcessingInventory inputInventory;
-    public ItemStackHandler outputInventory; // Slot 0 for primary temp, 1+ for secondary storage
+    public ItemStackHandler outputInventory;
 
     private ItemStack playEvent;
     public final IItemHandler itemHandler;
 
     public static final int INPUT_SLOT = 0;
-    private static final int MAX_SECONDARY_OUTPUTS_STORAGE = 4; // How many slots for secondary outputs
+    private static final int MAX_SECONDARY_OUTPUTS_STORAGE = 4;
     public static final int OUTPUT_INV_PRIMARY_SLOT_TEMP = 0;
     private static final int OUTPUT_INV_SIZE = 1 + MAX_SECONDARY_OUTPUTS_STORAGE;
+
+    private final Map<UUID, Long> entityCooldowns = new HashMap<>();
+    private static final int ARMADILLO_TURTLE_COOLDOWN_TICKS = 20 * 60 * 1; // 1分钟冷却
 
     public MechanicalPeelerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         inputInventory = new ProcessingInventory(this::startProcessingRecipe)
-                .withSlotLimit(true); // Respect stack size limits
+                .withSlotLimit(true);
         inputInventory.remainingTime = -1;
 
         outputInventory = new ItemStackHandler(OUTPUT_INV_SIZE) {
@@ -81,7 +99,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             @Override
             public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
                 if (slot == OUTPUT_INV_PRIMARY_SLOT_TEMP) {
-                    return stack; // Prevent direct insertion into primary temp slot
+                    return stack;
                 }
                 return super.insertItem(slot, stack, simulate);
             }
@@ -92,7 +110,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     private void startProcessingRecipe(ItemStack stackInInputSlot) {
-        if (!canProcess() || stackInInputSlot.isEmpty() || (level.isClientSide && !isVirtual()))
+        if (!canProcess() || stackInInputSlot.isEmpty() || (level != null && level.isClientSide && !isVirtual()))
             return;
 
         Optional<RecipeHolder<PeelingRecipe>> recipeHolder = getMatchingRecipe(new SingleRecipeInput(stackInInputSlot));
@@ -156,10 +174,16 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         compound.put("OutputInventory", outputInventory.serializeNBT(registries));
         super.write(compound, registries, clientPacket);
 
-        if (!clientPacket || playEvent.isEmpty())
-            return;
-        compound.put("PlayEvent", playEvent.saveOptional(registries));
-        playEvent = ItemStack.EMPTY;
+        if (!clientPacket) {
+            CompoundTag cooldownsTag = new CompoundTag();
+            entityCooldowns.forEach((uuid, time) -> cooldownsTag.putLong(uuid.toString(), time));
+            compound.put("EntityCooldowns", cooldownsTag);
+        }
+
+        if (!clientPacket || !playEvent.isEmpty()) {
+            compound.put("PlayEvent", playEvent.saveOptional(registries));
+            if (clientPacket) playEvent = ItemStack.EMPTY;
+        }
     }
 
     @Override
@@ -167,6 +191,22 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         super.read(compound, registries, clientPacket);
         inputInventory.deserializeNBT(registries, compound.getCompound("InputInventory"));
         outputInventory.deserializeNBT(registries, compound.getCompound("OutputInventory"));
+
+        if (!clientPacket) {
+            entityCooldowns.clear();
+            if (compound.contains("EntityCooldowns", CompoundTag.TAG_COMPOUND)) {
+                CompoundTag cooldownsTag = compound.getCompound("EntityCooldowns");
+                for (String key : cooldownsTag.getAllKeys()) {
+                    try {
+                        UUID uuid = UUID.fromString(key);
+                        long time = cooldownsTag.getLong(key);
+                        entityCooldowns.put(uuid, time);
+                    } catch (IllegalArgumentException e) {
+                        CreateFisheryMod.LOGGER.warn("Failed to parse UUID from cooldowns NBT: " + key, e);
+                    }
+                }
+            }
+        }
 
         if (compound.contains("PlayEvent"))
             playEvent = ItemStack.parseOptional(registries, compound.getCompound("PlayEvent"));
@@ -189,14 +229,17 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             Item item = playEvent.getItem();
             if (item instanceof BlockItem) {
                 Block block = ((BlockItem) item).getBlock();
-                isWood = block.getSoundType(block.defaultBlockState(), level, worldPosition, null) == SoundType.WOOD;
+                if (level != null)
+                    isWood = block.getSoundType(block.defaultBlockState(), level, worldPosition, null) == SoundType.WOOD;
             }
             spawnEventParticles(playEvent);
             playEvent = ItemStack.EMPTY;
-            if (!isWood)
-                AllSoundEvents.SAW_ACTIVATE_STONE.playAt(level, worldPosition, 3, 1, true);
-            else
-                AllSoundEvents.SAW_ACTIVATE_WOOD.playAt(level, worldPosition, 3, 1, true);
+            if (level != null) {
+                if (!isWood)
+                    AllSoundEvents.SAW_ACTIVATE_STONE.playAt(level, worldPosition, 3, 1, true);
+                else
+                    AllSoundEvents.SAW_ACTIVATE_WOOD.playAt(level, worldPosition, 3, 1, true);
+            }
         }
     }
 
@@ -247,6 +290,11 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     public void tick() {
         super.tick();
 
+        if (level == null || level.isClientSide) {
+            if (level != null && level.isClientSide && !playEvent.isEmpty()) tickAudio();
+            return;
+        }
+
         if (!canProcess() || getSpeed() == 0) {
             if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() &&
                     inputInventory.appliedRecipe && inputInventory.remainingTime <= 0) {
@@ -267,19 +315,13 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         float processingSpeed = Mth.clamp(Math.abs(getSpeed()) / 32f, 1, 128);
         inputInventory.remainingTime -= processingSpeed;
 
-        if (inputInventory.remainingTime > 0) {
-            spawnParticles(inputInventory.getStackInSlot(INPUT_SLOT));
-        }
-
         if (inputInventory.remainingTime < 5 && !inputInventory.appliedRecipe) {
-            if (level.isClientSide && !isVirtual()) return;
-
             playEvent = inputInventory.getStackInSlot(INPUT_SLOT).copy();
+            sendData();
             applyRecipeProducts();
             inputInventory.appliedRecipe = true;
             inputInventory.remainingTime = 20;
             inputInventory.recipeDuration = 20;
-            sendData();
             return;
         }
 
@@ -326,7 +368,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         DirectBeltInputBehaviour beltBehaviour = BlockEntityBehaviour.get(level, nextPos, DirectBeltInputBehaviour.TYPE);
 
         if (beltBehaviour != null && beltBehaviour.canInsertFromSide(itemMovementFacing)) {
-            if (level.isClientSide && !isVirtual()) return;
             ItemStack beltRemainder = beltBehaviour.handleInsertion(stackToEject.copy(), itemMovementFacing, false);
             if (!ItemStack.matches(beltRemainder, stackToEject)) {
                 updateEjectedStack(isPassThrough, beltRemainder);
@@ -366,20 +407,19 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                 inputInventory.remainingTime = -1;
                 inputInventory.appliedRecipe = false;
             } else {
-                // Continue processing remaining input
                 startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
             }
         } else {
             if (outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty()) {
                 inputInventory.remainingTime = -1;
                 inputInventory.appliedRecipe = false;
-                // Check if there's more input to process
                 if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
                     startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
                 }
             }
         }
     }
+
 
     private void applyRecipeProducts() {
         ItemStack inputStackCopy = inputInventory.getStackInSlot(INPUT_SLOT).copy();
@@ -393,10 +433,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         PeelingRecipe recipe = recipeHolder.get().value();
         int itemsToProcess = inputStackCopy.getCount();
-
-        // Clear input slot as it's being fully processed
         inputInventory.setStackInSlot(INPUT_SLOT, ItemStack.EMPTY);
-
         List<ItemStack> collectedPrimaryOutputs = new LinkedList<>();
         List<ItemStack> collectedSecondaryOutputs = new LinkedList<>();
 
@@ -405,7 +442,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             if (!primaryPerLoop.isEmpty()) {
                 ItemHelper.addToList(primaryPerLoop, collectedPrimaryOutputs);
             }
-
             List<ItemStack> secondariesPerLoop = recipe.rollResultsFor(recipe.getSecondaryOutputs());
             for (ItemStack secondaryStack : secondariesPerLoop) {
                 if (!secondaryStack.isEmpty()) {
@@ -414,13 +450,11 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             }
         }
 
-        // Consolidate and place primary outputs
         if (!collectedPrimaryOutputs.isEmpty()) {
             List<ItemStack> condensedPrimaryItems = new ArrayList<>();
             for (ItemStack collectedStack : collectedPrimaryOutputs) {
                 ItemHelper.addToList(collectedStack.copy(), condensedPrimaryItems);
             }
-
             if (!condensedPrimaryItems.isEmpty()) {
                 outputInventory.setStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP, condensedPrimaryItems.get(0).copy());
             } else {
@@ -467,12 +501,10 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     public void insertItem(ItemEntity entity) {
-        if (!canProcess() || !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() || !entity.isAlive() || level.isClientSide)
+        if (level == null || level.isClientSide || !canProcess() || !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() || !entity.isAlive())
             return;
-
         ItemStack toInsert = entity.getItem().copy();
         ItemStack remainder = inputInventory.insertItem(INPUT_SLOT, toInsert, false);
-
         if (!ItemStack.matches(remainder, toInsert)) {
             entity.setItem(remainder);
             if (remainder.isEmpty()) entity.discard();
@@ -482,9 +514,107 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         }
     }
 
+    // 移除 @Override 注解，因为这不是父类的方法
     protected boolean canProcess() {
-        return getBlockState().getValue(MechanicalPeelerBlock.FACING) == Direction.UP;
+        return getSpeed() != 0; // 或者你对“可以处理”有其他条件
     }
+
+    public void processEntity(Entity entity) {
+        // 移除 canProcess() 检查，因为外部调用者 (Block.entityInside 或 MovementBehaviour.tick) 应该已经检查过了
+        // 或者，如果你想在这里再加一层保险：
+        if (level == null || level.isClientSide || entity.isRemoved() || getSpeed() == 0) {
+            return;
+        }
+
+        UUID entityId = entity.getUUID();
+        boolean isArmadilloOrTurtle = entity instanceof Armadillo || entity instanceof Turtle;
+
+        if (isArmadilloOrTurtle) {
+            if (isEntityOnCooldown(entityId)) {
+                return;
+            }
+        }
+
+        boolean processedSuccessfully = false;
+
+        if (entity instanceof IShearable shearableTarget) {
+            if (shearableTarget.isShearable(null, ItemStack.EMPTY, level, entity.blockPosition())) {
+                List<ItemStack> drops = shearableTarget.onSheared(null, ItemStack.EMPTY, level, entity.blockPosition());
+                if (drops != null && !drops.isEmpty()) {
+                    for (ItemStack drop : drops) {
+                        if (!tryStoreItemInSecondaryOutput(drop)) {
+                            ItemEntity itemEntity = new ItemEntity(level, entity.getX(), entity.getY() + 0.5, entity.getZ(), drop);
+                            level.addFreshEntity(itemEntity);
+                        }
+                    }
+                    processedSuccessfully = true;
+                }
+            }
+        }
+
+        if (!processedSuccessfully && isArmadilloOrTurtle) {
+            if (entity instanceof Armadillo armadillo) { // 直接类型转换以便调用特定方法（如果需要）
+                if (tryStoreItemInSecondaryOutput(new ItemStack(Items.ARMADILLO_SCUTE))) {
+                    level.playSound(null, armadillo, SoundEvents.ARMADILLO_SCUTE_DROP, SoundSource.NEUTRAL, 1.0F, 1.0F);
+                    setEntityCooldown(entityId);
+                    processedSuccessfully = true;
+                }
+            } else if (entity instanceof Turtle turtle) {
+                if (tryStoreItemInSecondaryOutput(new ItemStack(Items.TURTLE_SCUTE))) {
+                    level.playSound(null, turtle, SoundEvents.ARMADILLO_SCUTE_DROP, SoundSource.NEUTRAL, 1.0F, 1.0F);
+                    setEntityCooldown(entityId);
+                    processedSuccessfully = true;
+                }
+            }
+        }
+
+        if (processedSuccessfully) {
+            spawnProcessingParticlesEffect();
+            setChanged();
+        }
+    }
+
+    private boolean tryStoreItemInSecondaryOutput(ItemStack stackToStore) {
+        if (stackToStore.isEmpty()) {
+            return true;
+        }
+        ItemStack remainder = stackToStore.copy();
+        for (int i = 1; i <= MAX_SECONDARY_OUTPUTS_STORAGE; i++) {
+            remainder = outputInventory.insertItem(i, remainder, false);
+            if (remainder.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isEntityOnCooldown(UUID entityId) {
+        if (level == null) return true;
+        return entityCooldowns.containsKey(entityId) &&
+                (level.getGameTime() - entityCooldowns.get(entityId)) < ARMADILLO_TURTLE_COOLDOWN_TICKS;
+    }
+
+    private void setEntityCooldown(UUID entityId) {
+        if (level == null) return;
+        entityCooldowns.put(entityId, level.getGameTime());
+    }
+
+    private void spawnProcessingParticlesEffect() {
+        if (level == null || !level.isClientSide) return;
+        RandomSource r = level.random;
+        Vec3 center = VecHelper.getCenterOf(this.worldPosition);
+        for (int i = 0; i < 5; i++) {
+            double motionX = (r.nextDouble() - 0.5D) * 0.1D;
+            double motionY = r.nextDouble() * 0.1D + 0.1D;
+            double motionZ = (r.nextDouble() - 0.5D) * 0.1D;
+            level.addParticle(ParticleTypes.SNOWFLAKE,
+                    center.x + (r.nextDouble() - 0.5D) * 0.6D,
+                    center.y + 1.1D,
+                    center.z + (r.nextDouble() - 0.5D) * 0.6D,
+                    motionX, motionY, motionZ);
+        }
+    }
+
 
     @Override
     public void setLevel(Level level) {
@@ -493,33 +623,36 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        CreateLang.translate("gui.goggles.kinetic_stats").forGoggles(tooltip);
+        boolean superAddedInformation = super.addToGoggleTooltip(tooltip, isPlayerSneaking);
 
-        boolean inputPresent = !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty();
-        boolean outputPrimaryPresent = !outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty();
-
-        if (canProcess()) {
-            if (inputPresent || outputPrimaryPresent) {
-                CreateLang.translate("tooltip.createfisheryindustry.peeler.progress").forGoggles(tooltip);
-                ItemStack displayedStack = outputPrimaryPresent ?
-                        outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP) :
-                        inputInventory.getStackInSlot(INPUT_SLOT);
-                CreateLang.text("  ").add(displayedStack.getHoverName().copy().withStyle(ChatFormatting.GRAY)).forGoggles(tooltip);
-            }
-        }
-
-        CreateLang.translate("gui.goggles.peeler_stored_outputs").forGoggles(tooltip);
-        boolean hasStoredSecondaries = false;
+        boolean hasAnySecondaryOutput = false;
         for (int i = 1; i < outputInventory.getSlots(); i++) {
-            ItemStack stack = outputInventory.getStackInSlot(i);
-            if (!stack.isEmpty()) {
-                CreateLang.text("").add(stack.getHoverName().copy().withStyle(ChatFormatting.GRAY))
-                        .add(CreateLang.text(" x" + stack.getCount()).style(ChatFormatting.GREEN)).forGoggles(tooltip, 1);
-                hasStoredSecondaries = true;
+            if (!outputInventory.getStackInSlot(i).isEmpty()) {
+                hasAnySecondaryOutput = true;
+                break;
             }
         }
-        if (!hasStoredSecondaries) {
-            CreateLang.translate("gui.goggles.inventory.empty").forGoggles(tooltip, 1);
+
+        if (hasAnySecondaryOutput) {
+            if (superAddedInformation) {
+                tooltip.add(Component.literal(" "));
+            }
+            CreateLang.translate("gui.goggles.peeler_stored_outputs").forGoggles(tooltip);
+            for (int i = 1; i < outputInventory.getSlots(); i++) {
+                ItemStack stack = outputInventory.getStackInSlot(i);
+                if (!stack.isEmpty()) {
+                    tooltip.add(CreateLang.text("  ")
+                            .add(Component.translatable(stack.getDescriptionId()).withStyle(ChatFormatting.GRAY))
+                            .add(CreateLang.text(" x" + stack.getCount()).style(ChatFormatting.GREEN))
+                            .component());
+                }
+            }
+        } else {
+            if (superAddedInformation) {
+                tooltip.add(Component.literal(" "));
+            }
+            CreateLang.translate("gui.goggles.peeler_stored_outputs").forGoggles(tooltip);
+            tooltip.add(CreateLang.text("  ").add(CreateLang.translate("gui.goggles.inventory.empty")).component());
         }
         return true;
     }
@@ -532,8 +665,8 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     @Override
     public void destroy() {
         super.destroy();
-        ItemHelper.dropContents(level, worldPosition, inputInventory);
         if (level != null && !level.isClientSide) {
+            ItemHelper.dropContents(level, worldPosition, inputInventory);
             for (int i = 0; i < outputInventory.getSlots(); ++i) {
                 Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), outputInventory.getStackInSlot(i));
             }
@@ -553,7 +686,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         @Override
         public int getSlots() {
-            // Expose input slot + secondary output slots (exclude primary output slot)
             return 1 + MAX_SECONDARY_OUTPUTS_STORAGE;
         }
 
@@ -562,7 +694,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             if (slot == 0) {
                 return inputInv.getStackInSlot(INPUT_SLOT);
             }
-            // Map slots 1 to MAX_SECONDARY_OUTPUTS_STORAGE to outputInv slots 1 to MAX_SECONDARY_OUTPUTS_STORAGE
             if (slot >= 1 && slot <= MAX_SECONDARY_OUTPUTS_STORAGE) {
                 return outputInv.getStackInSlot(slot);
             }
@@ -572,8 +703,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
             if (!be.canProcess()) return stack;
-
-            // Only allow insertion into input slot (slot 0)
             if (slot == 0) {
                 if (inputInv.getStackInSlot(INPUT_SLOT).isEmpty() && (inputInv.remainingTime == -1 || inputInv.appliedRecipe)) {
                     if (!simulate) {
@@ -616,17 +745,14 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                 }
                 return stack;
             }
-            // Prevent insertion into secondary output slots
             return stack;
         }
 
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            // Allow extraction from secondary output slots (slots 1 to MAX_SECONDARY_OUTPUTS_STORAGE)
             if (slot >= 1 && slot <= MAX_SECONDARY_OUTPUTS_STORAGE) {
                 return outputInv.extractItem(slot, amount, simulate);
             }
-            // Prevent extraction from input slot unless recipe is complete and pass-through is allowed
             if (slot == 0) {
                 if (inputInv.appliedRecipe && inputInv.remainingTime == 0 && be.canProcess()) {
                     return inputInv.extractItem(INPUT_SLOT, amount, simulate);
