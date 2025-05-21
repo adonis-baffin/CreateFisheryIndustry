@@ -1,11 +1,11 @@
 {
 	"credit": "Model generated using MrCrayfish's Model Creator (https://mrcrayfish.com/tools?id=mc)",
 	"textures": {
-		"gearbox_top": "create:block/gearbox_top",
-		"gearbox": "create:block/gearbox",
-		"andesite_casing_short": "create:block/andesite_casing_short",
-		"particle": "create:block/mechanical_saw_top",
-		"mechanical_saw_top": "create:block/mechanical_saw_top"
+		"gearbox_top": "createfisheryindustry:block/gearbox_top",
+		"gearbox": "createfisheryindustry:block/gearbox",
+		"andesite_casing_short": "createfisheryindustry:block/andesite_casing_short",
+		"mechanical_saw_top": "createfisheryindustry:block/mechanical_saw_top_no_slot",
+		"particle": "createfisheryindustry:block/mechanical_saw_top"
 	},
 	"elements": [
 		{

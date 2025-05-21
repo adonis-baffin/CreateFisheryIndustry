@@ -6,11 +6,12 @@
 	"elements": [
 		{
 			"name": "Blade",
-			"from": [1, 8, 11],
-			"to": [15, 8.062, 18],
+			"from": [8, 1, 11],
+			"to": [8.062, 15, 18],
+			"rotation": {"angle": 0, "axis": "z", "origin": [0, 16, 0]},
 			"faces": {
-				"up": {"uv": [15, 9, 1, 16], "rotation": 180, "texture": "#stonecutter_saw"},
-				"down": {"uv": [1, 9, 15, 16], "texture": "#stonecutter_saw"}
+				"east": {"uv": [15, 9, 1, 16], "rotation": 270, "texture": "#stonecutter_saw"},
+				"west": {"uv": [1, 9, 15, 16], "rotation": 90, "texture": "#stonecutter_saw"}
 			}
 		}
 	]

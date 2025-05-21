@@ -1,7 +1,19 @@
+
 {
-  "parent": "create:block/mechanical_saw/blade_horizontal_active",
+  "credit": "Made with Blockbench",
   "textures": {
-    "stonecutter_saw": "create:block/static_saw",
-    "stonecutter_saw_reversed": "create:block/static_saw"
-  }
+    "stonecutter_saw": "create:block/static_saw"
+  },
+  "elements": [
+    {
+      "name": "Blade",
+      "from": [8, 1, 11],
+      "to": [8.062, 15, 18],
+      "rotation": {"angle": 0, "axis": "z", "origin": [0, 16, 0]},
+      "faces": {
+        "east": {"uv": [1, 9, 15, 16], "rotation": 270, "texture": "#stonecutter_saw"},
+        "west": {"uv": [15, 9, 1, 16], "rotation": 90, "texture": "#stonecutter_saw"}
+      }
+    }
+  ]
 }
