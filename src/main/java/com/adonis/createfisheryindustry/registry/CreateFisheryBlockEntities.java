@@ -6,7 +6,7 @@ import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartBeehive.SmartBeehiveBlockEntity;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlockEntity;
-import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerVisual;
+//import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerVisual;
 import com.adonis.createfisheryindustry.client.renderer.MechanicalPeelerRenderer;
 import com.adonis.createfisheryindustry.CFIRegistrate;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
@@ -54,9 +54,10 @@ public class CreateFisheryBlockEntities {
 
     public static final BlockEntityEntry<MechanicalPeelerBlockEntity> MECHANICAL_PEELER = REGISTRATE
             .blockEntity("mechanical_peeler", MechanicalPeelerBlockEntity::new)
-            .visual(() -> MechanicalPeelerVisual::new) // Ensure these classes/constructors exist
+            // 移除下面这行:
+            // .visual(() -> MechanicalPeelerVisual::new)
             .validBlocks(CreateFisheryBlocks.MECHANICAL_PEELER)
-            .renderer(() -> MechanicalPeelerRenderer::new) // Ensure these classes/constructors exist
+            .renderer(() -> MechanicalPeelerRenderer::new)
             .register();
 
     public static final DeferredHolder<PoiType, PoiType> SMART_BEEHIVE_POI =

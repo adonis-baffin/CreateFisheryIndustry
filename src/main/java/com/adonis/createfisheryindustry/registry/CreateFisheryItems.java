@@ -41,9 +41,9 @@ public class CreateFisheryItems {
 
     // Food properties for new items
     public static final FoodProperties FISH_SKIN_FOOD = new FoodProperties.Builder()
-            .nutrition(2).saturationModifier(0.4f).build();
+            .nutrition(1).saturationModifier(0.4f).build();
     public static final FoodProperties ROASTED_FISH_SKIN_FOOD = new FoodProperties.Builder()
-            .nutrition(2).saturationModifier(0.4f).build();
+            .nutrition(4).saturationModifier(0.4f).build();
     public static final FoodProperties COD_STEAK_FOOD = new FoodProperties.Builder()
             .nutrition(2).saturationModifier(0.4f).build();
     public static final FoodProperties SALMON_STEAK_FOOD = new FoodProperties.Builder()

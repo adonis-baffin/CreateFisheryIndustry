@@ -2,17 +2,14 @@ package com.adonis.createfisheryindustry.client.renderer;
 
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlock;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlockEntity;
-import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import com.simibubi.create.AllPartialModels;
-import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
-import dev.engine_room.flywheel.api.visualization.VisualizationManager;
-import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
+import net.createmod.catnip.math.AngleHelper;
+import net.createmod.catnip.animation.AnimationTickHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -20,52 +17,104 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<MechanicalPeelerBlockEntity> {
+
+    private static final Vec3 PIVOT = new Vec3(0, 6, 9); // 用于水平朝向
 
     public MechanicalPeelerRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
     protected void renderSafe(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
-        renderBlade(be, ms, buffer, light);
+        renderRotatingPart(be, partialTicks, ms, buffer, light, overlay);
         renderItems(be, partialTicks, ms, buffer, light, overlay);
-
-        if (VisualizationManager.supportsVisualization(be.getLevel()))
-            return;
-
-        renderShaft(be, ms, buffer, light, overlay);
+        renderShaft(be, partialTicks, ms, buffer, light, overlay);
     }
 
-    protected void renderBlade(MechanicalPeelerBlockEntity be, PoseStack ms, MultiBufferSource buffer, int light) {
+    protected void renderRotatingPart(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
         BlockState blockState = be.getBlockState();
-        PartialModel partial;
-        float speed = be.getSpeed();
-        boolean rotate = false;
+        SuperByteBuffer superBuffer = CachedBuffers.partial(AllPartialModels.HARVESTER_BLADE, blockState);
 
-        if (MechanicalPeelerBlock.isHorizontal(blockState)) {
-            if (speed > 0) partial = CreateFisheryPartialModels.PEELER_BLADE_HORIZONTAL_ACTIVE;
-            else if (speed < 0) partial = CreateFisheryPartialModels.PEELER_BLADE_HORIZONTAL_REVERSED;
-            else partial = CreateFisheryPartialModels.PEELER_BLADE_HORIZONTAL_INACTIVE;
+        float speed = be.getSpeed();
+        Direction facing = blockState.getValue(MechanicalPeelerBlock.FACING);
+        boolean axisAlongFirst = blockState.getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE);
+        boolean flipped = blockState.getValue(MechanicalPeelerBlock.FLIPPED);
+
+        float originOffset = 1 / 16f;
+        Vec3 rotOffset = new Vec3(0, PIVOT.y * originOffset, PIVOT.z * originOffset);
+
+        float angle;
+        float logAngle;
+
+        if (facing.getAxis().isHorizontal()) {
+            // 水平朝向，与 HarvesterRenderer 一致，速度4倍
+            float time = AnimationTickHolder.getRenderTime(be.getLevel()) / 20;
+            angle = (time * speed * 4) % 360;
+            logAngle = angle;
+            superBuffer.rotateCentered(AngleHelper.rad(AngleHelper.horizontalAngle(facing)), Direction.UP)
+                    .translate(rotOffset.x, rotOffset.y, rotOffset.z)
+                    .rotate(AngleHelper.rad(angle), Direction.WEST)
+                    .translate(-rotOffset.x, -rotOffset.y, -rotOffset.z);
         } else {
-            if (speed > 0) partial = CreateFisheryPartialModels.PEELER_BLADE_VERTICAL_ACTIVE;
-            else if (speed < 0) partial = CreateFisheryPartialModels.PEELER_BLADE_VERTICAL_REVERSED;
-            else partial = CreateFisheryPartialModels.PEELER_BLADE_VERTICAL_INACTIVE;
-            if (blockState.getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE)) rotate = true;
+            // 上下朝向，参考 ThresherRenderer 的逻辑
+            Axis kineticShaftAxis = ((MechanicalPeelerBlock) blockState.getBlock()).getRotationAxis(blockState);
+            float time = AnimationTickHolder.getRenderTime(be.getLevel());
+            float rawAngle = (time * speed * 3f / 10f);
+            float prevTickTimeApproximation = time - 1f + partialTicks;
+            float prevRawAngle = (prevTickTimeApproximation * speed * 3f / 10f);
+            angle = AngleHelper.angleLerp(partialTicks, prevRawAngle, rawAngle) % 360f;
+            logAngle = angle;
+
+            // 初始旋转，匹配静态模型
+            if (facing == Direction.UP) {
+                superBuffer.rotateCentered(AngleHelper.rad((axisAlongFirst ? 270 : 0) + (flipped ? 180 : 0)), Direction.UP);
+            } else { // Direction.DOWN
+                superBuffer.rotateCentered(AngleHelper.rad(180), Direction.NORTH); // X轴180度
+                superBuffer.rotateCentered(AngleHelper.rad((axisAlongFirst ? 270 : 0) + (flipped ? 180 : 0)), Direction.UP);
+            }
+
+            // 动态旋转，参考 ThresherRenderer 的垂直朝向逻辑
+            superBuffer.translate(rotOffset.x, rotOffset.y, rotOffset.z);
+            if (kineticShaftAxis == Axis.X) {
+                superBuffer.rotate(AngleHelper.rad(angle), Direction.WEST); // 绕 X 轴
+            } else if (kineticShaftAxis == Axis.Z) {
+                superBuffer.rotate(AngleHelper.rad(angle), Direction.SOUTH); // 绕 Z 轴
+            }
+            superBuffer.translate(-rotOffset.x, -rotOffset.y, -rotOffset.z);
         }
 
-        SuperByteBuffer superBuffer = CachedBuffers.partialFacing(partial, blockState);
-        if (rotate) superBuffer.rotateCentered(Axis.YP.rotationDegrees(90));
-        superBuffer.color(0xFFFFFF).light(light).renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
+        superBuffer.light(light)
+                .overlay(overlay)
+                .renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
+
+        // 调试日志
+        System.out.println("Facing: " + facing + ", AxisAlongFirst: " + axisAlongFirst + ", Flipped: " + flipped + ", Speed: " + speed + ", Angle: " + logAngle + ", ShaftAxis: " + (facing.getAxis().isHorizontal() ? "N/A" : ((MechanicalPeelerBlock) blockState.getBlock()).getRotationAxis(blockState)));
     }
 
-    protected void renderShaft(MechanicalPeelerBlockEntity be, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
-        KineticBlockEntityRenderer.renderRotatingBuffer(be, getRotatedShaftModel(be), ms,
-                buffer.getBuffer(RenderType.solid()), light);
+    protected void renderShaft(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
+        BlockState blockState = be.getBlockState();
+        Direction facing = blockState.getValue(MechanicalPeelerBlock.FACING);
+        Axis kineticShaftAxis = ((MechanicalPeelerBlock) blockState.getBlock()).getRotationAxis(blockState);
+
+        SuperByteBuffer shaftBuffer;
+
+        if (facing == Direction.UP || facing == Direction.DOWN) {
+            BlockState shaftState = KineticBlockEntityRenderer.shaft(kineticShaftAxis);
+            shaftBuffer = CachedBuffers.block(KineticBlockEntityRenderer.KINETIC_BLOCK, shaftState);
+        } else {
+            shaftBuffer = CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF,
+                    blockState.rotate(be.getLevel(), be.getBlockPos(), Rotation.CLOCKWISE_180));
+        }
+
+        KineticBlockEntityRenderer.standardKineticRotationTransform(shaftBuffer, be, light)
+                .renderInto(ms, buffer.getBuffer(RenderType.solid()));
     }
 
     protected void renderItems(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
@@ -113,7 +162,7 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
         if (be.getSpeed() < 0 ^ alongZ) offset = 1 - offset;
 
         ms.pushPose();
-        if (alongZ) ms.mulPose(Axis.YP.rotationDegrees(90));
+        if (alongZ) ms.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90));
         ms.translate(0.5, 0, offset);
         if (alongZ) ms.translate(-1, 0, 0);
 
@@ -124,22 +173,10 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
         ms.pushPose();
         ms.translate(0, blockItem ? .925f : 13f / 16f, 0);
         ms.scale(.5f, .5f, .5f);
-        if (!blockItem) ms.mulPose(Axis.XP.rotationDegrees(90));
+        if (!blockItem) ms.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90));
         itemRenderer.render(animatedStack, ItemDisplayContext.FIXED, false, ms, buffer, light, overlay, modelWithOverrides);
         ms.popPose();
 
         ms.popPose();
-    }
-
-    protected SuperByteBuffer getRotatedShaftModel(KineticBlockEntity be) {
-        BlockState state = be.getBlockState();
-        if (state.getValue(MechanicalPeelerBlock.FACING).getAxis().isHorizontal())
-            return CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF,
-                    state.rotate(be.getLevel(), be.getBlockPos(), Rotation.CLOCKWISE_180));
-        return CachedBuffers.block(KineticBlockEntityRenderer.KINETIC_BLOCK, getRenderedBlockState(be));
-    }
-
-    protected BlockState getRenderedBlockState(KineticBlockEntity be) {
-        return KineticBlockEntityRenderer.shaft(KineticBlockEntityRenderer.getRotationAxisOf(be));
     }
 }
