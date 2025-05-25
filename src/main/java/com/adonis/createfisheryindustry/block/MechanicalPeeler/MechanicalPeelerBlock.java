@@ -3,6 +3,7 @@ package com.adonis.createfisheryindustry.block.MechanicalPeeler;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.AllShapes;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
+import com.simibubi.create.content.kinetics.simpleRelays.ShaftBlock;
 import com.simibubi.create.foundation.block.IBE;
 import net.createmod.catnip.placement.IPlacementHelper;
 import net.createmod.catnip.placement.PlacementHelpers;
@@ -14,6 +15,7 @@ import net.minecraft.core.Direction.AxisDirection;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.armadillo.Armadillo;
@@ -38,11 +40,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.phys.Vec3; // 确保导入
+import net.minecraft.world.phys.Vec3;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.function.Predicate;
+
+import static net.createmod.catnip.placement.IPlacementHelper.orderedByDistanceExceptAxis;
 
 @ParametersAreNonnullByDefault
 public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implements IBE<MechanicalPeelerBlockEntity> {
@@ -64,13 +69,25 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
+        // 与动力锯完全一致，仅设置 FLIPPED
         BlockState stateForPlacement = super.getStateForPlacement(context);
         Direction facing = stateForPlacement.getValue(FACING);
-        if (facing.getAxis() == Axis.Y) {
-            return stateForPlacement.setValue(FLIPPED, context.getHorizontalDirection()
-                    .getAxisDirection() == AxisDirection.POSITIVE);
+        return stateForPlacement.setValue(FLIPPED, facing.getAxis() == Axis.Y && context.getHorizontalDirection().getAxisDirection() == AxisDirection.NEGATIVE);
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        withBlockEntityDo(level, pos, be -> be.notifyUpdate());
+        level.updateNeighborsAt(pos, this);
+        // 强制更新邻近传动杆
+        for (Direction dir : Direction.values()) {
+            BlockPos neighborPos = pos.relative(dir);
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (neighborState.getBlock() instanceof ShaftBlock) {
+                level.updateNeighbourForOutputSignal(neighborPos, neighborState.getBlock());
+            }
         }
-        return stateForPlacement;
     }
 
     @Override
@@ -116,7 +133,6 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        // 假设这是一个标准的12像素高的外壳形状
         return AllShapes.CASING_12PX.get(state.getValue(FACING));
     }
 
@@ -132,7 +148,7 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
         if (player.isSpectator() || !stack.isEmpty())
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if (state.getValue(FACING) != Direction.UP) // 假设只有朝上时才能手动交互库存
+        if (state.getValue(FACING) != Direction.UP)
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
         return onBlockEntityUseItemOn(level, pos, be -> {
@@ -197,22 +213,14 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
         }
 
         Direction facing = state.getValue(FACING);
-        // 定义一个基础的交互区域，稍后会根据朝向调整
-        // 这个AABB是相对于方块自身坐标的，(0,0,0)是方块的角
-        // 实际的交互区域会根据方块的朝向和位置进行变换
-        // 例如，如果朝上，我们检测方块上方；如果朝前，我们检测方块前方。
-
-        // 获取交互区域的偏移量和大小，可以定义为常量
-        final double interactionDepth = 0.6; // 交互区域从方块表面向外延伸的深度
-        final double interactionWidth = 0.8; // 交互区域的宽度 (X/Z)
-        final double interactionHeight = 0.8; // 交互区域的高度 (Y，或平行于轴的另外两个方向)
-        final double offsetFromSurface = 0.1; // 交互区域从方块表面开始的微小偏移
+        final double interactionDepth = 0.6;
+        final double interactionWidth = 0.8;
+        final double interactionHeight = 0.8;
+        final double offsetFromSurface = 0.1;
 
         Vec3 min = Vec3.ZERO;
         Vec3 max = Vec3.ZERO;
 
-        // 根据朝向定义交互区域的AABB
-        // AABB的坐标是相对于方块原点 (pos) 的
         switch (facing) {
             case UP:
                 min = new Vec3((1 - interactionWidth) / 2, 1 + offsetFromSurface, (1 - interactionHeight) / 2);
@@ -242,22 +250,19 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
         AABB interactionZone = new AABB(min.x, min.y, min.z, max.x, max.y, max.z).move(pos);
 
-        // 获取与该区域碰撞的实体
         List<Entity> entities = level.getEntitiesOfClass(Entity.class, interactionZone,
                 (e) -> e.isAlive() && (e instanceof Sheep || e instanceof Armadillo || e instanceof Turtle));
 
         if (!entities.isEmpty()) {
             withBlockEntityDo(level, pos, be -> {
-                if (be.getSpeed() != 0) { // 移除be.canProcess()的显式调用，让BE内部判断
+                if (be.getSpeed() != 0) {
                     for (Entity e : entities) {
-                        be.processEntity(e); // 让BE处理每个实体
+                        be.processEntity(e);
                     }
                 }
             });
         }
-        // super.entityInside(state, level, pos, entity); // 通常不需要，除非基类有特定逻辑
     }
-
 
     @Override
     public PushReaction getPistonPushReaction(BlockState state) {
@@ -306,9 +311,11 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
         @Override
         public PlacementOffset getOffset(Player player, Level world, BlockState state, BlockPos pos, BlockHitResult ray) {
-            List<Direction> directions = IPlacementHelper.orderedByDistanceExceptAxis(pos, ray.getLocation(),
+            List<Direction> directions = orderedByDistanceExceptAxis(pos, ray.getLocation(),
                     state.getValue(FACING).getAxis(),
-                    dir -> world.getBlockState(pos.relative(dir)).canBeReplaced());
+                    (Direction dir) -> world.getBlockState(pos.relative(dir)).canBeReplaced());
+
+            System.out.println("Placement directions: " + directions);
 
             if (directions.isEmpty())
                 return PlacementOffset.fail();

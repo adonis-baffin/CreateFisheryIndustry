@@ -2,13 +2,13 @@
 	"credit": "Made with Blockbench",
 	"parent": "create:block/block",
 	"textures": {
-		"slit": "create:block/mechanical_saw_top_no_slot",
-		"stonecutter_saw": "block/stonecutter_saw",
-		"particle": "create:block/gearbox_top",
-		"gearbox_top": "create:block/gearbox_top",
-		"encased_belt": "create:block/encased_chain_drive",
-		"gearbox": "create:block/gearbox",
-		"andesite_casing_short": "create:block/andesite_casing_short"
+		"slit": "createfisheryindustry:block/mechanical_saw_top_no_slot",
+		"stonecutter_saw": "createfisheryindustry/block/mechanical_peeler/partial",
+		"particle": "createfisheryindustry:block/gearbox_top",
+		"gearbox_top": "createfisheryindustry:block/gearbox_top",
+		"encased_belt": "createfisheryindustry:block/encased_chain_drive",
+		"gearbox": "createfisheryindustry:block/gearbox",
+		"andesite_casing_short": "createfisheryindustry:block/andesite_casing_short"
 	},
 	"elements": [
 		{
