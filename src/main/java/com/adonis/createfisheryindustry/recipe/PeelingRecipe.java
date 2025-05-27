@@ -76,7 +76,7 @@ public class PeelingRecipe extends ProcessingRecipe<SingleRecipeInput> implement
 
     @Override
     protected boolean canSpecifyDuration() {
-        return true;
+        return false;
     }
 
     @Override

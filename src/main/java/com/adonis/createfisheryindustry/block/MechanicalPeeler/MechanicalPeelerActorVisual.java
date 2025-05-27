@@ -17,29 +17,26 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 // 使用你代码中已有的 Catnip 导入
-import net.createmod.catnip.animation.AnimationTickHolder; // 仅用于刀片旋转
+import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.math.AngleHelper;
 import net.createmod.catnip.math.VecHelper;
-
 
 public class MechanicalPeelerActorVisual extends ActorVisual {
 
     static final float PIVOT_OFFSET_UNITS = 8f;
     static final float ORIGIN_OFFSET = 1 / 16f;
 
-    protected TransformedInstance rotatingPartInstance; // 刀片仍然需要旋转
-    protected TransformedInstance shaftInstance;    // 传动杆在Actor中应该是不动的
+    protected TransformedInstance rotatingPartInstance;
+    protected TransformedInstance shaftInstance;
 
     private final BlockState blockState;
     private final Direction facing;
-    private final Axis kineticAxis; // 这个轴更多是用于刀片的旋转，以及传动杆的初始对齐
+    private final Axis kineticAxis;
     private final boolean axisAlongFirst;
     private final boolean flipped;
 
-    // 传动杆不再需要自己的旋转进度
-    private double bladeRotationProgress; // 只为刀片保留旋转进度
+    private double bladeRotationProgress;
     private double previousBladeRotationProgress;
-
 
     public MechanicalPeelerActorVisual(VisualizationContext visualizationContext, VirtualRenderWorld simulationWorld, MovementContext movementContext) {
         super(visualizationContext, simulationWorld, movementContext);
@@ -52,16 +49,14 @@ public class MechanicalPeelerActorVisual extends ActorVisual {
         MechanicalPeelerBlock block = (MechanicalPeelerBlock) blockState.getBlock();
         this.kineticAxis = block.getRotationAxis(blockState);
 
-        // --- 传动杆设置 (只在构造函数中设置一次变换) ---
+        // 传动杆设置
         PartialModel shaftModel = getShaftModelForContraption();
         shaftInstance = instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.partial(shaftModel))
                 .createInstance();
         shaftInstance.light(localBlockLight());
-        // 在构造函数中设置传动杆的最终静态变换
         setupStaticShaftTransform();
 
-
-        // --- 刀片设置 ---
+        // 刀片设置
         rotatingPartInstance = instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.partial(CreateFisheryPartialModels.THRESHER_BLADE))
                 .createInstance();
         rotatingPartInstance.light(localBlockLight());
@@ -80,81 +75,57 @@ public class MechanicalPeelerActorVisual extends ActorVisual {
         shaftInstance.setIdentityTransform()
                 .translate(context.localPos);
 
-
-        shaftInstance.center();
         if (MechanicalPeelerBlock.isHorizontal(blockState)) {
+            // 水平朝向：完全模仿静态渲染器的逻辑
+            // 静态渲染器使用：CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, blockState, oppositeFacing)
+            Direction oppositeFacing = facing.getOpposite();
 
-            Direction shaftConnectionDirection = facing.getOpposite();
-            float horizontalAngle = AngleHelper.horizontalAngle(shaftConnectionDirection);
-            shaftInstance.rotateYDegrees(horizontalAngle); // 对齐水平方向
-            Axis shaftModelPrimaryAxis = Axis.Y; // 假设SHAFT_HALF的长度是Y轴
-            if (kineticAxis == Axis.X && shaftModelPrimaryAxis == Axis.Y) shaftInstance.rotateZDegrees(90);
-            else if (kineticAxis == Axis.Z && shaftModelPrimaryAxis == Axis.Y) shaftInstance.rotateXDegrees(90);
+            // 模仿 partialFacing 的行为
+            shaftInstance.center();
 
-            if (facing.getOpposite() == Direction.NORTH) shaftInstance.rotateYDegrees(0);
-            else if (facing.getOpposite() == Direction.SOUTH) shaftInstance.rotateYDegrees(180);
-            else if (facing.getOpposite() == Direction.WEST) shaftInstance.rotateYDegrees(90);
-            else if (facing.getOpposite() == Direction.EAST) shaftInstance.rotateYDegrees(-90);
+            // 根据oppositeFacing方向进行旋转，完全按照静态渲染器的逻辑
+            if (oppositeFacing == Direction.NORTH) {
+                shaftInstance.rotateYDegrees(0).rotateXDegrees(180);
+            } else if (oppositeFacing == Direction.SOUTH) {
+                shaftInstance.rotateYDegrees(180).rotateXDegrees(180);
+            } else if (oppositeFacing == Direction.WEST) {
+                shaftInstance.rotateYDegrees(90).rotateXDegrees(180);
+            } else if (oppositeFacing == Direction.EAST) {
+                shaftInstance.rotateYDegrees(-90).rotateXDegrees(180);
+            }
 
-            alignModelToShaftDirection(shaftInstance, facing.getOpposite());
-
+            shaftInstance.uncenter();
 
         } else {
-            // 垂直完整轴，AllPartialModels.SHAFT 默认是 Y 轴
+            // 垂直朝向：完全模仿静态渲染器的逻辑
+            // 静态渲染器使用：CachedBuffers.block(KineticBlockEntityRenderer.KINETIC_BLOCK, KineticBlockEntityRenderer.shaft(axis))
+            shaftInstance.center();
+
             if (kineticAxis == Axis.X) {
-                shaftInstance.rotateZDegrees(90); // Y 轴模型转到 X 轴
+                shaftInstance.rotateZDegrees(90); // Y轴模型转到X轴
             } else if (kineticAxis == Axis.Z) {
-                shaftInstance.rotateXDegrees(90); // Y 轴模型转到 Z 轴
+                shaftInstance.rotateXDegrees(90); // Y轴模型转到Z轴
             }
-            // 如果 kineticAxis 是 Y，则不需要初始旋转轴向
-        }
-        shaftInstance.uncenter();
-        shaftInstance.setChanged(); // 设置一次即可
-    }
+            // 如果kineticAxis是Y，则不需要旋转
 
-    // 简化的对齐方法，假设模型（如SHAFT_HALF）的长度沿其局部Y轴，连接端在-Y
-    private void alignModelToShaftDirection(TransformedInstance instance, Direction targetDirection) {
-        instance.rotateYDegrees(AngleHelper.horizontalAngle(targetDirection)); // 对齐水平
-        if (targetDirection.getAxis().isHorizontal()) {
-            instance.rotateXDegrees(-90); // 将Y轴长度的杆子放平
-        } else if (targetDirection == Direction.DOWN) {
-            instance.rotateXDegrees(180); // 如果是朝下，并且Y轴是向上，则翻转
+            shaftInstance.uncenter();
         }
 
+        shaftInstance.setChanged();
     }
-
 
     @Override
     public void tick() {
         super.tick();
-        // 只更新刀片的旋转
-        previousBladeRotationProgress = bladeRotationProgress;
 
-        if (context.contraption.stalled || context.disabled) {
-            return;
-        }
-
-        if (MechanicalPeelerBlock.isHorizontal(blockState) && VecHelper.isVecPointingTowards(context.relativeMotion, facing.getOpposite())) {
-        }
-
-        double radiusBlocks = (6.5 / 16.0);
-        if (Math.abs(radiusBlocks) < 1e-5) return;
-
-        double distanceMoved = context.motion.length();
-        double angleChangeRad = distanceMoved / radiusBlocks;
-        float angleChangeDeg = (float) net.createmod.catnip.math.AngleHelper.deg(angleChangeRad);
-
-        float rotationDirection = 1.0f;
-        if (this.kineticAxis == facing.getAxis() && facing.getAxisDirection() == Direction.AxisDirection.NEGATIVE) {
-        }
-
-
-        bladeRotationProgress += angleChangeDeg * 1.25f * rotationDirection;
-        bladeRotationProgress %= 360;
+        // 动态结构中不进行旋转计算，保持刀片静止
+        previousBladeRotationProgress = 0;
+        bladeRotationProgress = 0;
     }
 
     protected float getBladeRenderAngle() {
-        return (float) net.createmod.catnip.math.AngleHelper.angleLerp(AnimationTickHolder.getPartialTicks(), previousBladeRotationProgress, bladeRotationProgress);
+        // 动态结构中返回固定角度0，保持刀片静止
+        return 0f;
     }
 
     @Override
@@ -172,22 +143,27 @@ public class MechanicalPeelerActorVisual extends ActorVisual {
         Vec3 pivot = new Vec3(0.5f, 0.5f, 0.5f);
 
         if (MechanicalPeelerBlock.isHorizontal(blockState)) {
+            // 水平朝向处理
             rotatingPartInstance.center()
-                    .rotateYDegrees(net.createmod.catnip.math.AngleHelper.horizontalAngle(facing))
+                    .rotateYDegrees(AngleHelper.horizontalAngle(facing))
                     .uncenter();
 
-            if (this.kineticAxis == Axis.X) {
+            // 根据传动杆轴向确定pivot和旋转轴
+            if (kineticAxis == Axis.X) {
+                // 东西走向的传动杆
                 pivot = new Vec3(0.5f, PIVOT_OFFSET_UNITS * ORIGIN_OFFSET, PIVOT_OFFSET_UNITS * ORIGIN_OFFSET);
-            } else { // this.kineticAxis == Axis.Z
+            } else { // kineticAxis == Axis.Z
+                // 南北走向的传动杆
                 pivot = new Vec3(PIVOT_OFFSET_UNITS * ORIGIN_OFFSET, PIVOT_OFFSET_UNITS * ORIGIN_OFFSET, 0.5f);
             }
 
             rotatingPartInstance.translate(pivot);
-            applyRotation(rotatingPartInstance, renderAngle, this.kineticAxis);
+            // 刀片应该绕传动杆轴旋转
+            applyRotation(rotatingPartInstance, renderAngle, kineticAxis);
             rotatingPartInstance.translateBack(pivot);
 
         } else {
-            // 垂直朝向 (UP/DOWN)
+            // 垂直朝向处理
             Direction bladeHorizontalFacing;
             if (kineticAxis == Axis.X) {
                 bladeHorizontalFacing = flipped ? Direction.SOUTH : Direction.NORTH;
@@ -196,32 +172,28 @@ public class MechanicalPeelerActorVisual extends ActorVisual {
             }
 
             rotatingPartInstance.center()
-                    .rotateYDegrees(net.createmod.catnip.math.AngleHelper.horizontalAngle(bladeHorizontalFacing));
+                    .rotateYDegrees(AngleHelper.horizontalAngle(bladeHorizontalFacing));
 
             if (facing == Direction.DOWN) {
                 rotatingPartInstance.rotateXDegrees(180);
             }
             rotatingPartInstance.uncenter();
 
-
-            // 垂直时的 Pivot 参考静态渲染器
-            if (this.kineticAxis == Axis.Z) { // 静态: (0, 0.5, 0) relative to corner
-                pivot = new Vec3(0.5f, PIVOT_OFFSET_UNITS * ORIGIN_OFFSET, 0.5f); // Simplified: center X, Z, offset Y
-            } else { // kineticAxis == Axis.X. Static: (0, 0.5, 0.5) relative to corner
+            // 设置pivot点
+            if (kineticAxis == Axis.Z) {
+                pivot = new Vec3(0.5f, PIVOT_OFFSET_UNITS * ORIGIN_OFFSET, 0.5f);
+            } else { // kineticAxis == Axis.X
                 pivot = new Vec3(0.5f, PIVOT_OFFSET_UNITS * ORIGIN_OFFSET, PIVOT_OFFSET_UNITS * ORIGIN_OFFSET);
             }
 
-            pivot = new Vec3(0.5, 0.5, 0.5);
-
-
             rotatingPartInstance.translate(pivot);
-            applyRotation(rotatingPartInstance, renderAngle, this.kineticAxis);
+            // 刀片绕传动杆轴旋转（与传动杆轴一致）
+            applyRotation(rotatingPartInstance, renderAngle, kineticAxis);
             rotatingPartInstance.translateBack(pivot);
         }
 
         rotatingPartInstance.setChanged();
     }
-
 
     private void applyRotation(TransformedInstance instance, float angle, Axis axis) {
         if (axis == Axis.X) {
@@ -232,7 +204,6 @@ public class MechanicalPeelerActorVisual extends ActorVisual {
             instance.rotateZDegrees(angle);
         }
     }
-
 
     @Override
     protected void _delete() {

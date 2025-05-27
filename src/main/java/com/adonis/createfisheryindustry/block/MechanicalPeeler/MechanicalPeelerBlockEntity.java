@@ -11,7 +11,8 @@ import com.simibubi.create.content.processing.recipe.ProcessingInventory;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.utility.CreateLang;
-import net.createmod.catnip.math.VecHelper; // 确保这个导入是正确的
+import com.tterrag.registrate.util.nullness.NonNullConsumer;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -51,18 +52,16 @@ import net.neoforged.neoforge.common.IShearable;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements IHaveGoggleInformation {
+
+    // 常量定义 - 统一的动画时间
+    private static final float INPUT_ANIMATION_TIME = 10f;  // 输入阶段动画时间
+    private static final float OUTPUT_ANIMATION_TIME = 10f; // 输出阶段动画时间
 
     public ProcessingInventory inputInventory;
     public ItemStackHandler outputInventory;
@@ -72,18 +71,19 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
     public static final int INPUT_SLOT = 0;
     private static final int MAX_SECONDARY_OUTPUTS_STORAGE = 4;
-    public static final int OUTPUT_INV_PRIMARY_SLOT_TEMP = 0; // 主输出的临时槽位
-    private static final int OUTPUT_INV_SIZE = 1 + MAX_SECONDARY_OUTPUTS_STORAGE; // 1个主输出临时槽 + 多个副产物槽
+    public static final int OUTPUT_INV_PRIMARY_SLOT_TEMP = 0;
+    private static final int OUTPUT_INV_SIZE = 1 + MAX_SECONDARY_OUTPUTS_STORAGE;
 
     private final Map<UUID, Long> entityCooldowns = new HashMap<>();
-    private static final int ARMADILLO_TURTLE_COOLDOWN_TICKS = 20 * 60 * 1; // 1分钟冷却
+    private static final int ARMADILLO_TURTLE_COOLDOWN_TICKS = 20 * 60 * 1;
+
+    private Float cachedSpeed = null;
+    private long lastSpeedCheck = 0;
 
     public MechanicalPeelerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        inputInventory = new ProcessingInventory(this::startProcessingRecipe)
+        inputInventory = new CustomProcessingInventory(this, this::startProcessingRecipe)
                 .withSlotLimit(true);
-        // inputInventory.remainingTime = -1; // 默认是-1，由ProcessingInventory构造函数处理
-
         outputInventory = new ItemStackHandler(OUTPUT_INV_SIZE) {
             @Override
             protected void onContentsChanged(int slot) {
@@ -94,7 +94,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             @Override
             public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
                 if (slot == OUTPUT_INV_PRIMARY_SLOT_TEMP) {
-                    return stack; // 不允许外部直接插入主输出临时槽
+                    return stack;
                 }
                 return super.insertItem(slot, stack, simulate);
             }
@@ -105,37 +105,35 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     private void startProcessingRecipe(ItemStack stackInInputSlot) {
+        CreateFisheryMod.LOGGER.info("=== Starting animation for: " + stackInInputSlot + " ===");
+
         if (!canProcess() || stackInInputSlot.isEmpty() || (level != null && level.isClientSide && !isVirtual()))
             return;
 
+        // 检查配方（但不使用配方的处理时间）
         Optional<RecipeHolder<PeelingRecipe>> recipeHolder = getMatchingRecipe(new SingleRecipeInput(stackInInputSlot));
 
         if (recipeHolder.isPresent()) {
+            CreateFisheryMod.LOGGER.info("Found recipe: " + recipeHolder.get().id());
+            // 预检查副产物空间
             PeelingRecipe recipe = recipeHolder.get().value();
             List<ItemStack> totalPotentialSecondaryProducts = new ArrayList<>();
             for (int i = 0; i < stackInInputSlot.getCount(); i++) {
                 totalPotentialSecondaryProducts.addAll(recipe.rollResultsFor(recipe.getSecondaryOutputs()));
             }
-
             if (!canStoreAllSecondaries(totalPotentialSecondaryProducts)) {
-                inputInventory.remainingTime = 10;
-                inputInventory.recipeDuration = 10;
-                inputInventory.appliedRecipe = false; // 让它走输入动画
-                sendData();
-                return;
+                CreateFisheryMod.LOGGER.warn("Cannot store all secondary products - they will drop");
             }
-
-            int timePerItem = recipe.getProcessingDuration();
-            if (timePerItem == 0) timePerItem = 100;
-            inputInventory.remainingTime = timePerItem * stackInInputSlot.getCount();
-            inputInventory.recipeDuration = inputInventory.remainingTime;
-            inputInventory.appliedRecipe = false; // 初始为 false
         } else {
-            // 无配方物品
-            inputInventory.remainingTime = 10;
-            inputInventory.recipeDuration = 10;
-            inputInventory.appliedRecipe = false; // 初始为 false
+            CreateFisheryMod.LOGGER.info("No recipe found - item will pass through");
         }
+
+        // 统一的动画时间
+        inputInventory.remainingTime = INPUT_ANIMATION_TIME;
+        inputInventory.recipeDuration = INPUT_ANIMATION_TIME;
+        inputInventory.appliedRecipe = false;
+
+        setChanged();
         sendData();
     }
 
@@ -145,17 +143,16 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         }
         ItemStackHandler tempSecondaryInv = new ItemStackHandler(MAX_SECONDARY_OUTPUTS_STORAGE);
         for (int i = 0; i < MAX_SECONDARY_OUTPUTS_STORAGE; i++) {
-            // 复制当前副产物槽的内容到临时库存
             tempSecondaryInv.setStackInSlot(i, outputInventory.getStackInSlot(i + 1).copy());
         }
 
         for (ItemStack product : secondaryProducts) {
             ItemStack remainder = product.copy();
             for (int i = 0; i < tempSecondaryInv.getSlots(); i++) {
-                remainder = tempSecondaryInv.insertItem(i, remainder.copy(), false); // 模拟插入到临时库存
+                remainder = tempSecondaryInv.insertItem(i, remainder.copy(), false);
                 if (remainder.isEmpty()) break;
             }
-            if (!remainder.isEmpty()) { // 如果模拟插入后仍有剩余，说明存不下
+            if (!remainder.isEmpty()) {
                 return false;
             }
         }
@@ -165,13 +162,47 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
         super.addBehaviours(behaviours);
-        behaviours.add(new DirectBeltInputBehaviour(this).allowingBeltFunnelsWhen(this::canProcess));
+        behaviours.add(new DirectBeltInputBehaviour(this)
+                .allowingBeltFunnelsWhen(this::canAcceptInput));
+    }
+
+    private boolean canAcceptInput() {
+        return canProcess() &&
+                inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() &&
+                inputInventory.remainingTime <= 0 &&
+                outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty();
+    }
+
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        // 确保每次 setChanged 都会触发数据同步
+        if (level != null && !level.isClientSide) {
+            sendData();
+        }
+    }
+
+    @Override
+    public void sendData() {
+        if (level != null && !level.isClientSide) {
+            CreateFisheryMod.LOGGER.debug("=== SENDING DATA TO CLIENT ===");
+            CreateFisheryMod.LOGGER.debug("Applied Recipe: " + inputInventory.appliedRecipe);
+            CreateFisheryMod.LOGGER.debug("Remaining Time: " + inputInventory.remainingTime);
+            CreateFisheryMod.LOGGER.debug("Recipe Duration: " + inputInventory.recipeDuration);
+            CreateFisheryMod.LOGGER.debug("Primary Output: " + outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP));
+        }
+        super.sendData();
     }
 
     @Override
     public void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         compound.put("InputInventory", inputInventory.serializeNBT(registries));
         compound.put("OutputInventory", outputInventory.serializeNBT(registries));
+
+        compound.putBoolean("AppliedRecipe", inputInventory.appliedRecipe);
+        compound.putFloat("RemainingTime", inputInventory.remainingTime);
+        compound.putFloat("RecipeDuration", inputInventory.recipeDuration);
+
         super.write(compound, registries, clientPacket);
 
         if (!clientPacket) {
@@ -180,17 +211,33 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             compound.put("EntityCooldowns", cooldownsTag);
         }
 
-        if (!clientPacket || !playEvent.isEmpty()) {
+        if (clientPacket && !playEvent.isEmpty()) {
             compound.put("PlayEvent", playEvent.saveOptional(registries));
-            if (clientPacket) playEvent = ItemStack.EMPTY; // 客户端发送后清空
+            playEvent = ItemStack.EMPTY;
+        }
+
+        if (clientPacket) {
+            CreateFisheryMod.LOGGER.debug("Writing client packet - Applied: " + inputInventory.appliedRecipe +
+                    ", Remaining: " + inputInventory.remainingTime);
         }
     }
 
     @Override
     protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(compound, registries, clientPacket);
+
         inputInventory.deserializeNBT(registries, compound.getCompound("InputInventory"));
         outputInventory.deserializeNBT(registries, compound.getCompound("OutputInventory"));
+
+        if (compound.contains("AppliedRecipe")) {
+            inputInventory.appliedRecipe = compound.getBoolean("AppliedRecipe");
+        }
+        if (compound.contains("RemainingTime")) {
+            inputInventory.remainingTime = compound.getFloat("RemainingTime");
+        }
+        if (compound.contains("RecipeDuration")) {
+            inputInventory.recipeDuration = compound.getFloat("RecipeDuration");
+        }
 
         if (!clientPacket) {
             entityCooldowns.clear();
@@ -210,6 +257,11 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         if (compound.contains("PlayEvent"))
             playEvent = ItemStack.parseOptional(registries, compound.getCompound("PlayEvent"));
+
+        if (clientPacket) {
+            CreateFisheryMod.LOGGER.debug("Read client packet - Applied: " + inputInventory.appliedRecipe +
+                    ", Remaining: " + inputInventory.remainingTime);
+        }
     }
 
     @Override
@@ -221,7 +273,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     @OnlyIn(Dist.CLIENT)
     public void tickAudio() {
         super.tickAudio();
-        // 客户端只在速度不为0且playEvent非空时播放声音和粒子
         if (getSpeed() == 0 || playEvent.isEmpty() || level == null)
             return;
 
@@ -231,8 +282,8 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             Block block = ((BlockItem) item).getBlock();
             isWood = block.getSoundType(block.defaultBlockState(), level, worldPosition, null) == SoundType.WOOD;
         }
-        spawnEventParticles(playEvent); // 产生事件粒子
-        playEvent = ItemStack.EMPTY; // 清空事件标记
+        spawnEventParticles(playEvent);
+        playEvent = ItemStack.EMPTY;
 
         if (!isWood)
             AllSoundEvents.SAW_ACTIVATE_STONE.playAt(level, worldPosition, 3, 1, true);
@@ -250,19 +301,18 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         Vec3 v = VecHelper.getCenterOf(this.worldPosition).add(0, 5 / 16f, 0);
         for (int i = 0; i < 10; i++) {
             Vec3 randomOffset = VecHelper.offsetRandomly(Vec3.ZERO, r, 0.125f);
-            Vec3 m = randomOffset.add(0, 0.25f, 0); // 稍微向上
+            Vec3 m = randomOffset.add(0, 0.25f, 0);
             level.addParticle(particleData, v.x, v.y, v.z, m.x, m.y, m.z);
         }
     }
 
     protected void spawnParticles(ItemStack stack) {
         if (stack == null || stack.isEmpty() || level == null || !canProcess()) return;
-
         ParticleOptions particleData;
         float particleSpeed = 0.125f;
         if (stack.getItem() instanceof BlockItem blockItem) {
             particleData = new BlockParticleOption(ParticleTypes.BLOCK, blockItem.getBlock().defaultBlockState());
-            particleSpeed = 0.2f; // 方块粒子速度稍快
+            particleSpeed = 0.2f;
         } else {
             particleData = new ItemParticleOption(ParticleTypes.ITEM, stack);
         }
@@ -271,26 +321,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         Vec3 itemMovementVec = getItemMovementVec();
         Vec3 center = VecHelper.getCenterOf(this.worldPosition);
 
-        float offsetRatio = 0;
-        if (inputInventory.recipeDuration != 0) {
-            offsetRatio = (float) (inputInventory.remainingTime) / inputInventory.recipeDuration;
-        }
-        // 调整offset计算以匹配物品在轨道上的位置
-        // 如果尚未应用配方 (输入阶段)，物品从1.0 -> 0.5 (视觉上)
-        // 如果已应用配方 (输出阶段)，物品从0.5 -> 0.0 (视觉上)
-        if (!inputInventory.appliedRecipe) {
-            offsetRatio = 1.0f - (0.5f * (1.0f - offsetRatio)); // 映射到 [0.5, 1.0] 区间
-        } else {
-            offsetRatio *= 0.5f; // 映射到 [0, 0.5] 区间
-        }
-        // 上述offsetRatio是物品从起始点到终点的进度（0到1）
-        // 实际渲染时，这个offset会被再次处理
-
-        // 我们需要粒子从当前物品的视觉位置发出
-        // 渲染器中的offset计算：
-        // if (!be.inputInventory.appliedRecipe) offset_render += 1; offset_render /= 2;
-        // 所以，如果 appliedRecipe = false, 视觉offset = (逻辑offset+1)/2
-        // 如果 appliedRecipe = true, 视觉offset = 逻辑offset/2
         float visualOffsetRatio;
         if (inputInventory.recipeDuration != 0) {
             visualOffsetRatio = (float) (inputInventory.remainingTime) / inputInventory.recipeDuration;
@@ -306,21 +336,13 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         if (getSpeed() < 0 ^ (!getBlockState().getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE))) {
             visualOffsetRatio = 1f - visualOffsetRatio;
         }
-        // Clamp to avoid particles spawning too far
         visualOffsetRatio = Mth.clamp(visualOffsetRatio, 0.125f, 0.875f);
 
-
-        // 粒子位置应基于物品的视觉位置，不是简单的中心点加偏移
-        // itemMovementVec 指向物品移动方向
-        // 粒子应该从物品当前位置发出，向 itemMovementVec 的反方向运动
         Vec3 particlePos = center.add(itemMovementVec.x() * (visualOffsetRatio - 0.5), 0.45, itemMovementVec.z() * (visualOffsetRatio - 0.5));
-
-
-        Vec3 particleMotion = new Vec3(-itemMovementVec.x() * particleSpeed, r.nextFloat() * particleSpeed * 0.5f, -itemMovementVec.z() * particleSpeed); // 减小Y轴速度
+        Vec3 particleMotion = new Vec3(-itemMovementVec.x() * particleSpeed, r.nextFloat() * particleSpeed * 0.5f, -itemMovementVec.z() * particleSpeed);
 
         level.addParticle(particleData, particlePos.x(), particlePos.y(), particlePos.z(), particleMotion.x, particleMotion.y, particleMotion.z);
     }
-
 
     @Override
     public void tick() {
@@ -328,121 +350,149 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         if (level == null) return;
 
+        // 调试输出（降低频率）
+        if (level.getGameTime() % 20 == 0 && inputInventory.remainingTime > 0) {
+            CreateFisheryMod.LOGGER.debug("Tick - Side: " + (level.isClientSide ? "CLIENT" : "SERVER") +
+                    ", Remaining: " + inputInventory.remainingTime +
+                    ", Applied: " + inputInventory.appliedRecipe);
+        }
+
+        // 传送带检测（仅服务端）
+        if (!level.isClientSide && level.getGameTime() % 5 == 0) {
+            Vec3 itemMovement = getItemMovementVec();
+            BlockPos inputPos = worldPosition.offset(BlockPos.containing(itemMovement.reverse()));
+            DirectBeltInputBehaviour inputBelt = BlockEntityBehaviour.get(level, inputPos, DirectBeltInputBehaviour.TYPE);
+            if (inputBelt != null) {
+                CreateFisheryMod.LOGGER.debug("Belt detected at input side, can accept: " + canAcceptInput());
+            }
+        }
+
+        // 客户端处理
         if (level.isClientSide) {
             if (!playEvent.isEmpty()) {
                 tickAudio();
             }
-            return;
-        }
 
-        // --- Server-side logic ---
-
-        if (!canProcess() || getSpeed() == 0) {
-            if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() &&
-                    inputInventory.appliedRecipe && inputInventory.remainingTime <= 0) {
-                ejectInputOrPrimaryOutput();
-            } else if (!outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty() && inputInventory.remainingTime <= 0) {
-                ejectInputOrPrimaryOutput();
+            // 客户端自行更新动画进度以保持流畅
+            if (inputInventory.remainingTime > 0 && canProcess()) {
+                float speed = Math.abs(getSpeed()) / 24f;
+                inputInventory.remainingTime = Math.max(0, inputInventory.remainingTime - speed);
             }
             return;
         }
 
-        if (inputInventory.remainingTime == -1) {
+        // === 服务端逻辑 ===
+
+        if (!canProcess() || getSpeed() == 0) {
+            // 机器停止但有待处理的物品
+            if (inputInventory.remainingTime <= 0) {
+                if (!outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty()) {
+                    ejectInputOrPrimaryOutput();
+                } else if (inputInventory.appliedRecipe && !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
+                    ejectInputOrPrimaryOutput();
+                }
+            }
+            return;
+        }
+
+        // 处理进行中
+        if (inputInventory.remainingTime > 0) {
+            float speed = Math.abs(getSpeed()) / 24f;
+            inputInventory.remainingTime -= speed;
+
+            // 生成粒子
+            if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
+                spawnParticles(inputInventory.getStackInSlot(INPUT_SLOT));
+            }
+
+            // 输入阶段结束 - 应用配方
+            if (inputInventory.remainingTime <= 0 && !inputInventory.appliedRecipe) {
+                CreateFisheryMod.LOGGER.info("Input phase complete, applying recipe");
+
+                // 播放音效
+                if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
+                    playEvent = inputInventory.getStackInSlot(INPUT_SLOT).copy();
+                }
+
+                // 应用配方
+                Optional<RecipeHolder<PeelingRecipe>> recipeHolder =
+                        getMatchingRecipe(new SingleRecipeInput(inputInventory.getStackInSlot(INPUT_SLOT)));
+
+                if (recipeHolder.isPresent()) {
+                    applyRecipeProducts(recipeHolder.get());
+                }
+
+                // 切换到输出阶段
+                inputInventory.appliedRecipe = true;
+                inputInventory.recipeDuration = OUTPUT_ANIMATION_TIME;
+                inputInventory.remainingTime = OUTPUT_ANIMATION_TIME;
+
+                // 强制同步
+                setChanged();
+                sendData();
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+
+                return;
+            }
+
+            // 输出阶段结束
+            if (inputInventory.remainingTime <= 0 && inputInventory.appliedRecipe) {
+                CreateFisheryMod.LOGGER.info("Output phase complete");
+                ejectInputOrPrimaryOutput();
+            }
+        } else {
+            // 空闲状态 - 检查新输入
             if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() && !inputInventory.appliedRecipe) {
                 startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
             }
-            return;
-        }
-
-        float processingSpeed = Mth.clamp(Math.abs(getSpeed()) / 24f, 1f, 128f);
-        inputInventory.remainingTime -= processingSpeed;
-
-        if (inputInventory.remainingTime > 0 && !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
-            spawnParticles(inputInventory.getStackInSlot(INPUT_SLOT));
-        }
-
-        if (inputInventory.remainingTime < 5 && !inputInventory.appliedRecipe) {
-            Optional<RecipeHolder<PeelingRecipe>> recipeHolder = getMatchingRecipe(new SingleRecipeInput(inputInventory.getStackInSlot(INPUT_SLOT)));
-
-            if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()){
-                playEvent = inputInventory.getStackInSlot(INPUT_SLOT).copy();
-            }
-
-            if (recipeHolder.isPresent()) {
-                PeelingRecipe recipe = recipeHolder.get().value();
-                List<ItemStack> totalPotentialSecondaryProducts = new ArrayList<>();
-                for (int i = 0; i < inputInventory.getStackInSlot(INPUT_SLOT).getCount(); i++) {
-                    totalPotentialSecondaryProducts.addAll(recipe.rollResultsFor(recipe.getSecondaryOutputs()));
-                }
-                if (canStoreAllSecondaries(totalPotentialSecondaryProducts)) {
-                    applyRecipeProducts(recipeHolder.get());
-                }
-            }
-            // For no-recipe items, applyRecipeProducts is not called.
-            // The input item remains in the input slot (logically) until ejected.
-
-            inputInventory.appliedRecipe = true;
-            inputInventory.recipeDuration = 30; // Output animation time
-            inputInventory.remainingTime = inputInventory.recipeDuration;
-            sendData();
-            return;
-        }
-
-        if (inputInventory.remainingTime <= 0) {
-            inputInventory.remainingTime = 0;
-            ejectInputOrPrimaryOutput();
         }
     }
 
     private void ejectInputOrPrimaryOutput() {
+        CreateFisheryMod.LOGGER.debug("=== Ejecting items ===");
+
         ItemStack stackToEject;
         boolean isPassThroughOutput;
 
         if (!outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty()) {
             stackToEject = outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP);
             isPassThroughOutput = false;
+            CreateFisheryMod.LOGGER.debug("Ejecting primary output: " + stackToEject);
         } else if (inputInventory.appliedRecipe && !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
             stackToEject = inputInventory.getStackInSlot(INPUT_SLOT);
             isPassThroughOutput = true;
+            CreateFisheryMod.LOGGER.debug("Ejecting passthrough item: " + stackToEject);
         } else {
-            if (inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() &&
-                    outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty()) {
-                inputInventory.remainingTime = -1;
-                inputInventory.appliedRecipe = false;
-                inputInventory.recipeDuration = 0;
-                sendData();
-            }
+            CreateFisheryMod.LOGGER.debug("Nothing to eject, resetting state");
+            inputInventory.remainingTime = -1;
+            inputInventory.appliedRecipe = false;
+            inputInventory.recipeDuration = 0;
+            setChanged();
+            sendData();
             return;
         }
 
         Vec3 itemMovement = getItemMovementVec();
         Direction itemMovementFacing = Direction.getNearest(itemMovement.x, itemMovement.y, itemMovement.z);
 
-        DirectBeltInputBehaviour funnelBehaviour = getBehaviour(DirectBeltInputBehaviour.TYPE);
-        if (funnelBehaviour != null) {
-            ItemStack currentStackCopy = stackToEject.copy(); // Work with a copy for funnel
-            ItemStack funnelRemainder = funnelBehaviour.tryExportingToBeltFunnel(currentStackCopy, itemMovementFacing.getOpposite(), false);
-            if (funnelRemainder != null && funnelRemainder.getCount() < currentStackCopy.getCount()) {
-                updateEjectedStack(isPassThroughOutput, funnelRemainder);
-                if (funnelRemainder.isEmpty()) {
-                    resetStateAfterEjectionOrTryNext(isPassThroughOutput);
-                }
-                // No sendData here, resetStateAfterEjectionOrTryNext will handle it
-                return;
-            }
-        }
-
         BlockPos nextPos = worldPosition.offset(BlockPos.containing(itemMovement));
         DirectBeltInputBehaviour beltBehaviour = BlockEntityBehaviour.get(level, nextPos, DirectBeltInputBehaviour.TYPE);
+
         if (beltBehaviour != null && beltBehaviour.canInsertFromSide(itemMovementFacing)) {
-            ItemStack currentStackCopy = stackToEject.copy(); // Work with a copy for belt
+            ItemStack currentStackCopy = stackToEject.copy();
             ItemStack beltRemainder = beltBehaviour.handleInsertion(currentStackCopy, itemMovementFacing, false);
+
+            CreateFisheryMod.LOGGER.debug("Belt insertion attempt - Original: " + currentStackCopy.getCount() +
+                    ", Remainder: " + beltRemainder.getCount());
+
             if (beltRemainder.getCount() < currentStackCopy.getCount()) {
                 updateEjectedStack(isPassThroughOutput, beltRemainder);
                 if (beltRemainder.isEmpty()) {
+                    CreateFisheryMod.LOGGER.debug("Fully ejected to belt");
                     resetStateAfterEjectionOrTryNext(isPassThroughOutput);
+                } else {
+                    CreateFisheryMod.LOGGER.debug("Partially ejected to belt, remainder: " + beltRemainder);
                 }
-                // No sendData here
                 return;
             }
         }
@@ -453,11 +503,12 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         entityOut.setDeltaMovement(outMotion);
         level.addFreshEntity(entityOut);
 
+        CreateFisheryMod.LOGGER.debug("Ejected as entity: " + stackToEject);
+
         updateEjectedStack(isPassThroughOutput, ItemStack.EMPTY);
         resetStateAfterEjectionOrTryNext(isPassThroughOutput);
 
         level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
-        // sendData() is handled by resetStateAfterEjectionOrTryNext
     }
 
     private void updateEjectedStack(boolean isPassThrough, ItemStack remainder) {
@@ -466,7 +517,8 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         } else {
             outputInventory.setStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP, remainder);
         }
-        // setChanged and sendData will be called by the calling context (e.g., resetStateAfterEjectionOrTryNext)
+        setChanged();
+        sendData();
     }
 
     private void resetStateAfterEjectionOrTryNext(boolean wasPassThroughOutput) {
@@ -474,25 +526,22 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         boolean primaryOutputSlotNowEmpty = outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty();
 
         if (wasPassThroughOutput) {
-            if (inputSlotNowEmpty) { // Input item fully passed through and ejected
+            if (inputSlotNowEmpty) {
                 inputInventory.remainingTime = -1;
                 inputInventory.appliedRecipe = false;
                 inputInventory.recipeDuration = 0;
-            } else { // Part of input item passed through, start processing remainder
+            } else {
                 startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
             }
-        } else { // Was a primary output ejection
-            if (primaryOutputSlotNowEmpty) { // Primary output fully ejected
+        } else {
+            if (primaryOutputSlotNowEmpty) {
                 inputInventory.remainingTime = -1;
                 inputInventory.appliedRecipe = false;
                 inputInventory.recipeDuration = 0;
-                // Check if new items in input slot to start next recipe
                 if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
                     startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
                 }
             }
-            // If primary output slot is not empty (e.g. partial ejection),
-            // next tick's ejectInputOrPrimaryOutput will handle it.
         }
         setChanged();
         sendData();
@@ -502,10 +551,12 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         ItemStack inputStackForRecipe = inputInventory.getStackInSlot(INPUT_SLOT).copy();
         if (inputStackForRecipe.isEmpty()) return;
 
+        CreateFisheryMod.LOGGER.info("=== Applying recipe products for " + inputStackForRecipe + " ===");
+
         PeelingRecipe recipe = recipeHolder.value();
         int itemsToProcess = inputStackForRecipe.getCount();
 
-        inputInventory.setStackInSlot(INPUT_SLOT, ItemStack.EMPTY); // Consume input
+        inputInventory.setStackInSlot(INPUT_SLOT, ItemStack.EMPTY);
 
         List<ItemStack> collectedPrimaryOutputs = new LinkedList<>();
         List<ItemStack> collectedSecondaryOutputs = new LinkedList<>();
@@ -515,6 +566,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             if (!primaryPerLoop.isEmpty()) {
                 ItemHelper.addToList(primaryPerLoop, collectedPrimaryOutputs);
             }
+
             List<ItemStack> secondariesPerLoop = recipe.rollResultsFor(recipe.getSecondaryOutputs());
             for (ItemStack secondaryStack : secondariesPerLoop) {
                 if (!secondaryStack.isEmpty()) {
@@ -523,60 +575,63 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             }
         }
 
-        if (!collectedPrimaryOutputs.isEmpty()) {
-            ItemStack finalPrimaryOutput = ItemStack.EMPTY;
-            // Consolidate primary outputs if they are the same item
-            for (ItemStack collectedStack : collectedPrimaryOutputs) {
-                if (finalPrimaryOutput.isEmpty()) {
-                    finalPrimaryOutput = collectedStack.copy();
-                } else if (ItemStack.isSameItemSameComponents(finalPrimaryOutput, collectedStack)) {
-                    finalPrimaryOutput.grow(collectedStack.getCount());
-                } else {
-                    // Handle multiple different primary outputs - drop extras for now
-                    CreateFisheryMod.LOGGER.warn("Peeling recipe resulted in multiple different primary output types. Dropping extras.");
-                    ItemEntity itemEntity = new ItemEntity(level,
-                            worldPosition.getX() + 0.5, worldPosition.getY() + 0.75, worldPosition.getZ() + 0.5,
-                            collectedStack.copy());
-                    itemEntity.setDeltaMovement(VecHelper.offsetRandomly(Vec3.ZERO, level.random, 0.1f).add(0, 0.2f, 0));
-                    level.addFreshEntity(itemEntity);
+        ItemStack finalPrimaryOutput = ItemStack.EMPTY;
+        for (ItemStack collectedStack : collectedPrimaryOutputs) {
+            if (finalPrimaryOutput.isEmpty()) {
+                finalPrimaryOutput = collectedStack.copy();
+            } else if (ItemStack.isSameItemSameComponents(finalPrimaryOutput, collectedStack)) {
+                int maxStack = finalPrimaryOutput.getMaxStackSize();
+                int canAdd = Math.min(collectedStack.getCount(), maxStack - finalPrimaryOutput.getCount());
+                if (canAdd > 0) {
+                    finalPrimaryOutput.grow(canAdd);
+                    collectedStack.shrink(canAdd);
+                }
+
+                if (!collectedStack.isEmpty()) {
+                    CreateFisheryMod.LOGGER.warn("Primary output overflow! Dropping excess: " + collectedStack);
+                    if (!tryStoreItemInSecondaryOutput(collectedStack)) {
+                        Vec3 dropPos = VecHelper.getCenterOf(worldPosition).add(0, 0.75, 0);
+                        ItemEntity overflow = new ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, collectedStack);
+                        level.addFreshEntity(overflow);
+                    }
                 }
             }
-            outputInventory.setStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP, finalPrimaryOutput);
-        } else {
-            outputInventory.setStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP, ItemStack.EMPTY);
         }
+
+        CreateFisheryMod.LOGGER.debug("Final primary output: " + finalPrimaryOutput);
+        outputInventory.setStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP, finalPrimaryOutput);
 
         for (ItemStack secondaryStack : collectedSecondaryOutputs) {
             if (secondaryStack.isEmpty()) continue;
+
             ItemStack remainderToStore = secondaryStack.copy();
             for (int slot = 1; slot < outputInventory.getSlots(); slot++) {
                 remainderToStore = outputInventory.insertItem(slot, remainderToStore, false);
                 if (remainderToStore.isEmpty()) break;
             }
+
             if (!remainderToStore.isEmpty()) {
-                ItemEntity itemEntity = new ItemEntity(level,
-                        worldPosition.getX() + 0.5, worldPosition.getY() + 0.75, worldPosition.getZ() + 0.5,
-                        remainderToStore);
-                itemEntity.setDeltaMovement(VecHelper.offsetRandomly(Vec3.ZERO, level.random, 0.1f).add(0, 0.2f, 0));
-                level.addFreshEntity(itemEntity);
+                CreateFisheryMod.LOGGER.warn("Secondary output overflow! Dropping: " + remainderToStore);
+                Vec3 dropPos = VecHelper.getCenterOf(worldPosition).add(0, 0.75, 0);
+                ItemEntity overflow = new ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, remainderToStore);
+                level.addFreshEntity(overflow);
             }
         }
+
         setChanged();
-        // sendData(); // Will be handled by tick or resetStateAfterEjectionOrTryNext
+        sendData();
     }
 
     public Vec3 getItemMovementVec() {
         Direction facing = getBlockState().getValue(MechanicalPeelerBlock.FACING);
         if (facing == Direction.UP) {
             boolean alongLocalX = !getBlockState().getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE);
-            int speedSign = getSpeed() < 0 ? 1 : -1; // Inverted to match saw's visual: positive speed moves item "forward"
+            int speedSign = getSpeed() < 0 ? 1 : -1;
             return new Vec3(speedSign * (alongLocalX ? 1 : 0), 0, speedSign * (alongLocalX ? 0 : 1));
         }
-        if (facing.getAxis().isHorizontal()) {
-            // For horizontal peelers, item movement is typically "out" of the peeler face
-            return Vec3.atLowerCornerOf(facing.getNormal());
+        if (facing.getAxis().isHorizontal()) {return Vec3.atLowerCornerOf(facing.getNormal());
         }
-        return Vec3.ZERO; // Should not happen for UP or Horizontal
+        return Vec3.ZERO;
     }
 
     private Optional<RecipeHolder<PeelingRecipe>> getMatchingRecipe(SingleRecipeInput input) {
@@ -585,29 +640,40 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     public void insertItem(ItemEntity entity) {
-        if (level == null || level.isClientSide || !canProcess() || !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() || !entity.isAlive())
+        if (level == null || level.isClientSide || !entity.isAlive())
             return;
+
+        if (!canAcceptInput()) {
+            CreateFisheryMod.LOGGER.debug("Cannot accept input - machine busy or output not clear");
+            return;
+        }
+
         ItemStack toInsert = entity.getItem().copy();
-        ItemStack remainder = inputInventory.insertItem(INPUT_SLOT, toInsert, false); // ProcessingInventory's insertItem handles this
+        CreateFisheryMod.LOGGER.info("=== Attempting to insert: " + toInsert + " ===");
+
+        ItemStack remainder = inputInventory.insertItem(INPUT_SLOT, toInsert, false);
         if (!ItemStack.matches(remainder, toInsert)) {
             entity.setItem(remainder);
             if (remainder.isEmpty()) entity.discard();
-            // startProcessingRecipe will be called by ProcessingInventory's onContentsChanged if a new item is inserted
-            // and remainingTime is -1. We don't need to explicitly call it here if using ProcessingInventory's callback.
-            // However, if we want to force start immediately:
-            if (inputInventory.remainingTime == -1 && !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() && !inputInventory.appliedRecipe) {
+
+            CreateFisheryMod.LOGGER.info("Item inserted successfully");
+            if (inputInventory.remainingTime == -1 && !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
                 startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
             }
         }
     }
 
     protected boolean canProcess() {
-        return getSpeed() != 0;
+        // 每个 tick 只计算一次速度
+        if (level != null && level.getGameTime() != lastSpeedCheck) {
+            lastSpeedCheck = level.getGameTime();
+            cachedSpeed = getSpeed();
+        }
+
+        return cachedSpeed != null && cachedSpeed != 0;
     }
 
     public void processEntity(Entity entity) {
-        // 移除 canProcess() 检查，因为外部调用者 (Block.entityInside 或 MovementBehaviour.tick) 应该已经检查过了
-        // 或者，如果你想在这里再加一层保险：
         if (level == null || level.isClientSide || entity.isRemoved() || getSpeed() == 0) {
             return;
         }
@@ -639,7 +705,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         }
 
         if (!processedSuccessfully && isArmadilloOrTurtle) {
-            if (entity instanceof Armadillo armadillo) { // 直接类型转换以便调用特定方法（如果需要）
+            if (entity instanceof Armadillo armadillo) {
                 if (tryStoreItemInSecondaryOutput(new ItemStack(Items.ARMADILLO_SCUTE))) {
                     level.playSound(null, armadillo, SoundEvents.ARMADILLO_SCUTE_DROP, SoundSource.NEUTRAL, 1.0F, 1.0F);
                     setEntityCooldown(entityId);
@@ -657,6 +723,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         if (processedSuccessfully) {
             spawnProcessingParticlesEffect();
             setChanged();
+            sendData();
         }
     }
 
@@ -665,17 +732,17 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             return true;
         }
         ItemStack remainder = stackToStore.copy();
-        for (int i = 1; i <= MAX_SECONDARY_OUTPUTS_STORAGE; i++) { // Slot 0 is primary temp, 1 to MAX_SECONDARY_OUTPUTS_STORAGE are secondaries
+        for (int i = 1; i <= MAX_SECONDARY_OUTPUTS_STORAGE; i++) {
             remainder = outputInventory.insertItem(i, remainder, false);
             if (remainder.isEmpty()) {
                 return true;
             }
         }
-        return false; // Could not store all of it
+        return false;
     }
 
     private boolean isEntityOnCooldown(UUID entityId) {
-        if (level == null) return true; // Can't check game time
+        if (level == null) return true;
         return entityCooldowns.containsKey(entityId) &&
                 (level.getGameTime() - entityCooldowns.get(entityId)) < ARMADILLO_TURTLE_COOLDOWN_TICKS;
     }
@@ -686,26 +753,21 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     private void spawnProcessingParticlesEffect() {
-        // This method is client-side only due to its current OnlyIn(Dist.CLIENT) in the original,
-        // but entity processing logic is server-side.
-        // For server-side particle spawning, use ServerLevel.sendParticles
-        // For simplicity, we'll keep the client-side check here, but ideally, send a packet.
-        if (level == null || level.isClientSide) { // Check if client side to spawn particles
+        if (level == null || level.isClientSide) {
             RandomSource r = level.random;
             Vec3 center = VecHelper.getCenterOf(this.worldPosition);
             for (int i = 0; i < 5; i++) {
                 double motionX = (r.nextDouble() - 0.5D) * 0.1D;
                 double motionY = r.nextDouble() * 0.1D + 0.1D;
                 double motionZ = (r.nextDouble() - 0.5D) * 0.1D;
-                level.addParticle(ParticleTypes.SNOWFLAKE, // Or a more fitting particle
+                level.addParticle(ParticleTypes.SNOWFLAKE,
                         center.x + (r.nextDouble() - 0.5D) * 0.6D,
-                        center.y + 1.1D, // Above the peeler
+                        center.y + 1.1D,
                         center.z + (r.nextDouble() - 0.5D) * 0.6D,
                         motionX, motionY, motionZ);
             }
         }
     }
-
 
     @Override
     public void setLevel(Level level) {
@@ -751,26 +813,20 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     @Override
     public void invalidate() {
         super.invalidate();
-        // No explicit capability invalidation needed with NeoForge's system unless doing something very custom.
     }
 
     @Override
     public void destroy() {
         super.destroy();
         if (level != null && !level.isClientSide) {
-            ItemHelper.dropContents(level, worldPosition, inputInventory); // Drops input inventory
-            // Drop output inventory (including primary temp and secondaries)
+            ItemHelper.dropContents(level, worldPosition, inputInventory);
             for (int i = 0; i < outputInventory.getSlots(); ++i) {
                 Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), outputInventory.getStackInSlot(i));
             }
         }
     }
 
-    // PeelerItemHandler: This is for exposing items to pipes/hoppers.
-    // Needs to be carefully considered how input/output is handled.
-    // Input should only go to INPUT_SLOT.
-    // Output should only come from secondary output slots (1 to MAX_SECONDARY_OUTPUTS_STORAGE).
-    // The OUTPUT_INV_PRIMARY_SLOT_TEMP is internal and shouldn't be directly accessible for extraction by pipes.
+    // 内部类：物品处理器
     private static class PeelerItemHandler implements IItemHandler {
         private final MechanicalPeelerBlockEntity be;
         private final ProcessingInventory inputInv;
@@ -784,39 +840,34 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         @Override
         public int getSlots() {
-            // Expose 1 input slot + secondary output slots
             return 1 + MAX_SECONDARY_OUTPUTS_STORAGE;
         }
 
         @Override
         public ItemStack getStackInSlot(int slot) {
-            if (slot == 0) { // Input slot
+            if (slot == 0) {
                 return inputInv.getStackInSlot(INPUT_SLOT);
             }
-            // Slots 1 to MAX_SECONDARY_OUTPUTS_STORAGE for secondary outputs
             if (slot >= 1 && slot <= MAX_SECONDARY_OUTPUTS_STORAGE) {
-                return outputInv.getStackInSlot(slot); // outputInv slot 'i' maps to handler slot 'i'
+                return outputInv.getStackInSlot(slot);
             }
             return ItemStack.EMPTY;
         }
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            if (!be.canProcess()) return stack;
-            if (slot == 0) { // Only allow insertion into the logical input slot
-                // Let ProcessingInventory handle the insertion logic, it will call startProcessingRecipe
+            if (!be.canAcceptInput()) return stack;
+            if (slot == 0) {
                 return inputInv.insertItem(INPUT_SLOT, stack, simulate);
             }
-            return stack; // Do not allow insertion into output slots via this handler
+            return stack;
         }
 
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            // Allow extraction from secondary output slots
             if (slot >= 1 && slot <= MAX_SECONDARY_OUTPUTS_STORAGE) {
                 return outputInv.extractItem(slot, amount, simulate);
             }
-            // Do not allow extraction from input slot or primary temp output slot via this handler
             return ItemStack.EMPTY;
         }
 
@@ -833,16 +884,47 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
-            if (slot == 0 && be.canProcess()) {
-                // Check if there's a recipe for the item.
-                // This also prevents inserting items if there's no recipe,
-                // which aligns with the goal of having a full animation pass even for "no recipe" items.
-                // If we want to allow "no recipe" items to pass through, this check might be too strict.
-                // However, for automated input, usually, we only want valid recipe inputs.
+            if (slot == 0 && be.canAcceptInput()) {
                 return be.getMatchingRecipe(new SingleRecipeInput(stack)).isPresent() ||
-                        (be.getMatchingRecipe(new SingleRecipeInput(stack)).isEmpty()); // Allow if no recipe for passthrough
+                        (be.getMatchingRecipe(new SingleRecipeInput(stack)).isEmpty());
             }
-            return false; // Output slots are not valid for insertion via this handler
+            return false;
+        }
+    }
+
+    // 内部类：自定义处理库存
+    private static class CustomProcessingInventory extends ProcessingInventory {
+        private final MechanicalPeelerBlockEntity blockEntity;
+
+        public CustomProcessingInventory(MechanicalPeelerBlockEntity be, NonNullConsumer<ItemStack> startProcessing) {
+            super(startProcessing);
+            this.blockEntity = be;
+        }
+
+        @Override
+        public void setStackInSlot(int slot, ItemStack stack) {
+            super.setStackInSlot(slot, stack);
+            if (blockEntity != null) {
+                blockEntity.setChanged();
+                blockEntity.sendData();
+            }
+        }
+
+        @Override
+        public CompoundTag serializeNBT(HolderLookup.Provider registries) {
+            CompoundTag tag = super.serializeNBT(registries);
+            tag.putBoolean("AppliedRecipe", appliedRecipe);
+            tag.putFloat("RemainingTime", remainingTime);
+            tag.putFloat("RecipeDuration", recipeDuration);
+            return tag;
+        }
+
+        @Override
+        public void deserializeNBT(HolderLookup.Provider registries, CompoundTag nbt) {
+            super.deserializeNBT(registries, nbt);
+            appliedRecipe = nbt.getBoolean("AppliedRecipe");
+            remainingTime = nbt.getFloat("RemainingTime");
+            recipeDuration = nbt.getFloat("RecipeDuration");
         }
     }
 }
