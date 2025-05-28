@@ -88,5 +88,19 @@
   "item.createfisheryindustry.cod_steak": "鳕鱼排",
   "item.createfisheryindustry.salmon_steak": "鲑鱼排",
   "item.createfisheryindustry.cooked_cod_steak": "熟鳕鱼排",
-  "item.createfisheryindustry.cooked_salmon_steak": "熟鲑鱼排"
+  "item.createfisheryindustry.cooked_salmon_steak": "熟鲑鱼排",
+
+  "recipe.createfisheryindustry.peeling": "切削",
+
+  "gui.goggles.kinetic_stats": "Kinetic Stats",
+  "create.gui.goggles.speed": "Speed: %s RPM",
+  "create.gui.goggles.peeler_input": "Input:",
+  "create.gui.goggles.peeler_outputs": "动力切削机内含:",
+  "create.gui.goggles.peeler_stored_outputs": "动力切削机内含:",
+  "block.createfisheryindustry.mechanical_peeler": "动力切削机",
+  "create.gui.goggles.mechanical_peeler_contents": "动力切削机副产品",
+
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "用于处理去皮配方的机械元件，也可与部分生物交互",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "接入应力时",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "可以处理去皮配方，类似动力锯。也可以给羊去羊毛，或采集乌龟和犰狳的鳞甲"
 }

@@ -34,7 +34,6 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
     private static final Vec3 PIVOT = new Vec3(0, 8, 8);
 
     public MechanicalPeelerRenderer(BlockEntityRendererProvider.Context context) {
-        CreateFisheryMod.LOGGER.debug("MechanicalPeelerRenderer constructor called!");
     }
 
     @Override
@@ -124,23 +123,18 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
             return;
 
         if (be.getLevel().getGameTime() % 20 == 0) {
-            CreateFisheryMod.LOGGER.debug("=== Render Debug ===");
-            CreateFisheryMod.LOGGER.debug("Rendering: " + itemToRender);
-            CreateFisheryMod.LOGGER.debug("Applied Recipe: " + be.inputInventory.appliedRecipe);
-            CreateFisheryMod.LOGGER.debug("Remaining Time: " + be.inputInventory.remainingTime);
-            CreateFisheryMod.LOGGER.debug("Recipe Duration: " + be.inputInventory.recipeDuration);
+
         }
 
-        boolean alongZ = !be.getBlockState().getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE);
+        // 使用与 getItemMovementVec() 相同的逻辑
+        Vec3 itemMovement = be.getItemMovementVec();
         float animationProgress = calculateAnimationProgress(be, partialTicks);
 
         if (be.getLevel().getGameTime() % 10 == 0 && be.inputInventory.remainingTime > 0) {
-            CreateFisheryMod.LOGGER.debug("Animation progress: " + animationProgress +
-                    ", PartialTicks: " + partialTicks +
-                    ", Speed: " + be.getSpeed());
+
         }
 
-        renderSingleItem(ms, buffer, light, overlay, itemToRender, animationProgress, alongZ, be);
+        renderSingleItem(ms, buffer, light, overlay, itemToRender, animationProgress, itemMovement, be);
     }
 
     private ItemStack getItemToRender(MechanicalPeelerBlockEntity be) {
@@ -177,37 +171,45 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
 
         float visualProgress;
         if (!be.inputInventory.appliedRecipe) {
+            // 输入阶段：从 1.0 到 0.5
             visualProgress = 1.0f - (interpolatedProgress * 0.5f);
         } else {
+            // 输出阶段：从 0.5 到 0.0
             visualProgress = 0.5f - (interpolatedProgress * 0.5f);
-        }
-
-        boolean alongZ = !be.getBlockState().getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE);
-        if (be.getSpeed() < 0 ^ alongZ) {
-            visualProgress = 1f - visualProgress;
         }
 
         return Mth.clamp(visualProgress, 0f, 1f);
     }
 
     private void renderSingleItem(PoseStack ms, MultiBufferSource buffer, int light, int overlay,
-                                  ItemStack stack, float offset, boolean alongZ, MechanicalPeelerBlockEntity be) {
+                                  ItemStack stack, float progress, Vec3 itemMovement, MechanicalPeelerBlockEntity be) {
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         BakedModel modelWithOverrides = itemRenderer.getModel(stack, be.getLevel(), null, 0);
         boolean blockItem = modelWithOverrides.isGui3d();
 
         ms.pushPose();
 
-        if (alongZ) {
+        // 计算物品位置
+        // progress: 1.0 = 输入侧, 0.5 = 中心, 0.0 = 输出侧
+        // 调转动画方向（180度），所以直接使用 progress
+        float positionOffset = progress - 0.5f; // 0.5 到 -0.5（反向）
+
+        // 应用移动向量
+        // itemMovement 指向物品移动的方向（从输入到输出）
+        ms.translate(
+                0.5 + itemMovement.x * positionOffset,
+                0,
+                0.5 + itemMovement.z * positionOffset
+        );
+
+        // 根据移动方向旋转物品
+        if (Math.abs(itemMovement.x) > 0) {
+            // 沿 X 轴移动（东西向）
             ms.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90));
         }
+        // 如果沿 Z 轴移动（南北向），不需要额外旋转
 
-        ms.translate(0.5, 0, offset);
-
-        if (alongZ) {
-            ms.translate(-1, 0, 0);
-        }
-
+        // 调整高度和缩放
         ms.translate(0, blockItem ? .925f : 13f / 16f, 0);
         ms.scale(.5f, .5f, .5f);
 
@@ -219,4 +221,5 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
 
         ms.popPose();
     }
+
 }

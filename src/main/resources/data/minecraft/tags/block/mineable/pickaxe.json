@@ -1,0 +1,9 @@
+{
+  "values": [
+    "createfisheryindustry:frame_trap",
+    "createfisheryindustry:mesh_trap",
+    "createfisheryindustry:smart_mesh",
+    "createfisheryindustry:trap_nozzle",
+    "createfisheryindustry:mechanical_peeler"
+  ]
+}

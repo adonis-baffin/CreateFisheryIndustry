@@ -24,16 +24,12 @@ public class PeelingRecipeSerializer implements RecipeSerializer<PeelingRecipe> 
             ProcessingOutput.CODEC.listOf().xmap(NonNullList::copyOf, Function.identity())
                     .fieldOf("results");
 
-    // The CODEC should map from PeelingRecipeParams to PeelingRecipe and back.
-    // PeelingRecipe::new is the factory.
-    // The second argument to xmap should be a Function<PeelingRecipe, PeelingRecipeParams>
     private static final MapCodec<PeelingRecipe> CODEC =
             PeelingRecipeParams.CODEC.xmap(
                     PeelingRecipe::new,
                     PeelingRecipe::getParams // Use the getter method
             );
 
-    // Similarly for the STREAM_CODEC
     public static final StreamCodec<RegistryFriendlyByteBuf, PeelingRecipe> STREAM_CODEC =
             PeelingRecipeParams.STREAM_CODEC.map(
                     PeelingRecipe::new,

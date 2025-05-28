@@ -85,10 +85,9 @@
   "create.createfisheryindustry.smart_beehive.mode_label": "Mode: ",
   "fluid.create.honey": "Honey",
 
-  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "Component for fishing on contraption.",
-  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "When in contraption:",
-  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "Captures nearby fish, or other small creatures, and items along the path. Also gains fishing loot from the current biome over time. Grants experience nuggets when fishing triggers or creatures are captured.",
-
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "A mechanical component for processing peeling recipes and interacting with certain entities",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "When powered by stress",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "Processes peeling recipes, similar to a mechanical saw. Can also shear sheep or harvest scutes from turtles and armadillos",
 
   "item.createfisheryindustry.chains": "Chains",
   "item.createfisheryindustry.fish_skin": "Fish Skin",

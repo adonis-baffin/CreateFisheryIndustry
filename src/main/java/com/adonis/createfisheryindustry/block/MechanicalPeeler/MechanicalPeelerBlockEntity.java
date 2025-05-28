@@ -80,6 +80,9 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     private Float cachedSpeed = null;
     private long lastSpeedCheck = 0;
 
+    // 新增字段：记录当前物品的输入方向
+    private Direction currentInputDirection = null;
+
     public MechanicalPeelerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         inputInventory = new CustomProcessingInventory(this, this::startProcessingRecipe)
@@ -105,7 +108,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     private void startProcessingRecipe(ItemStack stackInInputSlot) {
-        CreateFisheryMod.LOGGER.info("=== Starting animation for: " + stackInInputSlot + " ===");
+
 
         if (!canProcess() || stackInInputSlot.isEmpty() || (level != null && level.isClientSide && !isVirtual()))
             return;
@@ -114,7 +117,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         Optional<RecipeHolder<PeelingRecipe>> recipeHolder = getMatchingRecipe(new SingleRecipeInput(stackInInputSlot));
 
         if (recipeHolder.isPresent()) {
-            CreateFisheryMod.LOGGER.info("Found recipe: " + recipeHolder.get().id());
             // 预检查副产物空间
             PeelingRecipe recipe = recipeHolder.get().value();
             List<ItemStack> totalPotentialSecondaryProducts = new ArrayList<>();
@@ -122,10 +124,8 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                 totalPotentialSecondaryProducts.addAll(recipe.rollResultsFor(recipe.getSecondaryOutputs()));
             }
             if (!canStoreAllSecondaries(totalPotentialSecondaryProducts)) {
-                CreateFisheryMod.LOGGER.warn("Cannot store all secondary products - they will drop");
             }
         } else {
-            CreateFisheryMod.LOGGER.info("No recipe found - item will pass through");
         }
 
         // 统一的动画时间
@@ -159,12 +159,46 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         return true;
     }
 
+    private boolean isDirectionValidForAxis(Direction dir) {
+        if (!dir.getAxis().isHorizontal()) return false;
+
+        boolean alongLocalX = !getBlockState().getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE);
+
+        if (alongLocalX) {
+            // 旋转轴是 X 轴（东西向），只允许从东西方向输入（调转90度）
+            return dir == Direction.EAST || dir == Direction.WEST;
+        } else {
+            // 旋转轴是 Z 轴（南北向），只允许从南北方向输入（调转90度）
+            return dir == Direction.NORTH || dir == Direction.SOUTH;
+        }
+    }
+
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
         super.addBehaviours(behaviours);
         behaviours.add(new DirectBeltInputBehaviour(this)
-                .allowingBeltFunnelsWhen(this::canAcceptInput));
+                .allowingBeltFunnelsWhen(this::canAcceptInput)
+                .setInsertionHandler((transported, side, simulate) -> {
+                    Direction inputDir = side.getOpposite();
+
+                    if (!canAcceptInput() || !isDirectionValidForAxis(inputDir))
+                        return transported.stack;
+
+                    if (!simulate) {
+                        currentInputDirection = inputDir;
+                    }
+
+                    ItemStack stack = transported.stack;
+                    ItemStack remainder = inputInventory.insertItem(INPUT_SLOT, stack, simulate);
+
+                    if (!simulate && remainder.getCount() < stack.getCount() && inputInventory.remainingTime == -1) {
+                        startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
+                    }
+
+                    return remainder;
+                }));
     }
+
 
     private boolean canAcceptInput() {
         return canProcess() &&
@@ -185,11 +219,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     @Override
     public void sendData() {
         if (level != null && !level.isClientSide) {
-            CreateFisheryMod.LOGGER.debug("=== SENDING DATA TO CLIENT ===");
-            CreateFisheryMod.LOGGER.debug("Applied Recipe: " + inputInventory.appliedRecipe);
-            CreateFisheryMod.LOGGER.debug("Remaining Time: " + inputInventory.remainingTime);
-            CreateFisheryMod.LOGGER.debug("Recipe Duration: " + inputInventory.recipeDuration);
-            CreateFisheryMod.LOGGER.debug("Primary Output: " + outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP));
         }
         super.sendData();
     }
@@ -202,6 +231,10 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         compound.putBoolean("AppliedRecipe", inputInventory.appliedRecipe);
         compound.putFloat("RemainingTime", inputInventory.remainingTime);
         compound.putFloat("RecipeDuration", inputInventory.recipeDuration);
+
+        if (currentInputDirection != null) {
+            compound.putString("InputDirection", currentInputDirection.getName());
+        }
 
         super.write(compound, registries, clientPacket);
 
@@ -217,8 +250,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         }
 
         if (clientPacket) {
-            CreateFisheryMod.LOGGER.debug("Writing client packet - Applied: " + inputInventory.appliedRecipe +
-                    ", Remaining: " + inputInventory.remainingTime);
+
         }
     }
 
@@ -239,6 +271,10 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             inputInventory.recipeDuration = compound.getFloat("RecipeDuration");
         }
 
+        if (compound.contains("InputDirection")) {
+            currentInputDirection = Direction.byName(compound.getString("InputDirection"));
+        }
+
         if (!clientPacket) {
             entityCooldowns.clear();
             if (compound.contains("EntityCooldowns", CompoundTag.TAG_COMPOUND)) {
@@ -249,7 +285,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                         long time = cooldownsTag.getLong(key);
                         entityCooldowns.put(uuid, time);
                     } catch (IllegalArgumentException e) {
-                        CreateFisheryMod.LOGGER.warn("Failed to parse UUID from cooldowns NBT: " + key, e);
                     }
                 }
             }
@@ -259,8 +294,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             playEvent = ItemStack.parseOptional(registries, compound.getCompound("PlayEvent"));
 
         if (clientPacket) {
-            CreateFisheryMod.LOGGER.debug("Read client packet - Applied: " + inputInventory.appliedRecipe +
-                    ", Remaining: " + inputInventory.remainingTime);
+
         }
     }
 
@@ -333,9 +367,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         } else {
             visualOffsetRatio /= 2f;
         }
-        if (getSpeed() < 0 ^ (!getBlockState().getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE))) {
-            visualOffsetRatio = 1f - visualOffsetRatio;
-        }
+        // 移除对 speed 和 AXIS_ALONG_FIRST_COORDINATE 的依赖，固定方向
         visualOffsetRatio = Mth.clamp(visualOffsetRatio, 0.125f, 0.875f);
 
         Vec3 particlePos = center.add(itemMovementVec.x() * (visualOffsetRatio - 0.5), 0.45, itemMovementVec.z() * (visualOffsetRatio - 0.5));
@@ -352,9 +384,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         // 调试输出（降低频率）
         if (level.getGameTime() % 20 == 0 && inputInventory.remainingTime > 0) {
-            CreateFisheryMod.LOGGER.debug("Tick - Side: " + (level.isClientSide ? "CLIENT" : "SERVER") +
-                    ", Remaining: " + inputInventory.remainingTime +
-                    ", Applied: " + inputInventory.appliedRecipe);
+
         }
 
         // 传送带检测（仅服务端）
@@ -363,7 +393,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             BlockPos inputPos = worldPosition.offset(BlockPos.containing(itemMovement.reverse()));
             DirectBeltInputBehaviour inputBelt = BlockEntityBehaviour.get(level, inputPos, DirectBeltInputBehaviour.TYPE);
             if (inputBelt != null) {
-                CreateFisheryMod.LOGGER.debug("Belt detected at input side, can accept: " + canAcceptInput());
             }
         }
 
@@ -407,7 +436,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
             // 输入阶段结束 - 应用配方
             if (inputInventory.remainingTime <= 0 && !inputInventory.appliedRecipe) {
-                CreateFisheryMod.LOGGER.info("Input phase complete, applying recipe");
 
                 // 播放音效
                 if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
@@ -437,7 +465,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
             // 输出阶段结束
             if (inputInventory.remainingTime <= 0 && inputInventory.appliedRecipe) {
-                CreateFisheryMod.LOGGER.info("Output phase complete");
                 ejectInputOrPrimaryOutput();
             }
         } else {
@@ -449,7 +476,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     private void ejectInputOrPrimaryOutput() {
-        CreateFisheryMod.LOGGER.debug("=== Ejecting items ===");
 
         ItemStack stackToEject;
         boolean isPassThroughOutput;
@@ -457,13 +483,10 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         if (!outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty()) {
             stackToEject = outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP);
             isPassThroughOutput = false;
-            CreateFisheryMod.LOGGER.debug("Ejecting primary output: " + stackToEject);
         } else if (inputInventory.appliedRecipe && !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
             stackToEject = inputInventory.getStackInSlot(INPUT_SLOT);
             isPassThroughOutput = true;
-            CreateFisheryMod.LOGGER.debug("Ejecting passthrough item: " + stackToEject);
         } else {
-            CreateFisheryMod.LOGGER.debug("Nothing to eject, resetting state");
             inputInventory.remainingTime = -1;
             inputInventory.appliedRecipe = false;
             inputInventory.recipeDuration = 0;
@@ -473,37 +496,64 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         }
 
         Vec3 itemMovement = getItemMovementVec();
-        Direction itemMovementFacing = Direction.getNearest(itemMovement.x, itemMovement.y, itemMovement.z);
+        // 输出方向是输入方向的反向
+        Vec3 outputMovement = itemMovement.scale(-1);
+        Direction outputFacing = Direction.getNearest(outputMovement.x, outputMovement.y, outputMovement.z);
 
-        BlockPos nextPos = worldPosition.offset(BlockPos.containing(itemMovement));
-        DirectBeltInputBehaviour beltBehaviour = BlockEntityBehaviour.get(level, nextPos, DirectBeltInputBehaviour.TYPE);
+        // 首先尝试通过 DirectBeltInputBehaviour 导出到传送带漏斗
+        ItemStack tryExportingToBeltFunnel = getBehaviour(DirectBeltInputBehaviour.TYPE)
+                .tryExportingToBeltFunnel(stackToEject, outputFacing.getOpposite(), false);
 
-        if (beltBehaviour != null && beltBehaviour.canInsertFromSide(itemMovementFacing)) {
-            ItemStack currentStackCopy = stackToEject.copy();
-            ItemStack beltRemainder = beltBehaviour.handleInsertion(currentStackCopy, itemMovementFacing, false);
+        if (tryExportingToBeltFunnel != null) {
+            if (tryExportingToBeltFunnel.getCount() != stackToEject.getCount()) {
+                // 部分导出成功
+                updateEjectedStack(isPassThroughOutput, tryExportingToBeltFunnel);
+                return;
+            }
+            if (!tryExportingToBeltFunnel.isEmpty()) {
+                // 导出失败，继续尝试其他方法
 
-            CreateFisheryMod.LOGGER.debug("Belt insertion attempt - Original: " + currentStackCopy.getCount() +
-                    ", Remainder: " + beltRemainder.getCount());
+            } else {
+                // 完全导出成功
+                updateEjectedStack(isPassThroughOutput, ItemStack.EMPTY);
 
-            if (beltRemainder.getCount() < currentStackCopy.getCount()) {
-                updateEjectedStack(isPassThroughOutput, beltRemainder);
-                if (beltRemainder.isEmpty()) {
-                    CreateFisheryMod.LOGGER.debug("Fully ejected to belt");
-                    resetStateAfterEjectionOrTryNext(isPassThroughOutput);
-                } else {
-                    CreateFisheryMod.LOGGER.debug("Partially ejected to belt, remainder: " + beltRemainder);
-                }
+                resetStateAfterEjectionOrTryNext(isPassThroughOutput);
                 return;
             }
         }
 
-        Vec3 outPos = VecHelper.getCenterOf(worldPosition).add(itemMovement.scale(.5f)).add(0, .5, 0);
-        Vec3 outMotion = itemMovement.scale(.0625).add(0, .125, 0);
+        // 尝试直接输出到传送带
+        BlockPos nextPos = worldPosition.offset(BlockPos.containing(outputMovement));
+        DirectBeltInputBehaviour beltBehaviour = BlockEntityBehaviour.get(level, nextPos, DirectBeltInputBehaviour.TYPE);
+
+        if (beltBehaviour != null && beltBehaviour.canInsertFromSide(outputFacing)) {
+            if (level.isClientSide && !isVirtual())
+                return;
+
+            ItemStack currentStackCopy = stackToEject.copy();
+            ItemStack beltRemainder = beltBehaviour.handleInsertion(currentStackCopy, outputFacing, false);
+
+            if (!ItemStack.matches(beltRemainder, currentStackCopy)) {
+                // 有变化说明至少部分物品被接受
+                updateEjectedStack(isPassThroughOutput, beltRemainder);
+                if (beltRemainder.isEmpty()) {
+                    resetStateAfterEjectionOrTryNext(isPassThroughOutput);
+                } else {
+                }
+                setChanged();
+                sendData();
+                return;
+            }
+        }
+
+        // 如果无法输出到传送带，则作为实体弹出
+        Vec3 outPos = VecHelper.getCenterOf(worldPosition).add(outputMovement.scale(.5f)).add(0, .5, 0);
+        Vec3 outMotion = outputMovement.scale(.0625).add(0, .125, 0);
         ItemEntity entityOut = new ItemEntity(level, outPos.x, outPos.y, outPos.z, stackToEject.copy());
         entityOut.setDeltaMovement(outMotion);
         level.addFreshEntity(entityOut);
 
-        CreateFisheryMod.LOGGER.debug("Ejected as entity: " + stackToEject);
+
 
         updateEjectedStack(isPassThroughOutput, ItemStack.EMPTY);
         resetStateAfterEjectionOrTryNext(isPassThroughOutput);
@@ -530,6 +580,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                 inputInventory.remainingTime = -1;
                 inputInventory.appliedRecipe = false;
                 inputInventory.recipeDuration = 0;
+                currentInputDirection = null; // 清除方向记录
             } else {
                 startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
             }
@@ -538,6 +589,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                 inputInventory.remainingTime = -1;
                 inputInventory.appliedRecipe = false;
                 inputInventory.recipeDuration = 0;
+                currentInputDirection = null; // 清除方向记录
                 if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
                     startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
                 }
@@ -551,7 +603,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         ItemStack inputStackForRecipe = inputInventory.getStackInSlot(INPUT_SLOT).copy();
         if (inputStackForRecipe.isEmpty()) return;
 
-        CreateFisheryMod.LOGGER.info("=== Applying recipe products for " + inputStackForRecipe + " ===");
+
 
         PeelingRecipe recipe = recipeHolder.value();
         int itemsToProcess = inputStackForRecipe.getCount();
@@ -588,7 +640,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                 }
 
                 if (!collectedStack.isEmpty()) {
-                    CreateFisheryMod.LOGGER.warn("Primary output overflow! Dropping excess: " + collectedStack);
                     if (!tryStoreItemInSecondaryOutput(collectedStack)) {
                         Vec3 dropPos = VecHelper.getCenterOf(worldPosition).add(0, 0.75, 0);
                         ItemEntity overflow = new ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, collectedStack);
@@ -598,7 +649,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             }
         }
 
-        CreateFisheryMod.LOGGER.debug("Final primary output: " + finalPrimaryOutput);
         outputInventory.setStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP, finalPrimaryOutput);
 
         for (ItemStack secondaryStack : collectedSecondaryOutputs) {
@@ -611,7 +661,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             }
 
             if (!remainderToStore.isEmpty()) {
-                CreateFisheryMod.LOGGER.warn("Secondary output overflow! Dropping: " + remainderToStore);
                 Vec3 dropPos = VecHelper.getCenterOf(worldPosition).add(0, 0.75, 0);
                 ItemEntity overflow = new ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, remainderToStore);
                 level.addFreshEntity(overflow);
@@ -624,14 +673,71 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
     public Vec3 getItemMovementVec() {
         Direction facing = getBlockState().getValue(MechanicalPeelerBlock.FACING);
+
         if (facing == Direction.UP) {
+            // 如果有记录的输入方向，返回从输入到输出的向量
+            if (currentInputDirection != null && currentInputDirection.getAxis().isHorizontal()) {
+                // 返回输入方向的向量（物品沿着这个方向移动）
+                return Vec3.atLowerCornerOf(currentInputDirection.getNormal());
+            }
+
+            // 否则使用默认值（根据轴向）
             boolean alongLocalX = !getBlockState().getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE);
-            int speedSign = getSpeed() < 0 ? 1 : -1;
-            return new Vec3(speedSign * (alongLocalX ? 1 : 0), 0, speedSign * (alongLocalX ? 0 : 1));
+            if (alongLocalX) {
+                // 旋转轴是 X 轴，默认从北向南移动
+                return new Vec3(0, 0, 1);
+            } else {
+                // 旋转轴是 Z 轴，默认从西向东移动
+                return new Vec3(1, 0, 0);
+            }
         }
-        if (facing.getAxis().isHorizontal()) {return Vec3.atLowerCornerOf(facing.getNormal());
+
+        if (facing.getAxis().isHorizontal()) {
+            return Vec3.atLowerCornerOf(facing.getNormal());
         }
+
         return Vec3.ZERO;
+    }
+
+    // 新方法：处理来自传送带的输入
+    public void insertFromBelt(ItemStack stack, Direction from) {
+        if (!canAcceptInput()) {
+            return;
+        }
+
+        currentInputDirection = from;
+
+
+        ItemStack remainder = inputInventory.insertItem(INPUT_SLOT, stack, false);
+        if (remainder.getCount() < stack.getCount() && inputInventory.remainingTime == -1) {
+            startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
+        }
+    }
+
+    private Direction getInputDirection() {
+        if (level == null) return null;
+
+        // 检查所有水平方向
+        for (Direction dir : Direction.values()) {
+            if (!dir.getAxis().isHorizontal()) continue;
+
+            BlockPos checkPos = worldPosition.relative(dir);
+            DirectBeltInputBehaviour inputBehaviour =
+                    BlockEntityBehaviour.get(level, checkPos, DirectBeltInputBehaviour.TYPE);
+
+            if (inputBehaviour != null && inputBehaviour.canInsertFromSide(dir.getOpposite())) {
+                // 找到了输入传送带
+                return dir;
+            }
+        }
+
+        // 如果没有找到传送带，根据轴向返回默认方向
+        boolean alongLocalX = !getBlockState().getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE);
+        if (alongLocalX) {
+            return Direction.WEST; // 默认从西边输入
+        } else {
+            return Direction.NORTH; // 默认从北边输入
+        }
     }
 
     private Optional<RecipeHolder<PeelingRecipe>> getMatchingRecipe(SingleRecipeInput input) {
@@ -644,19 +750,36 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             return;
 
         if (!canAcceptInput()) {
-            CreateFisheryMod.LOGGER.debug("Cannot accept input - machine busy or output not clear");
+
             return;
         }
 
+        // 记录物品的来源方向
+        Vec3 entityPos = entity.position();
+        Vec3 blockCenter = VecHelper.getCenterOf(worldPosition);
+        Vec3 diff = entityPos.subtract(blockCenter);
+
+        Direction inputDir;
+        if (Math.abs(diff.x) > Math.abs(diff.z)) {
+            inputDir = diff.x > 0 ? Direction.EAST : Direction.WEST;
+        } else {
+            inputDir = diff.z > 0 ? Direction.SOUTH : Direction.NORTH;
+        }
+
+        // 检查输入方向是否有效
+        if (!isDirectionValidForAxis(inputDir)) {
+            return;
+        }
+
+        currentInputDirection = inputDir;
+
         ItemStack toInsert = entity.getItem().copy();
-        CreateFisheryMod.LOGGER.info("=== Attempting to insert: " + toInsert + " ===");
 
         ItemStack remainder = inputInventory.insertItem(INPUT_SLOT, toInsert, false);
         if (!ItemStack.matches(remainder, toInsert)) {
             entity.setItem(remainder);
             if (remainder.isEmpty()) entity.discard();
 
-            CreateFisheryMod.LOGGER.info("Item inserted successfully");
             if (inputInventory.remainingTime == -1 && !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
                 startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
             }

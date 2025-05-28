@@ -3,10 +3,11 @@ package com.adonis.createfisheryindustry.item;
 import com.adonis.createfisheryindustry.client.renderer.PneumaticHarpoonGunItemRenderer;
 import com.adonis.createfisheryindustry.entity.TetheredHarpoonEntity;
 import com.adonis.createfisheryindustry.procedures.PneumaticHarpoonGunItemInHandTickProcedure;
-import com.adonis.createfisheryindustry.registry.CreateFisheryEntityTypes;
+// import com.adonis.createfisheryindustry.registry.CreateFisheryEntityTypes; // Not used directly here
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.foundation.item.CustomArmPoseItem;
 import com.simibubi.create.foundation.item.render.SimpleCustomRenderer;
+import com.simibubi.create.infrastructure.config.AllConfigs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment; // Import for FMLEnvironment
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,13 +46,16 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
         super(properties.stacksTo(1).rarity(Rarity.UNCOMMON));
     }
 
+    private static int maxUses() {
+        return AllConfigs.server().equipment.maxExtendoGripActions.get();
+    }
+
     @Override
     public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(itemstack, world, entity, slot, selected);
         if (entity instanceof Player player && (selected || player.getOffhandItem() == itemstack)) {
             PneumaticHarpoonGunItemInHandTickProcedure.execute(world, player.getX(), player.getY(), player.getZ(), player, itemstack);
 
-            // 检查并清理过期的冷却时间
             CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
             if (customData.copyTag().contains("CooldownEndTick")) {
                 long cooldownEndTick = customData.copyTag().getLong("CooldownEndTick");
@@ -70,7 +75,6 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
             CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
             boolean tagHooked = customData.copyTag().getBoolean("tagHooked");
 
-            // 检查冷却时间
             if (customData.copyTag().contains("CooldownEndTick")) {
                 long cooldownEndTick = customData.copyTag().getLong("CooldownEndTick");
                 if (world.getGameTime() < cooldownEndTick) {
@@ -78,14 +82,12 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
                 }
             }
 
-            // 检查是否存在活跃的鱼叉实体
             List<TetheredHarpoonEntity> activeHarpoons = world.getEntitiesOfClass(
                     TetheredHarpoonEntity.class,
                     player.getBoundingBox().inflate(100),
                     e -> e.getOwner() == player && !e.isRetrieving()
             );
             if (!activeHarpoons.isEmpty() || tagHooked) {
-                // 收回鱼叉并设置冷却
                 activeHarpoons.forEach(TetheredHarpoonEntity::startRetrieving);
                 CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> {
                     tag.putBoolean("tagHooked", false);
@@ -100,7 +102,6 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
                 return InteractionResultHolder.sidedSuccess(itemstack, false);
             }
 
-            // 若气体不足，显示提示并阻止发射
             if (totalAir < LAUNCH_AIR_CONSUMPTION || backtanks.isEmpty()) {
                 if (player instanceof ServerPlayer sp) {
                     sp.displayClientMessage(Component.literal("Insufficient air to shoot"), true);
@@ -108,7 +109,6 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
                 return InteractionResultHolder.fail(itemstack);
             }
 
-            // 发射新鱼叉
             BacktankUtil.consumeAir(player, backtanks.get(0), LAUNCH_AIR_CONSUMPTION);
             Vec3 eyePos = player.getEyePosition(1.0F);
             Vec3 lookVec = player.getViewVector(1.0F);
@@ -127,42 +127,77 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
         return InteractionResultHolder.sidedSuccess(itemstack, world.isClientSide());
     }
 
-
+    // --- BAR METHODS ---
     @Override
     public boolean isBarVisible(ItemStack stack) {
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            return isBarVisibleClient(stack);
+        }
+        return false; // Default server value
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private boolean isBarVisibleClient(ItemStack stack) {
         Player player = Minecraft.getInstance().player;
         if (player == null) {
             return false;
         }
         List<ItemStack> backtanks = BacktankUtil.getAllWithAir(player);
-        boolean visible = !backtanks.isEmpty();
-        return visible;
+        if (backtanks.isEmpty()) {
+            return false;
+        }
+        return BacktankUtil.isBarVisible(backtanks.get(0), maxUses());
     }
 
     @Override
     public int getBarWidth(ItemStack stack) {
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            return getBarWidthClient(stack);
+        }
+        return 0; // Default server value
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private int getBarWidthClient(ItemStack stack) {
         Player player = Minecraft.getInstance().player;
         if (player == null) {
             return 0;
         }
         List<ItemStack> backtanks = BacktankUtil.getAllWithAir(player);
-        int totalAir = backtanks.stream().map(BacktankUtil::getAir).reduce(0, Integer::sum);
-        int maxAir = backtanks.isEmpty() ? 1 : backtanks.get(0).getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
-                .copyTag().getInt("MaxAir");
-        if (maxAir == 0) maxAir = 800;
-        int width = Math.round(13.0f * totalAir / maxAir);
-        return Math.max(0, Math.min(13, width));
+        if (backtanks.isEmpty()) {
+            return 0;
+        }
+        return BacktankUtil.getBarWidth(backtanks.get(0), maxUses());
     }
 
     @Override
     public int getBarColor(ItemStack stack) {
-        int color = 0xFFFFFF;
-        return color;
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            return getBarColorClient(stack);
+        }
+        // Fallback for server or if client player is null - uses the stack itself for color, which might be a reasonable default
+        return BacktankUtil.getBarColor(stack, maxUses());
     }
+
+    @OnlyIn(Dist.CLIENT)
+    private int getBarColorClient(ItemStack stack) {
+        Player player = Minecraft.getInstance().player;
+        if (player == null) {
+            return BacktankUtil.getBarColor(stack, maxUses()); // Fallback
+        }
+        List<ItemStack> backtanks = BacktankUtil.getAllWithAir(player);
+        if (backtanks.isEmpty()) {
+            return BacktankUtil.getBarColor(stack, maxUses()); // Fallback
+        }
+        return BacktankUtil.getBarColor(backtanks.get(0), maxUses());
+    }
+    // --- END BAR METHODS ---
 
     @Nullable
     @Override
     public HumanoidModel.ArmPose getArmPose(ItemStack stack, AbstractClientPlayer player, InteractionHand hand) {
+        // This method is part of CustomArmPoseItem and is expected to only be called on the client.
+        // The AbstractClientPlayer parameter itself signals this.
         return player.getUsedItemHand() == hand ? HumanoidModel.ArmPose.BOW_AND_ARROW : HumanoidModel.ArmPose.ITEM;
     }
 
