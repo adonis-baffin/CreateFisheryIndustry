@@ -1,0 +1,19 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "minecraft:obsidian"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:obsidian",
+      "count": 1,
+      "chance": 0.75
+    },
+    {
+      "id": "create:powdered_obsidian",
+      "count": 1
+    }
+  ]
+}

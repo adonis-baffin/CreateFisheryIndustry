@@ -1,0 +1,14 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "create:rose_quartz"
+    }
+  ],
+  "results": [
+    {
+      "id": "create:polished_rose_quartz",
+      "count": 1
+    }
+  ]
+}

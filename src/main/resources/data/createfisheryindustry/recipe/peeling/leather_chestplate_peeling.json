@@ -1,0 +1,14 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "minecraft:leather_chestplate"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:leather",
+      "count": 1
+    }
+  ]
+}

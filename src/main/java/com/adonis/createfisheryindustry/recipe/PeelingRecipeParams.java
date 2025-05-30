@@ -13,7 +13,9 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.fluids.FluidStack;
 import java.util.function.Function;
 
@@ -49,7 +51,7 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
     public static final MapCodec<PeelingRecipeParams> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             PeelingRecipeSerializer.INGREDIENTS_MAP_CODEC.forGetter(p -> p.ingredients),
             PeelingRecipeSerializer.RESULTS_MAP_CODEC.forGetter(p -> p.results),
-            // 移除 processingTime 字段，或者保留但忽略它
+            // 移除 processingTime 字段的读取
             HeatCondition.CODEC.optionalFieldOf("heatRequirement", HeatCondition.NONE).forGetter(p -> p.requiredHeat),
             FluidIngredient.CODEC.listOf().xmap(NonNullList::copyOf, Function.identity())
                     .optionalFieldOf("fluidIngredients", NonNullList.create()).forGetter(p -> p.fluidIngredients),
@@ -77,5 +79,52 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
         NonNullList<FluidIngredient> fluidIngredients = CatnipStreamCodecBuilders.nonNullList(FluidIngredient.STREAM_CODEC).decode(buffer);
         NonNullList<FluidStack> fluidResults = CatnipStreamCodecBuilders.nonNullList(FluidStack.STREAM_CODEC).decode(buffer);
         return new PeelingRecipeParams(ingredients, results, heat, fluidIngredients, fluidResults);
+    }
+    // 在 PeelingRecipeParams 类中添加以下代码
+
+// 在 PeelingRecipeParams 类中添加（如果还没有的话）
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private NonNullList<Ingredient> ingredients = NonNullList.create();
+        private NonNullList<ProcessingOutput> results = NonNullList.create();
+        private HeatCondition requiredHeat = HeatCondition.NONE;
+        private NonNullList<FluidIngredient> fluidIngredients = NonNullList.create();
+        private NonNullList<FluidStack> fluidResults = NonNullList.create();
+
+        public Builder require(ItemLike item) {
+            return require(Ingredient.of(item));
+        }
+
+        public Builder require(Ingredient ingredient) {
+            ingredients.add(ingredient);
+            return this;
+        }
+
+        public Builder output(ItemLike item) {
+            return output(item, 1);
+        }
+
+        public Builder output(ItemLike item, int count) {
+            results.add(new ProcessingOutput(new ItemStack(item, count), 1.0f));
+            return this;
+        }
+
+        public Builder output(ProcessingOutput output) {
+            results.add(output);
+            return this;
+        }
+
+        public Builder withHeat(HeatCondition heat) {
+            this.requiredHeat = heat;
+            return this;
+        }
+
+        public PeelingRecipeParams build() {
+            return new PeelingRecipeParams(ingredients, results, requiredHeat, fluidIngredients, fluidResults);
+        }
     }
 }

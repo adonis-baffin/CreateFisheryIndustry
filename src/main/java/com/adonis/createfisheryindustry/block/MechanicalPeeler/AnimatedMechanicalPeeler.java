@@ -21,19 +21,22 @@ public class AnimatedMechanicalPeeler extends AnimatedKinetics {
         matrixStack.mulPose(Axis.YP.rotationDegrees(22.5f + 90));
         int scale = 27;
 
+        // 渲染传动轴，带有旋转动画
         blockElement(shaft(Direction.Axis.X))
                 .rotateBlock(-getCurrentAngle(), 0, 0)
                 .scale(scale)
                 .render(graphics);
 
+        // 渲染切削机主体
         blockElement(CreateFisheryBlocks.MECHANICAL_PEELER.getDefaultState()
                 .setValue(MechanicalPeelerBlock.FACING, Direction.UP))
                 .rotateBlock(0, 0, 0)
                 .scale(scale)
                 .render(graphics);
 
-        blockElement(CreateFisheryPartialModels.PEELER_BLADE_VERTICAL_ACTIVE)
-                .rotateBlock(0, -90, -90)
+        // 渲染刀片，围绕X轴旋转 - 关键修改！
+        blockElement(CreateFisheryPartialModels.THRESHER_BLADE)
+                .rotateBlock(-getCurrentAngle(), 0, 0)
                 .scale(scale)
                 .render(graphics);
 
