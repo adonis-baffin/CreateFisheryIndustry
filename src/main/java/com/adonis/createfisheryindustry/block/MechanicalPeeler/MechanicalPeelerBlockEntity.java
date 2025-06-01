@@ -17,6 +17,12 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import com.tterrag.registrate.util.nullness.NonNullConsumer;
 import net.createmod.catnip.math.VecHelper;
 import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.item.Items;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -1021,11 +1027,18 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         if (state.isAir()) return false;
         Block block = state.getBlock();
 
+        // 检查除锈
         if (DataMapHooks.INVERSE_OXIDIZABLES_DATAMAP.containsKey(block)) {
             return true;
         }
 
+        // 检查除蜡
         if (DataMapHooks.INVERSE_WAXABLES_DATAMAP.containsKey(block)) {
+            return true;
+        }
+
+        // 新增：只检查完全成熟的紫水晶簇（不包括小型、中型、大型）
+        if (block == Blocks.AMETHYST_CLUSTER) {
             return true;
         }
 
@@ -1120,16 +1133,21 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             if (!level.isClientSide) {
                 Block targetBlock = targetState.getBlock();
 
-                // 检查是否是原木去皮操作
-                ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(targetBlock);
-                if (blockId != null) {
-                    String blockPath = blockId.getPath();
-                    if (blockPath.contains("log") && !blockPath.contains("stripped")) {
-                        // 这是一个原木，执行整棵树去皮
-                        processWholeTree(currentTargetPos, targetState);
-                    } else {
-                        // 其他类型的处理（除锈、除蜡）
-                        processSingleBlock(currentTargetPos, targetState);
+                // 新增：检查是否为完全成熟的紫水晶簇
+                if (targetBlock == Blocks.AMETHYST_CLUSTER) {
+                    processAmethystCluster(currentTargetPos, targetState);
+                } else {
+                    // 检查是否是原木去皮操作
+                    ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(targetBlock);
+                    if (blockId != null) {
+                        String blockPath = blockId.getPath();
+                        if (blockPath.contains("log") && !blockPath.contains("stripped")) {
+                            // 这是一个原木，执行整棵树去皮
+                            processWholeTree(currentTargetPos, targetState);
+                        } else {
+                            // 其他类型的处理（除锈、除蜡）
+                            processSingleBlock(currentTargetPos, targetState);
+                        }
                     }
                 }
             }
@@ -1143,6 +1161,36 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             setChanged();
         }
     }
+
+    private void processAmethystCluster(BlockPos pos, BlockState state) {
+        if (level == null || level.isClientSide) return;
+
+        ItemStack amethystShards = new ItemStack(Items.AMETHYST_SHARD, 4);
+
+        if (!tryStoreItemInSecondaryOutput(amethystShards)) {
+
+            Vec3 dropPos = Vec3.atCenterOf(pos).add(0, 0.5, 0);
+            ItemEntity itemEntity = new ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, amethystShards);
+
+            itemEntity.setDeltaMovement(
+                    (level.random.nextDouble() - 0.5) * 0.1,
+                    level.random.nextDouble() * 0.1 + 0.1,
+                    (level.random.nextDouble() - 0.5) * 0.1
+            );
+            level.addFreshEntity(itemEntity);
+        }
+
+        // 破坏方块（设置为空气）
+        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+
+        // 播放破坏音效
+        level.playSound(null, pos, state.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1.0F, 1.0F);
+
+        // 同步数据
+        setChanged();
+        sendData();
+    }
+
 
     // 处理单个方块（除锈、除蜡）
     private void processSingleBlock(BlockPos pos, BlockState state) {
@@ -1228,27 +1276,62 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     private void spawnBlockProcessingParticles(BlockState state) {
-        // This method is now primarily called by the client-side tick logic
         if (targetBlockPos == null || level == null || !level.isClientSide) return;
 
         RandomSource random = level.random;
         Vec3 center = Vec3.atCenterOf(targetBlockPos); // Use the actual target block's center
 
-        // Generate particles around the target block
-        for (int i = 0; i < 3; i++) { // Number of particles
-            double offsetX = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getXsize();
-            double offsetY = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getYsize();
-            double offsetZ = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getZsize();
+        if (state.getBlock() == Blocks.AMETHYST_CLUSTER) {
+            for (int i = 0; i < 2; i++) { // 从5减少到2
+                double offsetX = (random.nextDouble() - 0.5) * 0.8;
+                double offsetY = (random.nextDouble() - 0.5) * 0.8;
+                double offsetZ = (random.nextDouble() - 0.5) * 0.8;
 
-            level.addParticle(
-                    new BlockParticleOption(ParticleTypes.BLOCK, state),
-                    center.x + offsetX,
-                    center.y + offsetY,
-                    center.z + offsetZ,
-                    (random.nextDouble() - 0.5) * 0.2D, // Motion x
-                    random.nextDouble() * 0.1D + 0.05D, // Motion y (slightly upwards)
-                    (random.nextDouble() - 0.5) * 0.2D  // Motion z
-            );
+                // 使用不同的粒子类型来营造闪亮效果
+                level.addParticle(
+                        ParticleTypes.END_ROD, // 闪亮的粒子
+                        center.x + offsetX,
+                        center.y + offsetY,
+                        center.z + offsetZ,
+                        (random.nextDouble() - 0.5) * 0.1D, // Motion x
+                        random.nextDouble() * 0.1D + 0.02D, // Motion y (slightly upwards)
+                        (random.nextDouble() - 0.5) * 0.1D  // Motion z
+                );
+            }
+
+            // 额外添加一些方块粒子（减少到30%）
+            for (int i = 0; i < 1; i++) { // 从2减少到1
+                double offsetX = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getXsize();
+                double offsetY = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getYsize();
+                double offsetZ = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getZsize();
+
+                level.addParticle(
+                        new BlockParticleOption(ParticleTypes.BLOCK, state),
+                        center.x + offsetX,
+                        center.y + offsetY,
+                        center.z + offsetZ,
+                        (random.nextDouble() - 0.5) * 0.2D, // Motion x
+                        random.nextDouble() * 0.1D + 0.05D, // Motion y (slightly upwards)
+                        (random.nextDouble() - 0.5) * 0.2D  // Motion z
+                );
+            }
+        } else {
+            // 原有的普通方块粒子效果
+            for (int i = 0; i < 3; i++) { // Number of particles
+                double offsetX = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getXsize();
+                double offsetY = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getYsize();
+                double offsetZ = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getZsize();
+
+                level.addParticle(
+                        new BlockParticleOption(ParticleTypes.BLOCK, state),
+                        center.x + offsetX,
+                        center.y + offsetY,
+                        center.z + offsetZ,
+                        (random.nextDouble() - 0.5) * 0.2D, // Motion x
+                        random.nextDouble() * 0.1D + 0.05D, // Motion y (slightly upwards)
+                        (random.nextDouble() - 0.5) * 0.2D  // Motion z
+                );
+            }
         }
     }
 
@@ -1256,9 +1339,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     @Override
     public void setLevel(Level level) {
         super.setLevel(level);
-        // Could reset cachedSpeed here if level changes, though getSpeed() should handle it
-        if (this.level != null && !this.level.isClientSide) { // If old level was server
-            // Clear potentially server-specific data if needed, though NBT handles most
+        if (this.level != null && !this.level.isClientSide) {
         }
     }
 
@@ -1301,7 +1382,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     @Override
     public void invalidate() {
         super.invalidate();
-        // No specific capability invalidation needed here unless you add some
     }
 
     @Override
@@ -1315,7 +1395,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         }
     }
 
-    // 内部类：物品处理器
     private static class PeelerItemHandler implements IItemHandler {
         private final MechanicalPeelerBlockEntity be;
         private final ProcessingInventory inputInv;
@@ -1329,8 +1408,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         @Override
         public int getSlots() {
-            // 1 input slot + secondary output slots
-            // Primary output is not directly accessible via this handler for insertion/extraction by external means
             return 1 + MAX_SECONDARY_OUTPUTS_STORAGE;
         }
 
@@ -1339,33 +1416,29 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             if (slot == INPUT_SLOT) { // Slot 0 is input
                 return inputInv.getStackInSlot(INPUT_SLOT);
             }
-            // Slots 1 to MAX_SECONDARY_OUTPUTS_STORAGE are for secondary outputs
             if (slot >= 1 && slot <= MAX_SECONDARY_OUTPUTS_STORAGE) {
-                return outputInv.getStackInSlot(slot); // outputInv slot 0 is primary_temp, 1+ are secondaries
+                return outputInv.getStackInSlot(slot);
             }
             return ItemStack.EMPTY;
         }
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            // Only allow insertion into the input slot (slot 0 of this handler)
             if (slot == INPUT_SLOT) {
                 if (!be.canAcceptInput() || be.getBlockState().getValue(MechanicalPeelerBlock.FACING) != Direction.UP) {
-                    return stack; // Cannot accept if not UP or cannot accept input
+                    return stack;
                 }
-                // Simulate is handled by inputInv.insertItem
                 ItemStack remainder = inputInv.insertItem(INPUT_SLOT, stack, simulate);
                 if (!simulate && remainder.getCount() < stack.getCount() && be.inputInventory.remainingTime == -1) {
                     be.startProcessingRecipe(inputInv.getStackInSlot(INPUT_SLOT));
                 }
                 return remainder;
             }
-            return stack; // Cannot insert into output slots via this handler
+            return stack;
         }
 
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            // Allow extraction from secondary output slots
             if (slot >= 1 && slot <= MAX_SECONDARY_OUTPUTS_STORAGE) {
                 return outputInv.extractItem(slot, amount, simulate); // outputInv slot 0 is primary_temp, 1+ are secondaries
             }

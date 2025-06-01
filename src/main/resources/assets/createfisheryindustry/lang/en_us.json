@@ -70,7 +70,7 @@
   "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "Extracts items, up to one stack at a time.",
 
   "block.createfisheryindustry.smart_beehive": "Smart Beehive",
-  "block.createfisheryindustry.smart_beehive.tooltip.summary": "Test block, the functions are still under development. This block is not part of the content of this mod 'Create: Fishery Industry'. It will be released in the upcoming new mod 'Create: Beekeeper' in the future. Stay tuned.",
+  "block.createfisheryindustry.smart_beehive.tooltip.summary": "Test block, the functions are still under development. This block is not part of the content of this mod 'Create: Fishery Industry'. It will be released in the upcoming new mod 'Create: Dinner' in the future. Stay tuned.",
   "createfisheryindustry.smart_beehive.mode": "Beehive Mode",
   "createfisheryindustry.smart_beehive.mode.honey_fluid": "Honey Fluid",
   "createfisheryindustry.smart_beehive.mode.honeycomb": "Honeycomb",
@@ -87,7 +87,7 @@
 
   "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "A mechanical component for processing peeling recipes and interacting with certain entities",
   "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "When powered by stress",
-  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "Processes peeling recipes, similar to a mechanical saw. Can also shear sheep or harvest scutes from turtles and armadillos",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "Processes peeling recipes, similar to a mechanical saw. Can shear sheep or harvest scutes from turtles and armadillos. Can strip bark from entire trees, remove rust and wax from blocks, and harvest mature amethyst clusters.",
 
   "item.createfisheryindustry.chains": "Chains",
   "item.createfisheryindustry.fish_skin": "Fish Skin",

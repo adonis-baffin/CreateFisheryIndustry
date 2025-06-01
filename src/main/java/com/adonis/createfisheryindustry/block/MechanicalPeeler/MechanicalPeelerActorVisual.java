@@ -76,14 +76,10 @@ public class MechanicalPeelerActorVisual extends ActorVisual {
                 .translate(context.localPos);
 
         if (MechanicalPeelerBlock.isHorizontal(blockState)) {
-            // 水平朝向：完全模仿静态渲染器的逻辑
-            // 静态渲染器使用：CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, blockState, oppositeFacing)
             Direction oppositeFacing = facing.getOpposite();
 
-            // 模仿 partialFacing 的行为
             shaftInstance.center();
 
-            // 根据oppositeFacing方向进行旋转，完全按照静态渲染器的逻辑
             if (oppositeFacing == Direction.NORTH) {
                 shaftInstance.rotateYDegrees(0).rotateXDegrees(180);
             } else if (oppositeFacing == Direction.SOUTH) {
@@ -97,8 +93,6 @@ public class MechanicalPeelerActorVisual extends ActorVisual {
             shaftInstance.uncenter();
 
         } else {
-            // 垂直朝向：完全模仿静态渲染器的逻辑
-            // 静态渲染器使用：CachedBuffers.block(KineticBlockEntityRenderer.KINETIC_BLOCK, KineticBlockEntityRenderer.shaft(axis))
             shaftInstance.center();
 
             if (kineticAxis == Axis.X) {
@@ -106,7 +100,6 @@ public class MechanicalPeelerActorVisual extends ActorVisual {
             } else if (kineticAxis == Axis.Z) {
                 shaftInstance.rotateXDegrees(90); // Y轴模型转到Z轴
             }
-            // 如果kineticAxis是Y，则不需要旋转
 
             shaftInstance.uncenter();
         }
@@ -118,13 +111,11 @@ public class MechanicalPeelerActorVisual extends ActorVisual {
     public void tick() {
         super.tick();
 
-        // 动态结构中不进行旋转计算，保持刀片静止
         previousBladeRotationProgress = 0;
         bladeRotationProgress = 0;
     }
 
     protected float getBladeRenderAngle() {
-        // 动态结构中返回固定角度0，保持刀片静止
         return 0f;
     }
 

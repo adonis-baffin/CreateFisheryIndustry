@@ -56,7 +56,6 @@ public class CreateFisheryCommonConfig {
 
     public static List<ResourceLocation> getWhitelist() {
         if (!isConfigLoaded) {
-            CreateFisheryMod.LOGGER.warn("Attempted to access whitelist before config is loaded. Returning cached or empty list.");
             return cachedWhitelist;
         }
 
@@ -69,7 +68,6 @@ public class CreateFisheryCommonConfig {
                         .collect(Collectors.toList());
                 lastWhitelistUpdate = currentTime;
             } catch (IllegalStateException e) {
-                CreateFisheryMod.LOGGER.error("Failed to load whitelist: {}", e.getMessage());
             }
         }
         return cachedWhitelist;
@@ -77,7 +75,6 @@ public class CreateFisheryCommonConfig {
 
     public static List<ResourceLocation> getBlacklist() {
         if (!isConfigLoaded) {
-            CreateFisheryMod.LOGGER.warn("Attempted to access blacklist before config is loaded. Returning cached or empty list.");
             return cachedBlacklist;
         }
 
@@ -90,7 +87,6 @@ public class CreateFisheryCommonConfig {
                         .collect(Collectors.toList());
                 lastBlacklistUpdate = currentTime;
             } catch (IllegalStateException e) {
-                CreateFisheryMod.LOGGER.error("Failed to load blacklist: {}", e.getMessage());
             }
         }
         return cachedBlacklist;
@@ -98,26 +94,22 @@ public class CreateFisheryCommonConfig {
 
     public static void refreshCache() {
         if (!isConfigLoaded) {
-            CreateFisheryMod.LOGGER.warn("Cannot refresh cache: Config not loaded yet.");
             return;
         }
         lastWhitelistUpdate = 0;
         lastBlacklistUpdate = 0;
         getWhitelist();
         getBlacklist();
-        CreateFisheryMod.LOGGER.info("Config cache refreshed.");
     }
 
     public static void onLoad() {
         isConfigLoaded = true;
         refreshCache();
-        CreateFisheryMod.LOGGER.info("CreateFisheryCommonConfig loaded.");
     }
 
     public static void onReload() {
         isConfigLoaded = true;
         refreshCache();
-        CreateFisheryMod.LOGGER.info("CreateFisheryCommonConfig reloaded.");
     }
 
     public static boolean isEntityWhitelisted(ResourceLocation entityId) {

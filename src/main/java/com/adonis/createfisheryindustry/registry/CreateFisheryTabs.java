@@ -29,7 +29,7 @@ public class CreateFisheryTabs {
             output.accept(CreateFisheryBlocks.MESH_TRAP);
             output.accept(CreateFisheryBlocks.TRAP_NOZZLE);
             output.accept(CreateFisheryBlocks.SMART_MESH);
-            output.accept(CreateFisheryBlocks.SMART_BEEHIVE);
+//            output.accept(CreateFisheryBlocks.SMART_BEEHIVE);
             output.accept(CreateFisheryBlocks.MECHANICAL_PEELER);
             output.accept(CreateFisheryItems.WORN_HARPOON.get());
             output.accept(CreateFisheryItems.HARPOON.get());

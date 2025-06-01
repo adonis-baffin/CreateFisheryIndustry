@@ -64,22 +64,16 @@ public class CreateFisheryStressConfig extends ConfigBase {
 
     @Override
     public String getName() {
-        // 配置文件名，例如 "createfisheryindustry-stressValues.v1"
-        // Catnip 会自动加上 .toml 后缀
-        // 确保这个名字对于你的模组是唯一的，通常会包含模组ID
         return modId + "-stressValues.v" + getVersion();
     }
 
     @Nullable
     public DoubleSupplier getImpact(Block block) {
         ResourceLocation id = RegisteredObjectsHelper.getKeyOrThrow(block);
-        // 只为本模组的方块提供应力值
         if (!id.getNamespace().equals(this.modId)) {
             return null;
         }
         ModConfigSpec.ConfigValue<Double> configValue = this.impacts.get(id);
-        // 如果配置文件中没有该条目（例如，新增的方块），则返回null
-        // Create可能会有默认处理或报错
         return configValue == null ? null : configValue::get;
     }
 
@@ -98,13 +92,10 @@ public class CreateFisheryStressConfig extends ConfigBase {
 
     public <B extends Block, P> NonNullUnaryOperator<BlockBuilder<B, P>> setImpact(double value) {
         return builder -> {
-            // 确保这个方块属于我们正在配置的模组
-            // builder.getOwner().getModid() 应该是 this.modId
             if (!builder.getOwner().getModid().equals(this.modId)) {
                 throw new IllegalStateException("Attempting to set stress impact for block '" + builder.getName()
                         + "' from mod '" + builder.getOwner().getModid() + "' using config for mod '" + this.modId + "'.");
             }
-            // builder.getName() 返回的是不带命名空间的路径名
             ResourceLocation id = ResourceLocation.fromNamespaceAndPath(this.modId, builder.getName());
             this.defaultImpacts.put(id, value);
             return builder;
