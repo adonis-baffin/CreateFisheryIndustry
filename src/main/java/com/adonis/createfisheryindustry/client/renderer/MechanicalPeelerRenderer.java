@@ -6,14 +6,19 @@ import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerB
 import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllPartialModels;
+import com.simibubi.create.content.contraptions.behaviour.MovementContext;
+import com.simibubi.create.content.contraptions.render.ContraptionMatrices;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
+import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
+import net.createmod.catnip.math.VecHelper;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
 import net.createmod.catnip.math.AngleHelper;
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -38,9 +43,13 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
 
     @Override
     protected void renderSafe(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
-        renderRotatingPart(be, partialTicks, ms, buffer, light, overlay);
-        renderItems(be, partialTicks, ms, buffer, light, overlay);
-        renderShaft(be, partialTicks, ms, buffer, light, overlay);
+        try {
+            renderRotatingPart(be, partialTicks, ms, buffer, light, overlay);
+            renderItems(be, partialTicks, ms, buffer, light, overlay);
+            renderShaft(be, partialTicks, ms, buffer, light, overlay);
+        } catch (Exception e) {
+            CreateFisheryMod.LOGGER.error("Error rendering MechanicalPeeler at {}", be.getBlockPos(), e);
+        }
     }
 
     protected void renderRotatingPart(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
@@ -68,50 +77,68 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
             rotOffset = new Vec3(0, PIVOT.y * originOffset, PIVOT.z * originOffset);
         }
 
-        if (facing.getAxis().isHorizontal()) {
-            superBuffer = CachedBuffers.partial(CreateFisheryPartialModels.THRESHER_BLADE, blockState);
-            superBuffer.rotateCentered(AngleHelper.rad(AngleHelper.horizontalAngle(facing)), Direction.UP);
-            superBuffer.translate(rotOffset.x, rotOffset.y, rotOffset.z);
-            superBuffer.rotate(AngleHelper.rad(angle), Direction.WEST);
-            superBuffer.translate(-rotOffset.x, -rotOffset.y, -rotOffset.z);
-        } else {
-            Direction horizontalFacing;
-            if (kineticShaftAxis == Axis.X) {
-                horizontalFacing = flipped ? Direction.SOUTH : Direction.NORTH;
+        try {
+            if (facing.getAxis().isHorizontal()) {
+                superBuffer = CachedBuffers.partial(CreateFisheryPartialModels.THRESHER_BLADE, blockState);
+                if (superBuffer == null) {
+                    CreateFisheryMod.LOGGER.warn("THRESHER_BLADE model is null for horizontal facing");
+                    return;
+                }
+                superBuffer.rotateCentered(AngleHelper.rad(AngleHelper.horizontalAngle(facing)), Direction.UP);
+                superBuffer.translate(rotOffset.x, rotOffset.y, rotOffset.z);
+                superBuffer.rotate(AngleHelper.rad(angle), Direction.WEST);
+                superBuffer.translate(-rotOffset.x, -rotOffset.y, -rotOffset.z);
             } else {
-                horizontalFacing = flipped ? Direction.WEST : Direction.EAST;
+                Direction horizontalFacing;
+                if (kineticShaftAxis == Axis.X) {
+                    horizontalFacing = flipped ? Direction.SOUTH : Direction.NORTH;
+                } else {
+                    horizontalFacing = flipped ? Direction.WEST : Direction.EAST;
+                }
+
+                superBuffer = CachedBuffers.partialFacingVertical(CreateFisheryPartialModels.THRESHER_BLADE, blockState, horizontalFacing);
+                if (superBuffer == null) {
+                    CreateFisheryMod.LOGGER.warn("THRESHER_BLADE model is null for vertical facing");
+                    return;
+                }
+
+                if (facing == Direction.DOWN) {
+                    superBuffer.rotateCentered(AngleHelper.rad(180), Direction.EAST);
+                }
+
+                KineticBlockEntityRenderer.standardKineticRotationTransform(superBuffer, be, light)
+                        .renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
+                return;
             }
 
-            superBuffer = CachedBuffers.partialFacingVertical(CreateFisheryPartialModels.THRESHER_BLADE, blockState, horizontalFacing);
-
-            if (facing == Direction.DOWN) {
-                superBuffer.rotateCentered(AngleHelper.rad(180), Direction.EAST);
-            }
-
-            KineticBlockEntityRenderer.standardKineticRotationTransform(superBuffer, be, light)
+            superBuffer.light(light)
+                    .overlay(overlay)
                     .renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
-            return;
+        } catch (Exception e) {
+            CreateFisheryMod.LOGGER.error("Error rendering rotating part for MechanicalPeeler", e);
         }
-
-        superBuffer.light(light)
-                .overlay(overlay)
-                .renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
     }
 
     protected void renderShaft(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
         BlockState blockState = be.getBlockState();
         SuperByteBuffer shaftBuffer;
 
-        if (blockState.getValue(MechanicalPeelerBlock.FACING).getAxis().isHorizontal()) {
-            Direction oppositeFacing = blockState.getValue(MechanicalPeelerBlock.FACING).getOpposite();
-            shaftBuffer = CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, blockState, oppositeFacing);
-        } else {
-            Axis axis = ((MechanicalPeelerBlock) blockState.getBlock()).getRotationAxis(blockState);
-            shaftBuffer = CachedBuffers.block(KineticBlockEntityRenderer.KINETIC_BLOCK, KineticBlockEntityRenderer.shaft(axis));
-        }
+        try {
+            if (blockState.getValue(MechanicalPeelerBlock.FACING).getAxis().isHorizontal()) {
+                Direction oppositeFacing = blockState.getValue(MechanicalPeelerBlock.FACING).getOpposite();
+                shaftBuffer = CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, blockState, oppositeFacing);
+            } else {
+                Axis axis = ((MechanicalPeelerBlock) blockState.getBlock()).getRotationAxis(blockState);
+                shaftBuffer = CachedBuffers.block(KineticBlockEntityRenderer.KINETIC_BLOCK, KineticBlockEntityRenderer.shaft(axis));
+            }
 
-        KineticBlockEntityRenderer.standardKineticRotationTransform(shaftBuffer, be, light)
-                .renderInto(ms, buffer.getBuffer(RenderType.solid()));
+            if (shaftBuffer != null) {
+                KineticBlockEntityRenderer.standardKineticRotationTransform(shaftBuffer, be, light)
+                        .renderInto(ms, buffer.getBuffer(RenderType.solid()));
+            }
+        } catch (Exception e) {
+            CreateFisheryMod.LOGGER.error("Error rendering shaft for MechanicalPeeler", e);
+        }
     }
 
     protected void renderItems(MechanicalPeelerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
@@ -188,14 +215,8 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
         boolean blockItem = modelWithOverrides.isGui3d();
 
         ms.pushPose();
-
-        // 计算物品位置
-        // progress: 1.0 = 输入侧, 0.5 = 中心, 0.0 = 输出侧
-        // 调转动画方向（180度），所以直接使用 progress
         float positionOffset = progress - 0.5f; // 0.5 到 -0.5（反向）
 
-        // 应用移动向量
-        // itemMovement 指向物品移动的方向（从输入到输出）
         ms.translate(
                 0.5 + itemMovement.x * positionOffset,
                 0,
@@ -222,4 +243,159 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
         ms.popPose();
     }
 
+// 在 MechanicalPeelerRenderer 类中修改以下静态方法
+
+    public static void renderInContraption(MovementContext context, VirtualRenderWorld renderWorld,
+                                           ContraptionMatrices matrices, MultiBufferSource buffer) {
+
+        BlockState state = context.state;
+        Direction facing = state.getValue(MechanicalPeelerBlock.FACING);
+        boolean axisAlongFirst = state.getValue(MechanicalPeelerBlock.AXIS_ALONG_FIRST_COORDINATE);
+        boolean flipped = state.getValue(MechanicalPeelerBlock.FLIPPED);
+
+        // 渲染刀片
+        renderBladeInContraption(context, renderWorld, matrices, buffer, state, facing, axisAlongFirst, flipped);
+
+        // 渲染传动杆
+        renderShaftInContraption(context, renderWorld, matrices, buffer, state, facing, axisAlongFirst);
+    }
+
+    private static void renderBladeInContraption(MovementContext context, VirtualRenderWorld renderWorld,
+                                                 ContraptionMatrices matrices, MultiBufferSource buffer, BlockState state, Direction facing,
+                                                 boolean axisAlongFirst, boolean flipped) {
+
+        SuperByteBuffer superBuffer;
+
+        if (facing.getAxis().isHorizontal()) {
+            superBuffer = CachedBuffers.partial(CreateFisheryPartialModels.THRESHER_BLADE, state);
+        } else {
+            // 垂直朝向使用partialFacingVertical
+            Direction horizontalFacing;
+            Axis kineticAxis = axisAlongFirst ? Axis.X : Axis.Z;
+            if (kineticAxis == Axis.X) {
+                horizontalFacing = flipped ? Direction.SOUTH : Direction.NORTH;
+            } else {
+                horizontalFacing = flipped ? Direction.WEST : Direction.EAST;
+            }
+            superBuffer = CachedBuffers.partialFacingVertical(CreateFisheryPartialModels.THRESHER_BLADE, state, horizontalFacing);
+        }
+
+        if (superBuffer == null) {
+            CreateFisheryMod.LOGGER.warn("THRESHER_BLADE model is null in contraption rendering");
+            return;
+        }
+
+        // 计算旋转速度和角度
+        float speed = (float) (context.contraption.stalled
+                || !VecHelper.isVecPointingTowards(context.relativeMotion, facing.getOpposite())
+                ? context.getAnimationSpeed() : 0);
+
+        float time = AnimationTickHolder.getRenderTime() / 20;
+        float angle = (float) (((time * speed * 6f / 10f) % 360));
+
+        // 应用变换
+        superBuffer.transform(matrices.getModel());
+
+        if (facing.getAxis().isHorizontal()) {
+            // 水平放置的变换 - 与静态渲染器完全一致
+            superBuffer.center()
+                    .rotateYDegrees(AngleHelper.horizontalAngle(facing))
+                    .uncenter();  // 先完成朝向旋转
+
+            // 应用pivot偏移和旋转
+            float originOffset = 1 / 16f;
+            float rotOffsetY = 8 * originOffset;
+            float rotOffsetZ = 8 * originOffset;
+
+            superBuffer.translate(0, rotOffsetY, rotOffsetZ)
+                    .rotateXDegrees(angle)
+                    .translate(0, -rotOffsetY, -rotOffsetZ);
+        } else {
+            // 垂直放置的变换 - 与静态渲染器完全一致
+            if (facing == Direction.DOWN) {
+                superBuffer.center()
+                        .rotateXDegrees(180)
+                        .uncenter();
+            }
+
+            // 使用standardKineticRotationTransform逻辑
+            superBuffer.center();
+
+            // 垂直朝向时，刀片的旋转轴应该与传动杆轴一致
+            Axis kineticAxis = axisAlongFirst ? Axis.X : Axis.Z;
+            if (kineticAxis == Axis.X) {
+                superBuffer.rotateXDegrees(angle);
+            } else {
+                superBuffer.rotateZDegrees(angle);
+            }
+
+            superBuffer.uncenter();
+        }
+
+        superBuffer.light(LevelRenderer.getLightColor(renderWorld, context.localPos))
+                .useLevelLight(context.world, matrices.getWorld())
+                .renderInto(matrices.getViewProjection(), buffer.getBuffer(RenderType.cutoutMipped()));
+    }
+
+    private static void renderShaftInContraption(MovementContext context, VirtualRenderWorld renderWorld,
+                                                 ContraptionMatrices matrices, MultiBufferSource buffer, BlockState state, Direction facing,
+                                                 boolean axisAlongFirst) {
+
+        SuperByteBuffer shaftBuffer;
+
+        try {
+            if (facing.getAxis().isHorizontal()) {
+                // 水平朝向使用半轴
+                Direction oppositeFacing = facing.getOpposite();
+                shaftBuffer = CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, state, oppositeFacing);
+            } else {
+                // 垂直朝向使用完整轴
+                shaftBuffer = CachedBuffers.partial(AllPartialModels.SHAFT, state);
+            }
+
+            if (shaftBuffer != null) {
+                // 计算旋转速度和角度
+                float speed = (float) (context.contraption.stalled
+                        || !VecHelper.isVecPointingTowards(context.relativeMotion, facing.getOpposite())
+                        ? context.getAnimationSpeed() : 0);
+
+                float time = AnimationTickHolder.getRenderTime() / 20;
+                float angle = (float) (((time * speed * 6f / 10f) % 360));
+
+                shaftBuffer.transform(matrices.getModel());
+
+                if (facing.getAxis().isHorizontal()) {
+                    // 水平朝向：使用standardKineticRotationTransform逻辑
+                    // 注意：CachedBuffers.partialFacing已经处理了朝向，所以只需要旋转
+                    shaftBuffer.center();
+                    shaftBuffer.rotateYDegrees(angle);  // 沿Y轴旋转（因为已经朝向正确方向）
+                    shaftBuffer.uncenter();
+                } else {
+                    // 垂直朝向：根据轴向旋转
+                    shaftBuffer.center();
+
+                    Axis kineticAxis = axisAlongFirst ? Axis.X : Axis.Z;
+                    if (kineticAxis == Axis.X) {
+                        // X轴：需要先旋转90度使轴沿X方向
+                        shaftBuffer.rotateZDegrees(90);
+                        // 然后绕新的轴旋转（Y轴变成了X轴）
+                        shaftBuffer.rotateYDegrees(-angle);  // 负号是因为坐标系的差异
+                    } else {
+                        // Z轴：需要先旋转90度使轴沿Z方向
+                        shaftBuffer.rotateXDegrees(90);
+                        // 然后绕新的轴旋转（Y轴变成了Z轴）
+                        shaftBuffer.rotateYDegrees(angle);
+                    }
+
+                    shaftBuffer.uncenter();
+                }
+
+                shaftBuffer.light(LevelRenderer.getLightColor(renderWorld, context.localPos))
+                        .useLevelLight(context.world, matrices.getWorld())
+                        .renderInto(matrices.getViewProjection(), buffer.getBuffer(RenderType.solid()));
+            }
+        } catch (Exception e) {
+            CreateFisheryMod.LOGGER.error("Error rendering shaft for MechanicalPeeler in contraption", e);
+        }
+    }
 }

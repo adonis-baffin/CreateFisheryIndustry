@@ -54,8 +54,6 @@ public class CreateFisheryBlockEntities {
 
     public static final BlockEntityEntry<MechanicalPeelerBlockEntity> MECHANICAL_PEELER = REGISTRATE
             .blockEntity("mechanical_peeler", MechanicalPeelerBlockEntity::new)
-            // 移除下面这行:
-            // .visual(() -> MechanicalPeelerVisual::new)
             .validBlocks(CreateFisheryBlocks.MECHANICAL_PEELER)
             .renderer(() -> MechanicalPeelerRenderer::new)
             .register();

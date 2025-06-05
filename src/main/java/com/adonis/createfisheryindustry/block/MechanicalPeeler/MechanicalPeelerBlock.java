@@ -2,6 +2,7 @@ package com.adonis.createfisheryindustry.block.MechanicalPeeler;
 
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.AllShapes;
+import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.content.kinetics.simpleRelays.ShaftBlock;
 import com.simibubi.create.foundation.block.IBE;
@@ -315,8 +316,6 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
                     state.getValue(FACING).getAxis(),
                     (Direction dir) -> world.getBlockState(pos.relative(dir)).canBeReplaced());
 
-            System.out.println("Placement directions: " + directions);
-
             if (directions.isEmpty())
                 return PlacementOffset.fail();
             else {
@@ -326,5 +325,9 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
                                 .setValue(FLIPPED, state.getValue(FLIPPED)));
             }
         }
+    }
+
+    public MovementBehaviour getMovementBehaviour() {
+        return new MechanicalPeelerMovementBehaviour();
     }
 }

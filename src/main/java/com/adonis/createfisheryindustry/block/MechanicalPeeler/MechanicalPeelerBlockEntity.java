@@ -7,6 +7,8 @@ import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.kinetics.saw.TreeCutter;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
+import net.minecraft.tags.ItemTags;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.DataMapHooks;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
@@ -100,6 +102,11 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     private int blockProcessingTime = 0;
     private boolean isProcessingBlock = false;
     private BlockPos targetBlockPos = null;
+
+    private static Item FARMERS_DELIGHT_TREE_BARK = null;
+    private static boolean farmersDelightChecked = false;
+    private static final String FARMERS_DELIGHT_MOD_ID = "farmersdelight";
+    private static final String TREE_BARK_ITEM_ID = "tree_bark"; // Farmer's Delight 树皮的物品 ID
 
     public MechanicalPeelerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -220,6 +227,25 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                 inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() &&
                 inputInventory.remainingTime <= 0 &&
                 outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty();
+    }
+
+    private static Item getFarmersDelightTreeBark() {
+        if (!farmersDelightChecked) {
+            farmersDelightChecked = true;
+            if (ModList.get().isLoaded(FARMERS_DELIGHT_MOD_ID)) {
+                CreateFisheryMod.LOGGER.info("Farmer's Delight mod detected. Attempting to load Tree Bark item.");
+                Item barkItem = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(FARMERS_DELIGHT_MOD_ID, TREE_BARK_ITEM_ID));
+                if (barkItem != null && barkItem != Items.AIR) {
+                    FARMERS_DELIGHT_TREE_BARK = barkItem;
+                    CreateFisheryMod.LOGGER.info("Successfully loaded Farmer's Delight Tree Bark: " + FARMERS_DELIGHT_TREE_BARK.toString());
+                } else {
+                    CreateFisheryMod.LOGGER.warn("Farmer's Delight is loaded, but its Tree Bark item could not be found at '{}:{}'.", FARMERS_DELIGHT_MOD_ID, TREE_BARK_ITEM_ID);
+                }
+            } else {
+                CreateFisheryMod.LOGGER.info("Farmer's Delight mod not detected. Tree Bark from Farmer's Delight will not be dropped.");
+            }
+        }
+        return FARMERS_DELIGHT_TREE_BARK;
     }
 
     // 添加一个方法来查找所有需要去皮的原木
@@ -526,15 +552,13 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             //         blockProcessingTime, targetBlockPos);
         }
 
-
         // 传送带检测（仅服务端，且机器朝上时）
         if (!level.isClientSide && getBlockState().getValue(MechanicalPeelerBlock.FACING) == Direction.UP && level.getGameTime() % 5 == 0) {
-            Vec3 itemMovement = getItemMovementVec(); // This might need adjustment if getItemMovementVec depends on currentInputDirection not yet set
-            if (!Vec3.ZERO.equals(itemMovement)) { // Ensure there's a valid movement vector
+            Vec3 itemMovement = getItemMovementVec();
+            if (!Vec3.ZERO.equals(itemMovement)) {
                 BlockPos inputPos = worldPosition.offset(BlockPos.containing(itemMovement.reverse()));
                 DirectBeltInputBehaviour inputBelt = BlockEntityBehaviour.get(level, inputPos, DirectBeltInputBehaviour.TYPE);
                 if (inputBelt != null) {
-                    // Potentially try to pull items if conditions are met
                     // CreateFisheryMod.LOGGER.debug("Belt detected at {} for input direction {}", inputPos, itemMovement.reverse());
                 }
             }
@@ -545,14 +569,28 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             if (!playEvent.isEmpty()) {
                 tickAudio();
             }
-            // 客户端物品处理动画
+
+            // 客户端物品处理动画和粒子效果
             if (inputInventory.remainingTime > 0 && getBlockState().getValue(MechanicalPeelerBlock.FACING) == Direction.UP && canProcess()) {
                 float speed = Math.abs(getSpeed()) / 24f;
                 inputInventory.remainingTime = Math.max(0, inputInventory.remainingTime - speed);
+
+                // 在物品移动过程中显示粒子效果
+                if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() && !inputInventory.appliedRecipe) {
+                    // 输入阶段粒子效果
+                    spawnParticles(inputInventory.getStackInSlot(INPUT_SLOT));
+                } else if (!outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty() && inputInventory.appliedRecipe) {
+                    // 输出阶段粒子效果
+                    spawnParticles(outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP));
+                }
             }
+
             // 客户端方块处理粒子
             if (isProcessingBlock && targetBlockPos != null && blockProcessingTime > 0 && shouldProcessBlock()) {
-                spawnBlockProcessingParticles(level.getBlockState(targetBlockPos));
+                // 每几个tick显示一次粒子，避免过于频繁
+                if (level.getGameTime() % 3 == 0) {
+                    spawnBlockProcessingParticles(level.getBlockState(targetBlockPos));
+                }
             }
             return;
         }
@@ -561,40 +599,27 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         // 物品处理逻辑 (当机器朝上时)
         if (getBlockState().getValue(MechanicalPeelerBlock.FACING) == Direction.UP) {
-            if (!canProcess() || getSpeed() == 0) { // Not enough speed or cannot process items
-                // 如果机器停止但有待处理的物品或已处理的输出
-                if (inputInventory.remainingTime <= 0) { // Not in an active processing animation
+            if (!canProcess() || getSpeed() == 0) {
+                if (inputInventory.remainingTime <= 0) {
                     if (!outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty()) {
                         ejectInputOrPrimaryOutput();
                     } else if (inputInventory.appliedRecipe && !inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
-                        // This case means recipe was applied, but output became empty, and input (which was pass-through) remains.
                         ejectInputOrPrimaryOutput();
                     }
                 }
-                // If it was processing a block and is now UP, reset block processing (handled further down)
-            } else { // Can process items and has speed
-                if (inputInventory.remainingTime > 0) { // Item processing/animation in progress
+            } else {
+                if (inputInventory.remainingTime > 0) {
                     float speed = Math.abs(getSpeed()) / 24f;
                     inputInventory.remainingTime -= speed;
 
-                    if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() && !inputInventory.appliedRecipe) { // Input phase particles
-                        spawnParticles(inputInventory.getStackInSlot(INPUT_SLOT));
-                    } else if (!outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP).isEmpty() && inputInventory.appliedRecipe) { // Output phase particles
-                        spawnParticles(outputInventory.getStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP));
-                    }
-
-
-                    if (inputInventory.remainingTime <= 0 && !inputInventory.appliedRecipe) { // Input phase finished
+                    if (inputInventory.remainingTime <= 0 && !inputInventory.appliedRecipe) {
                         if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty()) {
-                            playEvent = inputInventory.getStackInSlot(INPUT_SLOT).copy(); // For sound/event particles
+                            playEvent = inputInventory.getStackInSlot(INPUT_SLOT).copy();
                         }
                         Optional<RecipeHolder<PeelingRecipe>> recipeHolder =
                                 getMatchingRecipe(new SingleRecipeInput(inputInventory.getStackInSlot(INPUT_SLOT)));
                         if (recipeHolder.isPresent()) {
                             applyRecipeProducts(recipeHolder.get());
-                        } else {
-                            // No recipe, treat as pass-through if applicable, or handle error
-                            // For now, it will just move to appliedRecipe=true and then eject in output phase
                         }
                         inputInventory.appliedRecipe = true;
                         inputInventory.recipeDuration = OUTPUT_ANIMATION_TIME;
@@ -603,10 +628,10 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                         sendData();
                         level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
 
-                    } else if (inputInventory.remainingTime <= 0 && inputInventory.appliedRecipe) { // Output phase finished
+                    } else if (inputInventory.remainingTime <= 0 && inputInventory.appliedRecipe) {
                         ejectInputOrPrimaryOutput();
                     }
-                } else { // Idle state for item processing (remainingTime <= 0)
+                } else {
                     if (!inputInventory.getStackInSlot(INPUT_SLOT).isEmpty() && !inputInventory.appliedRecipe && canAcceptInput()) {
                         startProcessingRecipe(inputInventory.getStackInSlot(INPUT_SLOT));
                     }
@@ -616,16 +641,14 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         // 方块处理逻辑 - 简化条件
         if (shouldProcessBlock() && getSpeed() != 0) {
-            // 只要是水平放置且有速度就处理方块
             processBlock();
         } else {
-            // 如果不应该处理方块了（比如朝向改变或速度为0），并且之前正在处理方块，则重置状态
             if (isProcessingBlock) {
                 blockProcessingTime = 0;
                 isProcessingBlock = false;
                 targetBlockPos = null;
-                setChanged(); // 保存重置的状态
-                sendData();   // 同步到客户端
+                setChanged();
+                sendData();
             }
         }
     }
@@ -743,8 +766,8 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     private void applyRecipeProducts(RecipeHolder<PeelingRecipe> recipeHolder) {
-        ItemStack inputStackForRecipe = inputInventory.getStackInSlot(INPUT_SLOT).copy();
-        if (inputStackForRecipe.isEmpty() || level == null) return; // 添加 level 空检查
+        ItemStack inputStackForRecipe = inputInventory.getStackInSlot(INPUT_SLOT).copy(); // 获取输入槽的物品副本进行处理
+        if (inputStackForRecipe.isEmpty() || level == null) return;
 
         PeelingRecipe recipe = recipeHolder.value();
         int itemsToProcess = inputStackForRecipe.getCount();
@@ -753,7 +776,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         ItemStack aggregatedPrimaryOutput = ItemStack.EMPTY;
         List<ItemStack> aggregatedSecondaryOutputs = new LinkedList<>();
 
-        // 获取配方定义的所有潜在产物（ProcessingOutput 列表）
         List<ProcessingOutput> definedOutputs = recipe.getRollableResults();
         if (definedOutputs.isEmpty()) {
             setChanged();
@@ -761,25 +783,20 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             return;
         }
 
-        // 按照Create的惯例，第一个定义的产物是主产物
         ProcessingOutput primaryDefinedOutput = definedOutputs.get(0);
-        // 其余的是副产物
         List<ProcessingOutput> secondaryDefinedOutputs = definedOutputs.size() > 1 ?
                 definedOutputs.subList(1, definedOutputs.size()) : Collections.emptyList();
 
-        for (int i = 0; i < itemsToProcess; i++) { // 对原输入槽中的每一个物品进行处理
-            // 为主产物掷骰子
-            // 注意：recipe.rollResults(List<ProcessingOutput>) 会返回一个 ItemStack 列表
+        for (int i = 0; i < itemsToProcess; i++) {
             List<ItemStack> rolledPrimaryList = recipe.rollResults(Collections.singletonList(primaryDefinedOutput));
             if (!rolledPrimaryList.isEmpty()) {
-                ItemStack currentPrimaryRolledItem = rolledPrimaryList.get(0); // 通常列表里只有一个元素，或者为空ItemStack
+                ItemStack currentPrimaryRolledItem = rolledPrimaryList.get(0);
                 if (!currentPrimaryRolledItem.isEmpty()) {
                     if (aggregatedPrimaryOutput.isEmpty()) {
                         aggregatedPrimaryOutput = currentPrimaryRolledItem.copy();
                     } else if (ItemStack.isSameItemSameComponents(aggregatedPrimaryOutput, currentPrimaryRolledItem)) {
                         aggregatedPrimaryOutput.grow(currentPrimaryRolledItem.getCount());
                     } else {
-                        // 如果roll出了不同类型的主产物（理论上不应该，但为了健壮性）
                         Vec3 dropPos = VecHelper.getCenterOf(worldPosition).add(0, 0.75, 0);
                         ItemEntity overflow = new ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, currentPrimaryRolledItem);
                         level.addFreshEntity(overflow);
@@ -787,7 +804,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                 }
             }
 
-            // 为所有副产物掷骰子
             if (!secondaryDefinedOutputs.isEmpty()) {
                 List<ItemStack> currentSecondaries = recipe.rollResults(secondaryDefinedOutputs);
                 for (ItemStack secondaryStack : currentSecondaries) {
@@ -796,20 +812,28 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                     }
                 }
             }
+
+            // 新增：如果输入是原木，尝试添加农夫乐事的树皮
+            // 需要使用原始的 inputStackForRecipe 来判断类型，因为它代表了配方的输入
+            if (inputStackForRecipe.is(ItemTags.LOGS_THAT_BURN)) { // 使用原版的log tag
+                Item bark = getFarmersDelightTreeBark();
+                if (bark != null) {
+                    // 每处理一个原木物品，就尝试给一个树皮
+                    ItemHelper.addToList(new ItemStack(bark, 1), aggregatedSecondaryOutputs);
+                }
+            }
         }
 
-        // 将聚合后的主产物（如果存在）放入临时输出槽
         outputInventory.setStackInSlot(OUTPUT_INV_PRIMARY_SLOT_TEMP, aggregatedPrimaryOutput);
 
-        // 存储副产物
         for (ItemStack secondaryStack : aggregatedSecondaryOutputs) {
             if (secondaryStack.isEmpty()) continue;
             ItemStack remainderToStore = secondaryStack.copy();
-            for (int slot = 1; slot < outputInventory.getSlots(); slot++) { // 副产物从槽位1开始
+            for (int slot = 1; slot < outputInventory.getSlots(); slot++) {
                 remainderToStore = outputInventory.insertItem(slot, remainderToStore, false);
                 if (remainderToStore.isEmpty()) break;
             }
-            if (!remainderToStore.isEmpty()) { // 如果副产物存不下，则丢弃在地上
+            if (!remainderToStore.isEmpty()) {
                 Vec3 dropPos = VecHelper.getCenterOf(worldPosition).add(0, 0.75, 0);
                 ItemEntity overflow = new ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, remainderToStore);
                 level.addFreshEntity(overflow);
@@ -818,7 +842,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         setChanged();
         sendData();
     }
-
 
     public Vec3 getItemMovementVec() {
         Direction facing = getBlockState().getValue(MechanicalPeelerBlock.FACING);
@@ -892,7 +915,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     protected boolean canProcess() {
-        // 每个 tick 只计算一次速度
+
         if (level != null && level.getGameTime() != lastSpeedCheck) {
             lastSpeedCheck = level.getGameTime();
             cachedSpeed = getSpeed();
@@ -901,17 +924,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         if (cachedSpeed == null || cachedSpeed == 0) {
             return false;
         }
-
-        // 垂直放置时处理物品
-        if (getBlockState().getValue(MechanicalPeelerBlock.FACING) == Direction.UP) {
-            return true;
-        }
-
-        // 水平放置时也可以工作（处理方块）
-        if (getBlockState().getValue(MechanicalPeelerBlock.FACING).getAxis().isHorizontal()) {
-            return true;
-        }
-        return false;
+        return true;
     }
 
 
@@ -1014,9 +1027,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     }
 
     protected boolean shouldProcessBlock() {
-        return getBlockState().getValue(MechanicalPeelerBlock.FACING)
-                .getAxis()
-                .isHorizontal();
+        return true;
     }
 
     protected BlockPos getTargetBlockPos() {
@@ -1191,13 +1202,42 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         sendData();
     }
 
+    private void tryDropBarkForLog(BlockPos logPos, BlockState originalLogState) {
+        if (level == null || level.isClientSide) return;
 
-    // 处理单个方块（除锈、除蜡）
+        // 检查原方块是否为原木 (避免在已经是去皮木或其他方块上错误触发)
+        ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(originalLogState.getBlock());
+        if (blockId == null || !blockId.getPath().contains("log") || blockId.getPath().contains("stripped")) {
+            return; // 不是未去皮的原木
+        }
+
+        Item bark = getFarmersDelightTreeBark();
+        if (bark != null) {
+            ItemStack barkDrop = new ItemStack(bark, 1); // 每次去皮一个方块，掉落一个树皮
+
+            // 尝试存入副产物槽
+            if (!tryStoreItemInSecondaryOutput(barkDrop)) {
+                // 如果存不下，则在方块位置掉落
+                Vec3 dropPosition = Vec3.atCenterOf(logPos).add(0, 0.25, 0); // 稍微向上偏移
+                ItemEntity itemEntity = new ItemEntity(level, dropPosition.x, dropPosition.y, dropPosition.z, barkDrop);
+                // 给物品一点随机运动
+                itemEntity.setDeltaMovement(
+                        (level.random.nextDouble() - 0.5) * 0.1,
+                        level.random.nextDouble() * 0.1 + 0.05,
+                        (level.random.nextDouble() - 0.5) * 0.1
+                );
+                level.addFreshEntity(itemEntity);
+            }
+            // 可以考虑在这里播放一个小的音效，比如树皮剥落的声音
+            // level.playSound(null, logPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.5F + level.random.nextFloat() * 0.2F);
+        }
+    }
+
+
     private void processSingleBlock(BlockPos pos, BlockState state) {
-        Block processedBlock = getProcessedBlock(state.getBlock());
+        Block processedBlock = getProcessedBlock(state.getBlock()); // 这个方法会返回去皮后的木头
         if (processedBlock != state.getBlock()) {
             BlockState newState = processedBlock.defaultBlockState();
-            // 复制相同的属性
             for (Property<?> property : state.getProperties()) {
                 if (newState.hasProperty(property)) {
                     newState = copyPropertyUnchecked(state, newState, property);
@@ -1205,23 +1245,24 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             }
             level.setBlock(pos, newState, 3);
             level.playSound(null, pos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
+
+            // 如果原方块是原木，尝试掉落树皮
+            tryDropBarkForLog(pos, state);
         }
     }
 
-    // 处理整棵树（去皮）
     private void processWholeTree(BlockPos startPos, BlockState startState) {
         List<BlockPos> logs = findTreeLogs(startPos, startState);
 
         if (logs.isEmpty()) {
-            // 如果找不到树，至少处理当前方块
-            processSingleBlock(startPos, startState);
+            // 如果找不到树（或只是单个原木），按单个方块处理
+            processSingleBlock(startPos, startState); // processSingleBlock 内部会调用 tryDropBarkForLog
             return;
         }
 
-        // 对所有找到的原木进行去皮
         int processedCount = 0;
         for (BlockPos logPos : logs) {
-            BlockState logState = level.getBlockState(logPos);
+            BlockState logState = level.getBlockState(logPos); // 获取当前位置的方块状态
             Block logBlock = logState.getBlock();
 
             ResourceLocation logId = BuiltInRegistries.BLOCK.getKey(logBlock);
@@ -1238,7 +1279,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                         Block strippedBlock = BuiltInRegistries.BLOCK.get(strippedId);
                         BlockState newState = strippedBlock.defaultBlockState();
 
-                        // 复制属性
                         for (Property<?> property : logState.getProperties()) {
                             if (newState.hasProperty(property)) {
                                 newState = copyPropertyUnchecked(logState, newState, property);
@@ -1248,7 +1288,9 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                         level.setBlock(logPos, newState, 3);
                         processedCount++;
 
-                        // 每处理几个方块播放一次音效，避免太吵
+                        // 尝试为这个被去皮的原木掉落树皮
+                        tryDropBarkForLog(logPos, logState); // 传递原始的 logState
+
                         if (processedCount % 3 == 1) {
                             level.playSound(null, logPos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 0.8F, 1.0F);
                         }
@@ -1257,7 +1299,6 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             }
         }
 
-        // 在起始位置播放一个主音效
         if (processedCount > 0) {
             level.playSound(null, startPos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
