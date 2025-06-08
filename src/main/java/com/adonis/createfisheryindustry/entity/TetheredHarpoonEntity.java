@@ -37,6 +37,9 @@ import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TetheredHarpoonEntity extends AbstractArrow {
     private static final Logger LOGGER = LoggerFactory.getLogger(TetheredHarpoonEntity.class);
     private Player owner;
@@ -326,9 +329,8 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                     Vec3 targetPos = hitEntity.position().add(0, hitEntity.getBbHeight() * 0.5, 0);
                     this.setPos(targetPos);
                     this.setDeltaMovement(Vec3.ZERO);
-                    this.deathDelayTicks = 0; // 重置延迟计数
+                    this.deathDelayTicks = 0;
                 } else {
-                    // 实体死亡或无效，延迟收回
                     if (deathDelayTicks < MAX_DEATH_DELAY && hitEntity != null) {
                         this.deathDelayTicks++;
                     } else {
@@ -353,6 +355,57 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             }
 
             if (currentState == HarpoonState.FLYING) {
+                // 改进的物品检测
+                if (tickCount > 4) {
+                    // 使用位置而不是碰撞盒来检测
+                    Vec3 harpoonPos = this.position();
+                    double detectionRadius = 3.0;
+
+                    // 获取附近所有实体，然后筛选ItemEntity
+                    List<Entity> allEntities = level().getEntities(this,
+                            this.getBoundingBox().inflate(detectionRadius * 2));
+
+                    List<ItemEntity> nearbyItems = new ArrayList<>();
+                    int entityCount = 0;
+
+                    for (Entity entity : allEntities) {
+                        entityCount++;
+                        if (entity instanceof ItemEntity item) {
+                            double distance = item.position().distanceTo(harpoonPos);
+                            if (distance <= detectionRadius && !item.isRemoved() && item.isAlive()) {
+                                nearbyItems.add(item);
+                            }
+                        }
+                    }
+
+                    if (!nearbyItems.isEmpty()) {
+                        // 使用 getOwner() 而不是 owner 字段
+                        Entity ownerEntity = this.getOwner();
+                        if (ownerEntity instanceof Player player) {
+
+                            long tetherEndTime = level().getGameTime() + 200;
+                            for (ItemEntity item : nearbyItems) {
+                                CompoundTag tag = item.getPersistentData();
+                                tag.putBoolean("HarpoonTethered", true);
+                                tag.putInt("TetherPlayerId", player.getId());
+                                tag.putLong("TetherEndTime", tetherEndTime);
+
+                                // 初始速度
+                                Vec3 itemPos = item.position();
+                                Vec3 playerPos = player.position();
+                                Vec3 direction = playerPos.subtract(itemPos).normalize();
+                                item.setDeltaMovement(direction.scale(0.5));
+                                item.setPickUpDelay(10);
+                            }
+
+                            this.playSound(SoundEvents.FISHING_BOBBER_RETRIEVE, 1.0F, 1.0F);
+                            this.startRetrieving();
+                            return;
+                        }
+                    }
+                }
+
+                // 碰撞检测
                 this.checkCollision();
                 if (hitEntity != null) {
                     this.currentState = HarpoonState.HOOKED_IN_ENTITY;
@@ -371,7 +424,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             }
         }
     }
-
     @Override
     public void playerTouch(Player entity) {
         if (this.ownedBy(entity) || this.getOwner() == null) {

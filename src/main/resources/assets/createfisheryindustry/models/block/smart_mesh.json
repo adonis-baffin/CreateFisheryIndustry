@@ -8,6 +8,7 @@
 		"9": "createfisheryindustry:block/chute_smart_top",
 		"particle": "createfisheryindustry:block/chute_smart"
 	},
+	"render_type": "minecraft:cutout",
 	"elements": [
 		{
 			"from": [0, 8, 0],

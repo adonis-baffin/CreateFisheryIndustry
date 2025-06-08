@@ -5,6 +5,7 @@
 		"5": "block/anvil",
 		"particle": "createfisheryindustry:block/axis_top"
 	},
+	"render_type": "minecraft:cutout",
 	"elements": [
 		{
 			"name": "Blade",

@@ -6,6 +6,7 @@
 		"1_0": "createfisheryindustry:block/zinc_trapdoor",
 		"1_1": "createfisheryindustry:block/net"
 	},
+	"render_type": "minecraft:cutout",
 	"elements": [
 		{
 			"from": [2, 8, 2],
