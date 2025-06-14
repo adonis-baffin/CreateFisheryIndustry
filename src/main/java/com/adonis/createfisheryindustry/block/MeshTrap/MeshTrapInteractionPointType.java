@@ -39,7 +39,7 @@ class MeshTrapInteractionPoint extends ArmInteractionPoint {
         return pos;
     }
 
-    @Override
+
     protected IItemHandler getHandler() {
         if (level.getBlockEntity(pos) instanceof MeshTrapBlockEntity meshTrap) {
             IItemHandler handler = meshTrap.getInventory();
@@ -48,7 +48,7 @@ class MeshTrapInteractionPoint extends ArmInteractionPoint {
         return null;
     }
 
-    @Override
+
     public ItemStack insert(ItemStack stack, boolean simulate) {
         IItemHandler handler = getHandler();
         if (handler == null) {
@@ -58,7 +58,7 @@ class MeshTrapInteractionPoint extends ArmInteractionPoint {
         return remainder;
     }
 
-    @Override
+
     public ItemStack extract(int slot, int amount, boolean simulate) {
         IItemHandler handler = getHandler();
         if (handler == null) {
@@ -68,7 +68,7 @@ class MeshTrapInteractionPoint extends ArmInteractionPoint {
         return extracted;
     }
 
-    @Override
+
     public int getSlotCount() {
         IItemHandler handler = getHandler();
         int slotCount = handler != null ? handler.getSlots() : 0;

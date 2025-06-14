@@ -104,6 +104,8 @@ dependencies {
 
     compileOnly("top.theillusivec4.curios:curios-neoforge:${curios_version}+${curios_minecraft_version}:api")
     localRuntime("top.theillusivec4.curios:curios-neoforge:${curios_version}+${curios_minecraft_version}")
+    localImplementation("maven.modrinth:nether-depths-upgrade:${nether_depths_upgrade_version}")
+    localImplementation("maven.modrinth:geckolib:${geckolib_version}")
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

@@ -26,6 +26,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
@@ -89,5 +90,11 @@ public class ClientSetup {
                 return HarpoonISTER.RENDERER;
             }
         }, CreateFisheryItems.HARPOON.get());
+    }
+
+    @SubscribeEvent
+    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(TetheredHarpoonRenderer.HARPOON_LAYER,
+                TetheredHarpoonRenderer.HarpoonModel::createBodyLayer);
     }
 }

@@ -1,16 +1,16 @@
 {
 	"credit": "Made with Blockbench",
-	"texture_size": [32, 32],
+	"texture_size": [64, 64],
 	"textures": {
-		"2": "createfisheryindustry:block/pneumatic_harpoon_gun_hook",
-		"particle": "createfisheryindustry:block/pneumatic_harpoon_gun_hook"
+		"2": "createfisheryindustry:block/pneumatic_harpoon_gun_handle",
+		"particle": "createfisheryindustry:block/pneumatic_harpoon_gun_handle"
 	},
 	"elements": [
 		{
 			"name": "bone",
-			"from": [7.30942, 8.01486, -12.96237],
-			"to": [8.68472, 9.39016, 2.88771],
-			"rotation": {"angle": 0, "axis": "y", "origin": [8, 9.97996, -9]},
+			"from": [7.30942, 8.01486, -3.94],
+			"to": [8.68472, 9.39016, 12.0501],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 9.97996, 0]},
 			"faces": {
 				"north": {"uv": [1.25, 7.5, 1, 7.75], "texture": "#2"},
 				"east": {"uv": [10, 5.75, 6, 6], "texture": "#2"},
@@ -22,9 +22,23 @@
 		},
 		{
 			"name": "bone",
-			"from": [6.99301, 7.69845, -9.71237],
-			"to": [9.00112, 9.70657, -5.11229],
-			"rotation": {"angle": 0, "axis": "y", "origin": [8, 9.97996, -9]},
+			"from": [7.30942, 8.01486, 12.03763],
+			"to": [8.68472, 9.39016, 27.88771],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 9.97996, 16]},
+			"faces": {
+				"north": {"uv": [1.25, 7.5, 1, 7.75], "texture": "#2"},
+				"east": {"uv": [10, 5.75, 6, 6], "texture": "#2"},
+				"south": {"uv": [6.5, 7.75, 6.25, 8], "texture": "#2"},
+				"west": {"uv": [10.5, 2, 6.5, 2.25], "texture": "#2"},
+				"up": {"uv": [6.5, 2.5, 10.5, 2.25], "rotation": 90, "texture": "#2"},
+				"down": {"uv": [6.5, 2.5, 10.5, 2.75], "rotation": 270, "texture": "#2"}
+			}
+		},
+		{
+			"name": "bone",
+			"from": [6.99301, 7.69845, -0.71237],
+			"to": [9.00112, 9.70657, 3.88771],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 9.97996, 0]},
 			"faces": {
 				"north": {"uv": [7.25, 8, 6.75, 8.5], "texture": "#2"},
 				"east": {"uv": [7.75, 2.75, 6.5, 3.25], "texture": "#2"},
@@ -36,9 +50,9 @@
 		},
 		{
 			"name": "bone",
-			"from": [7.38751, 9.04766, -8.48467],
-			"to": [8.60664, 12.50186, -7.26554],
-			"rotation": {"angle": 45, "axis": "x", "origin": [8, 9.97996, -9]},
+			"from": [7.38751, 9.04766, 0.51533],
+			"to": [8.60664, 12.50186, 1.73446],
+			"rotation": {"angle": 45, "axis": "x", "origin": [8, 9.97996, 0]},
 			"faces": {
 				"north": {"uv": [4, 6.25, 3.75, 7], "texture": "#2"},
 				"east": {"uv": [6, 3.25, 5.75, 4], "texture": "#2"},
@@ -50,9 +64,9 @@
 		},
 		{
 			"name": "bone",
-			"from": [7.38751, 8.94194, -7.65161],
-			"to": [8.60664, 11.64614, -6.43248],
-			"rotation": {"angle": 22.5, "axis": "x", "origin": [8, 9.97996, -9]},
+			"from": [7.38751, 8.94194, 1.34839],
+			"to": [8.60664, 11.64614, 2.56752],
+			"rotation": {"angle": 22.5, "axis": "x", "origin": [8, 9.97996, 0]},
 			"faces": {
 				"north": {"uv": [4.25, 8.5, 4, 9.25], "texture": "#2"},
 				"east": {"uv": [4, 8.5, 3.75, 9.25], "texture": "#2"},
@@ -64,9 +78,9 @@
 		},
 		{
 			"name": "bone",
-			"from": [7.38751, 9.24981, -6.47286],
-			"to": [8.60664, 10.46894, -4.26866],
-			"rotation": {"angle": -22.5, "axis": "x", "origin": [8, 9.97996, -9]},
+			"from": [7.38751, 9.24981, 2.52714],
+			"to": [8.60664, 10.46894, 4.73134],
+			"rotation": {"angle": -22.5, "axis": "x", "origin": [8, 9.97996, 0]},
 			"faces": {
 				"north": {"uv": [9.25, 0.75, 9, 1], "texture": "#2"},
 				"east": {"uv": [9, 3.5, 8.5, 3.75], "texture": "#2"},
@@ -78,9 +92,9 @@
 		},
 		{
 			"name": "bone",
-			"from": [7.38751, 11.90651, -6.59234],
-			"to": [8.60664, 12.80923, -5.13814],
-			"rotation": {"angle": 22.5, "axis": "x", "origin": [8, 9.97996, -9]},
+			"from": [7.38751, 11.90651, 2.40766],
+			"to": [8.60664, 12.80923, 3.86186],
+			"rotation": {"angle": 22.5, "axis": "x", "origin": [8, 9.97996, 0]},
 			"faces": {
 				"north": {"uv": [1.5, 9, 1.25, 9.25], "texture": "#2"},
 				"east": {"uv": [9.25, 1, 9, 1.25], "texture": "#2"},
@@ -91,9 +105,9 @@
 			}
 		},
 		{
-			"from": [7.32129, 5.7907, -11.38354],
-			"to": [8.68457, 6.75945, -10.41479],
-			"rotation": {"angle": 45, "axis": "x", "origin": [8, 9.97996, -9]},
+			"from": [7.32129, 5.7907, -2.38354],
+			"to": [8.68457, 6.75945, -1.41479],
+			"rotation": {"angle": 45, "axis": "x", "origin": [8, 9.97996, 0]},
 			"faces": {
 				"north": {"uv": [9.25, 2.75, 9, 3], "texture": "#2"},
 				"east": {"uv": [2.75, 9, 2.5, 9.25], "texture": "#2"},
@@ -105,50 +119,18 @@
 		}
 	],
 	"display": {
-		"thirdperson_righthand": {
-			"translation": [0, 1.35, -1.75],
-			"scale": [0.9, 0.9, 0.9]
-		},
-		"thirdperson_lefthand": {
-			"translation": [0, 1.35, -1.75],
-			"scale": [0.9, 0.9, 0.9]
-		},
-		"firstperson_righthand": {
-			"rotation": [10, 12, 10],
-			"translation": [3.75, 0, -1.5]
-		},
-		"firstperson_lefthand": {
-			"rotation": [10, 12, 10],
-			"translation": [3.75, 0, -1.5]
-		},
-		"ground": {
-			"rotation": [0, 0, 90],
-			"translation": [0, 2.7, 0],
-			"scale": [0.38457, 0.38457, 0.38457]
-		},
-		"display": {
-			"gui": {
-				"rotation": [73, -66, 60],
-				"translation": [-0.5, 0, 0],
-				"scale": [0.64, 0.64, 0.64]
-			}
-		},
-		"head": {
-			"translation": [0, 15, 0]
-		},
-		"fixed": {
-			"rotation": [0, 90, 0],
-			"translation": [2.75, 4.75, -1.25]
+		"gui": {
+			"rotation": [73, -66, 60],
+			"translation": [-0.25, 0, 0],
+			"scale": [0.64, 0.64, 0.64]
 		}
 	},
 	"groups": [
 		{
-			"name": "pneumatic_harpoon_gun_hook",
-			"origin": [8, 6, -2.5],
+			"name": "group2",
+			"origin": [5.80897, 8.80675, 20.21223],
 			"color": 0,
-			"children": [0, 1]
-		},
-		2,
-		3
+			"children": [0, 1, 2, 3, 4, 5, 6, 7]
+		}
 	]
 }

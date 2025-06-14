@@ -38,7 +38,7 @@ class TrapNozzleInteractionPoint extends ArmInteractionPoint {
         return Vec3.atLowerCornerOf(this.pos).add(0.5, 14 / 16.0, 0.5);
     }
 
-    @Override
+
     protected IItemHandler getHandler() {
         if (level.getBlockEntity(pos) instanceof TrapNozzleBlockEntity trapNozzle) {
             return trapNozzle.getInventory();
@@ -46,7 +46,7 @@ class TrapNozzleInteractionPoint extends ArmInteractionPoint {
         return null;
     }
 
-    @Override
+
     public ItemStack insert(ItemStack stack, boolean simulate) {
         IItemHandler handler = getHandler();
         if (handler == null) {
@@ -55,7 +55,7 @@ class TrapNozzleInteractionPoint extends ArmInteractionPoint {
         return ItemHandlerHelper.insertItem(handler, stack, simulate);
     }
 
-    @Override
+
     public ItemStack extract(int slot, int amount, boolean simulate) {
         IItemHandler handler = getHandler();
         if (handler == null) {
@@ -64,7 +64,7 @@ class TrapNozzleInteractionPoint extends ArmInteractionPoint {
         return handler.extractItem(slot, amount, simulate);
     }
 
-    @Override
+
     public int getSlotCount() {
         IItemHandler handler = getHandler();
         return handler != null ? handler.getSlots() : 0;

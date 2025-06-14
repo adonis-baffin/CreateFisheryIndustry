@@ -6,18 +6,12 @@ import net.minecraft.resources.ResourceLocation;
 
 public class CreateFisheryPartialModels {
 
-    public static final PartialModel PEELER_BLADE_HORIZONTAL_ACTIVE = partial("block/mechanical_peeler/blade_horizontal_active");
-    public static final PartialModel PEELER_BLADE_HORIZONTAL_INACTIVE = partial("block/mechanical_peeler/blade_horizontal_inactive");
-    public static final PartialModel PEELER_BLADE_HORIZONTAL_REVERSED = partial("block/mechanical_peeler/blade_horizontal_reversed");
+    // 使用更清晰的命名
+    public static final PartialModel THRESHER_BLADE = block("mechanical_peeler/blade");
 
-    public static final PartialModel PEELER_BLADE_VERTICAL_ACTIVE = partial("block/mechanical_peeler/blade_vertical_active");
-    public static final PartialModel PEELER_BLADE_VERTICAL_INACTIVE = partial("block/mechanical_peeler/blade_vertical_inactive");
-    public static final PartialModel PEELER_BLADE_VERTICAL_REVERSED = partial("block/mechanical_peeler/blade_vertical_reversed");
-    public static final PartialModel THRESHER_BLADE = partial("block/mechanical_peeler/partial");
-
-
-    private static PartialModel partial(String path) {
-        return PartialModel.of(CreateFisheryMod.asResource(path));
+    // 使用与 Create 相同的方法签名
+    private static PartialModel block(String path) {
+        return PartialModel.of(CreateFisheryMod.asResource("block/" + path));
     }
 
     public static void init() {

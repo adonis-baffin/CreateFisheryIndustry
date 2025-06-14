@@ -89,12 +89,10 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             int id = this.getEntityData().get(DATA_HOOKED_ENTITY);
             this.hitEntity = id > 0 ? this.level().getEntity(id - 1) : null;
             this.currentState = this.hitEntity != null ? HarpoonState.HOOKED_IN_ENTITY : HarpoonState.FLYING;
-            LOGGER.debug("Updated hooked entity: {}, state: {}", this.hitEntity, this.currentState);
         }
         if (DATA_ANCHORED.equals(key)) {
             this.anchored = this.getEntityData().get(DATA_ANCHORED);
             this.currentState = this.anchored ? HarpoonState.ANCHORED : HarpoonState.FLYING;
-            LOGGER.debug("Updated anchored state: {}, state: {}", this.anchored, this.currentState);
         }
     }
 
@@ -127,7 +125,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                 });
             }
         }
-        LOGGER.debug("Harpoon anchored at: {}", pos);
     }
 
     public void setHitEntity(Entity entity, int tick) {
@@ -150,7 +147,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                 });
             }
         }
-        LOGGER.debug("Harpoon hooked entity: {}", entity);
     }
 
     private ItemStack getHarpoonGunFromPlayer(Player player) {
@@ -203,7 +199,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             }
         }
         this.discard();
-        LOGGER.debug("Harpoon retrieving");
     }
 
     public void shoot(Vec3 direction, float speed) {
