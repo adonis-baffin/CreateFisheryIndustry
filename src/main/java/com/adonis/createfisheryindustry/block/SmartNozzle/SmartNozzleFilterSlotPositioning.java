@@ -26,34 +26,34 @@ public class SmartNozzleFilterSlotPositioning extends ValueBoxTransform.Sided {
                 case NORTH -> {
                     // 远离喷嘴（向南），在四个面显示
                     switch (side) {
-                        case UP -> { return VecHelper.voxelSpace(8, 14, 12); }    // 上表面（原位置）
-                        case DOWN -> { return VecHelper.voxelSpace(8, 2, 12); }   // 下表面
-                        case WEST -> { return VecHelper.voxelSpace(2, 8, 12); }   // 左侧面
-                        case EAST -> { return VecHelper.voxelSpace(14, 8, 12); }  // 右侧面
+                        case UP -> { return VecHelper.voxelSpace(8, 15, 11); }    // 上表面，向喷嘴方向移动1像素与下表面对称
+                        case DOWN -> { return VecHelper.voxelSpace(8, 1, 11); }   // 下表面，向喷嘴方向移动1像素
+                        case WEST -> { return VecHelper.voxelSpace(1, 8, 11); }   // 左侧面
+                        case EAST -> { return VecHelper.voxelSpace(15, 8, 11); }  // 右侧面
                     }
                 }
                 case SOUTH -> {
                     switch (side) {
-                        case UP -> { return VecHelper.voxelSpace(8, 14, 4); }
-                        case DOWN -> { return VecHelper.voxelSpace(8, 2, 4); }
-                        case WEST -> { return VecHelper.voxelSpace(14, 8, 4); }
-                        case EAST -> { return VecHelper.voxelSpace(2, 8, 4); }
+                        case UP -> { return VecHelper.voxelSpace(8, 15, 5); }     // 上表面，向喷嘴方向移动1像素与下表面对称
+                        case DOWN -> { return VecHelper.voxelSpace(8, 1, 5); }    // 下表面，向喷嘴方向移动1像素
+                        case WEST -> { return VecHelper.voxelSpace(15, 8, 5); }
+                        case EAST -> { return VecHelper.voxelSpace(1, 8, 5); }
                     }
                 }
                 case WEST -> {
                     switch (side) {
-                        case UP -> { return VecHelper.voxelSpace(12, 14, 8); }
-                        case DOWN -> { return VecHelper.voxelSpace(12, 2, 8); }
-                        case NORTH -> { return VecHelper.voxelSpace(12, 8, 2); }
-                        case SOUTH -> { return VecHelper.voxelSpace(12, 8, 14); }
+                        case UP -> { return VecHelper.voxelSpace(11, 15, 8); }    // 上表面，向喷嘴方向移动1像素与下表面对称
+                        case DOWN -> { return VecHelper.voxelSpace(11, 1, 8); }   // 下表面，向喷嘴方向移动1像素
+                        case NORTH -> { return VecHelper.voxelSpace(11, 8, 1); }
+                        case SOUTH -> { return VecHelper.voxelSpace(11, 8, 15); }
                     }
                 }
                 case EAST -> {
                     switch (side) {
-                        case UP -> { return VecHelper.voxelSpace(4, 14, 8); }
-                        case DOWN -> { return VecHelper.voxelSpace(4, 2, 8); }
-                        case NORTH -> { return VecHelper.voxelSpace(4, 8, 14); }
-                        case SOUTH -> { return VecHelper.voxelSpace(4, 8, 2); }
+                        case UP -> { return VecHelper.voxelSpace(5, 15, 8); }     // 上表面，向喷嘴方向移动1像素与下表面对称
+                        case DOWN -> { return VecHelper.voxelSpace(5, 1, 8); }    // 下表面，向喷嘴方向移动1像素
+                        case NORTH -> { return VecHelper.voxelSpace(5, 8, 15); }
+                        case SOUTH -> { return VecHelper.voxelSpace(5, 8, 1); }
                     }
                 }
             }
@@ -63,11 +63,11 @@ public class SmartNozzleFilterSlotPositioning extends ValueBoxTransform.Sided {
             float horizontalAngle = AngleHelper.horizontalAngle(side);
             Vec3 baseLocation;
             if (facing == Direction.UP) {
-                // 朝上时，在下半部分（远离喷嘴），向外移动避免内嵌
-                baseLocation = VecHelper.voxelSpace(8, 4, 14);
+                // 朝上时，在下半部分（远离喷嘴），向喷嘴方向移动1像素与DOWN朝向对称
+                baseLocation = VecHelper.voxelSpace(8, 5, 15);
             } else {
-                // 朝下时，在上半部分（远离喷嘴），向外移动避免内嵌
-                baseLocation = VecHelper.voxelSpace(8, 12, 14);
+                // 朝下时，在上半部分（远离喷嘴），向喷嘴方向移动1像素更接近中心
+                baseLocation = VecHelper.voxelSpace(8, 11, 15);
             }
             return VecHelper.rotateCentered(baseLocation, horizontalAngle, Direction.Axis.Y);
         }
