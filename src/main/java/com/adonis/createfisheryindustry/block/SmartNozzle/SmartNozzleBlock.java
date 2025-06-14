@@ -1,9 +1,7 @@
-package com.adonis.createfisheryindustry.block.TrapNozzle;
+package com.adonis.createfisheryindustry.block.SmartNozzle;
 
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
-import com.simibubi.create.AllShapes;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
-import com.simibubi.create.content.kinetics.fan.IAirCurrentSource;
 import com.simibubi.create.content.kinetics.fan.NozzleBlock;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmItem;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
@@ -30,11 +28,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.block.RenderShape;
+import com.simibubi.create.AllShapes;
+import com.simibubi.create.content.kinetics.fan.IAirCurrentSource;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
-public class TrapNozzleBlock extends NozzleBlock implements ProperWaterloggedBlock {
+public class SmartNozzleBlock extends NozzleBlock implements ProperWaterloggedBlock {
 
-    public TrapNozzleBlock(Properties properties) {
+    public SmartNozzleBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
     }
@@ -49,9 +49,8 @@ public class TrapNozzleBlock extends NozzleBlock implements ProperWaterloggedBlo
     public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
         BlockState state = super.getStateForPlacement(context);
         if (state == null) return null;
-        return withWater(state, context); // 直接传递 context 而不是拆分它的属性
+        return withWater(state, context);
     }
-
 
     @Override
     public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, net.minecraft.world.level.LevelAccessor level, BlockPos currentPos, BlockPos facingPos) {
@@ -66,13 +65,13 @@ public class TrapNozzleBlock extends NozzleBlock implements ProperWaterloggedBlo
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return CreateFisheryBlockEntities.TRAP_NOZZLE.get().create(pos, state);
+        return CreateFisheryBlockEntities.SMART_NOZZLE.get().create(pos, state);
     }
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return type == CreateFisheryBlockEntities.TRAP_NOZZLE.get()
-                ? (lvl, pos, blockState, be) -> TrapNozzleBlockEntity.tick(lvl, pos, blockState, (TrapNozzleBlockEntity) be)
+        return type == CreateFisheryBlockEntities.SMART_NOZZLE.get()
+                ? (lvl, pos, blockState, be) -> SmartNozzleBlockEntity.tick(lvl, pos, blockState, (SmartNozzleBlockEntity) be)
                 : null;
     }
 
@@ -80,8 +79,8 @@ public class TrapNozzleBlock extends NozzleBlock implements ProperWaterloggedBlo
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
             BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof TrapNozzleBlockEntity trapNozzle) {
-                trapNozzle.dropInventory();
+            if (be instanceof SmartNozzleBlockEntity smartNozzle) {
+                smartNozzle.dropInventory();
             }
             super.onRemove(state, level, pos, newState, isMoving);
         }
@@ -107,7 +106,7 @@ public class TrapNozzleBlock extends NozzleBlock implements ProperWaterloggedBlo
 
     @Override
     public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        // 处理扳手交互（如果需要的话）
+        // 处理扳手交互
         if (stack.getItem() instanceof WrenchItem) {
             UseOnContext wrenchContext = new UseOnContext(level, player, hand, stack, hitResult);
             InteractionResult result = player.isShiftKeyDown()
@@ -130,11 +129,11 @@ public class TrapNozzleBlock extends NozzleBlock implements ProperWaterloggedBlo
 
         // 获取方块实体
         BlockEntity be = level.getBlockEntity(pos);
-        if (!(be instanceof TrapNozzleBlockEntity trapNozzle)) {
+        if (!(be instanceof SmartNozzleBlockEntity smartNozzle)) {
             return ItemInteractionResult.FAIL;
         }
 
-        var inventory = trapNozzle.getInventory();
+        var inventory = smartNozzle.getInventory();
         if (inventory == null) {
             return ItemInteractionResult.FAIL;
         }
@@ -165,7 +164,7 @@ public class TrapNozzleBlock extends NozzleBlock implements ProperWaterloggedBlo
 
             // 显示提取信息
             player.displayClientMessage(
-                    Component.translatable("create_fishery.trap_nozzle.extracted",
+                    Component.translatable("create_fishery.smart_nozzle.extracted",
                             extracted.getCount(),
                             Component.translatable(extracted.getDescriptionId())),
                     true
@@ -175,12 +174,12 @@ public class TrapNozzleBlock extends NozzleBlock implements ProperWaterloggedBlo
             // 没有提取到物品
             if (totalItems > 0) {
                 player.displayClientMessage(
-                        Component.translatable("create_fishery.trap_nozzle.extraction_failed"),
+                        Component.translatable("create_fishery.smart_nozzle.extraction_failed"),
                         true
                 );
             } else {
                 player.displayClientMessage(
-                        Component.translatable("create_fishery.trap_nozzle.empty"),
+                        Component.translatable("create_fishery.smart_nozzle.empty"),
                         true
                 );
             }

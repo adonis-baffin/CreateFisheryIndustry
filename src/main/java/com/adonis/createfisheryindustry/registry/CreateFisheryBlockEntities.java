@@ -3,6 +3,7 @@ package com.adonis.createfisheryindustry.registry;
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
+import com.adonis.createfisheryindustry.block.SmartNozzle.SmartNozzleBlockEntity;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartBeehive.SmartBeehiveBlockEntity;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlockEntity;
@@ -50,6 +51,13 @@ public class CreateFisheryBlockEntities {
                     BlockEntityType.Builder.of(
                             (pos, state) -> new TrapNozzleBlockEntity(CreateFisheryBlockEntities.TRAP_NOZZLE.get(), pos, state),
                             CreateFisheryBlocks.TRAP_NOZZLE.get()
+                    ).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SmartNozzleBlockEntity>> SMART_NOZZLE =
+            BLOCK_ENTITIES.register("smart_nozzle", () ->
+                    BlockEntityType.Builder.of(
+                            (pos, state) -> new SmartNozzleBlockEntity(CreateFisheryBlockEntities.SMART_NOZZLE.get(), pos, state),
+                            CreateFisheryBlocks.SMART_NOZZLE.get()
                     ).build(null));
 
     public static final BlockEntityEntry<MechanicalPeelerBlockEntity> MECHANICAL_PEELER = REGISTRATE
@@ -119,6 +127,6 @@ public class CreateFisheryBlockEntities {
 
         TrapNozzleBlockEntity.registerCapabilities(event);
         SmartMeshBlockEntity.registerCapabilities(event);
-        CreateFisheryMod.LOGGER.info("Registered BlockEntity Capabilities for Create Fishery Mod");
+        SmartNozzleBlockEntity.registerCapabilities(event);
     }
 }

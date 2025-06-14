@@ -104,6 +104,34 @@
   "create.gui.goggles.speed": "Speed: %s RPM",
   "create.gui.goggles.peeler_input": "Input:",
   "create.gui.goggles.peeler_outputs": "Stored Outputs:",
-  "create.gui.goggles.peeler_stored_outputs": "Stored Outputs:"
+  "create.gui.goggles.peeler_stored_outputs": "Stored Outputs:",
+
+  "block.createfisheryindustry.smart_nozzle": "Smart Nozzle",
+
+  "create.gui.goggles.smart_nozzle_contents": "Smart Nozzle Contents",
+
+  "create_fishery.smart_mesh.extracted": "Extracted %s x %s",
+  "create_fishery.smart_mesh.extraction_failed": "Extraction failed, please try again",
+  "create_fishery.smart_mesh.empty": "Smart Mesh is empty",
+
+  "create_fishery.mesh_trap.extracted": "Extracted %s x %s",
+  "create_fishery.mesh_trap.extraction_failed": "Extraction failed, please try again",
+  "create_fishery.mesh_trap.empty": "Mesh Trap is empty",
+
+  "create_fishery.trap_nozzle.extracted": "Extracted %s x %s",
+  "create_fishery.trap_nozzle.extraction_failed": "Extraction failed, please try again",
+  "create_fishery.trap_nozzle.empty": "Trap Nozzle is empty",
+
+  "create_fishery.smart_nozzle.extracted": "Extracted %s x %s",
+  "create_fishery.smart_nozzle.extraction_failed": "Extraction failed, please try again",
+  "create_fishery.smart_nozzle.empty": "Smart Nozzle is empty",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "Smart Nozzle with filter capability that can automatically collect nearby items matching the filter criteria.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "When attached to an encased fan:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "Automatically collects nearby items matching the filter and stores them. Air flow only affects filtered items.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "When right-clicked:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Extracts items, up to one stack at a time.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Filter Slot:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Place an item in the filter slot to collect only that type of item. Air flow will ignore non-matching items completely."
 
 }

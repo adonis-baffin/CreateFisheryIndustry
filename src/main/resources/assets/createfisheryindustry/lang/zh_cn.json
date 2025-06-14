@@ -102,5 +102,33 @@
 
   "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "用于处理去皮配方的机械元件，也可与部分生物交互",
   "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "接入应力时",
-  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "在物品处理方面，可以处理去皮配方，类似动力锯。在对实体处理方面，可以给羊去羊毛，或采集乌龟和犰狳的鳞甲。在对方块处理方面，可以给整棵树去树皮，给方块除锈除蜡，还可以采收成熟的紫水晶簇。"
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "在物品处理方面，可以处理去皮配方，类似动力锯。在对实体处理方面，可以给羊去羊毛，或采集乌龟和犰狳的鳞甲。在对方块处理方面，可以给整棵树去树皮，给方块除锈除蜡，还可以采收成熟的紫水晶簇。",
+
+  "block.createfisheryindustry.smart_nozzle": "智能气滤网",
+
+  "create.gui.goggles.smart_nozzle_contents": "智能气滤网内容物",
+
+  "create_fishery.smart_mesh.extracted": "提取了 %s 个 %s",
+  "create_fishery.smart_mesh.extraction_failed": "提取失败，请重试",
+  "create_fishery.smart_mesh.empty": "智能滤网为空",
+
+  "create_fishery.mesh_trap.extracted": "提取了 %s 个 %s",
+  "create_fishery.mesh_trap.extraction_failed": "提取失败，请重试",
+  "create_fishery.mesh_trap.empty": "捕获网为空",
+
+  "create_fishery.trap_nozzle.extracted": "提取了 %s 个 %s",
+  "create_fishery.trap_nozzle.extraction_failed": "提取失败，请重试",
+  "create_fishery.trap_nozzle.empty": "气滤网为空",
+
+  "create_fishery.smart_nozzle.extracted": "提取了 %s 个 %s",
+  "create_fishery.smart_nozzle.extraction_failed": "提取失败，请重试",
+  "create_fishery.smart_nozzle.empty": "智能气滤网为空",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "具有过滤功能的智能气滤网，可以自动收集符合过滤条件的附近物品。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "当连接到鼓风机时：",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "自动收集符合过滤条件的附近物品并存储。气流只影响过滤的物品。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "右键点击时：",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "提取物品，一次最多一组。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "过滤槽：",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "在过滤槽中放置物品以仅收集该类型的物品。气流将完全忽略不匹配的物品。"
 }
