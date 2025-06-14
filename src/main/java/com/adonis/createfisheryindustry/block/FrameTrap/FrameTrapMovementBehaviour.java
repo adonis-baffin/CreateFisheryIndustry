@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -21,7 +22,6 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -36,7 +36,7 @@ import java.util.List;
 public class FrameTrapMovementBehaviour implements MovementBehaviour {
     // 可调参数：最大碰撞箱尺寸（宽、高、深）
     private static final double MAX_COLLISION_BOX_SIZE = 0.8;
-    // 新增：worn_harpoon 的生成概率（2%）
+    // worn_harpoon 的生成概率（3%）
     private static final float WORN_HARPOON_CHANCE = 0.03f;
 
     @Override
@@ -53,22 +53,33 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
     public void visitNewPosition(MovementContext context, BlockPos pos) {
         if (context.world instanceof ServerLevel level) {
             FrameTrapContext fishing = getFishingNetContext(context, level);
-            boolean inWater = fishing.visitNewPosition(level, pos);
+            boolean inValidFluid = fishing.visitNewPosition(level, pos);
+
+            // 实体捕获和物品收集功能
             killNearbyEntities(context, pos, level);
             collectNearbyItems(context, pos, level);
-            if (!inWater || fishing.timeUntilCatch > 0) return;
 
-            if (fishing.canCatch()) {
+            if (!inValidFluid || fishing.timeUntilCatch > 0) return;
+
+            // 检查是否启用钓鱼功能
+            // 检查是否启用钓鱼功能
+            if (!CreateFisheryCommonConfig.isFishingEnabled()) {
+                return;
+            }
+
+            if (fishing.canCatch(level, pos)) {
+                // 获取对应环境的战利品表
+                LootTable lootTable = fishing.getLootTable(level, pos);
                 LootParams params = fishing.buildLootContext(context, level, pos);
-                LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.FISHING);
                 List<ItemStack> loots = lootTable.getRandomItems(params);
 
-                // 新增：以 WORN_HARPOON_CHANCE 概率添加 worn_harpoon
+                // 添加 worn_harpoon 的概率生成
                 if (fishing.getFishingHook().getRandom().nextFloat() < WORN_HARPOON_CHANCE) {
                     ItemStack wornHarpoon = new ItemStack(CreateFisheryItems.WORN_HARPOON.get());
                     loots.add(wornHarpoon);
                 }
 
+                // 获取最近的玩家用于事件
                 List<ServerPlayer> players = level.getServer().getPlayerList().getPlayers();
                 ServerPlayer selectedPlayer = null;
                 if (!players.isEmpty()) {
@@ -80,12 +91,16 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
 
                 FishingHook fishingHook = selectedPlayer != null ? new FishingHook(selectedPlayer, level, 0, 0) : null;
                 ItemFishedEvent event = NeoForge.EVENT_BUS.post(new ItemFishedEvent(loots, 0, fishingHook));
+
                 if (!event.isCanceled()) {
                     loots.forEach(stack -> dropItem(context, stack));
+
+                    // 确定环境类型用于粒子效果
+                    boolean inLava = level.getFluidState(pos).is(FluidTags.LAVA);
                     addExperienceNugget(context, level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-                    spawnParticles(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, inWater);
+                    spawnFishingParticles(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, inLava);
                 }
-                fishing.reset(level);
+                fishing.reset(level, pos); // 使用环境感知的reset方法
             }
         }
     }
@@ -132,27 +147,15 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
             EntityType<?> entityType = entity.getType();
             ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
 
-            // 调试日志
-            if (entityId.toString().equals("minecraft:breeze")) {
-            }
-
             // 规则1：黑名单中的实体直接跳过，绝对不捕获
             if (CreateFisheryCommonConfig.isEntityBlacklisted(entityId)) {
-                if (entityId.toString().equals("minecraft:breeze")) {
-                }
                 continue;
             }
 
             // 规则2：白名单中的实体直接捕获，不考虑大小限制
             if (CreateFisheryCommonConfig.isEntityWhitelisted(entityId)) {
-                if (entityId.toString().equals("minecraft:breeze")) {
-                }
                 processEntityDrops(context, level, mob);
                 continue;
-            }
-
-            // 如果是breeze实体但执行到这里，说明既不在白名单也不在黑名单
-            if (entityId.toString().equals("minecraft:breeze")) {
             }
 
             // 规则3：既不在白名单也不在黑名单的实体，根据尺寸判断是否捕获
@@ -161,21 +164,13 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
             double height = collisionBox.getYsize();
             double depth = collisionBox.getZsize();
 
-            if (entityId.toString().equals("minecraft:breeze")) {
-            }
-
             if (width <= MAX_COLLISION_BOX_SIZE && height <= MAX_COLLISION_BOX_SIZE && depth <= MAX_COLLISION_BOX_SIZE) {
-                if (entityId.toString().equals("minecraft:breeze")) {
-                }
                 processEntityDrops(context, level, mob);
-            } else if (entityId.toString().equals("minecraft:breeze")) {
             }
         }
     }
 
     private void processEntityDrops(MovementContext context, ServerLevel level, Mob mob) {
-        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
-
         var lootTableKey = mob.getLootTable();
         if (lootTableKey == null) return;
 
@@ -201,10 +196,11 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
         }
 
         mob.setRemoved(Entity.RemovalReason.KILLED);
-        addExperienceNugget(context, level, mob.getX(), mob.getY() + 0.5, mob.getZ());
-        spawnParticles(level, mob.getX(), mob.getY() + 0.5, mob.getZ(), level.getFluidState(new BlockPos((int) mob.getX(), (int) mob.getY(), (int) mob.getZ())).is(net.minecraft.world.level.material.Fluids.WATER));
 
-        // 记录实体被成功捕获
+        // 确定环境类型用于粒子效果
+        boolean inLava = level.getFluidState(new BlockPos((int) mob.getX(), (int) mob.getY(), (int) mob.getZ())).is(FluidTags.LAVA);
+        addExperienceNugget(context, level, mob.getX(), mob.getY() + 0.5, mob.getZ());
+        spawnEntityCaptureParticles(level, mob.getX(), mob.getY() + 0.5, mob.getZ(), inLava);
     }
 
     private void addExperienceNugget(MovementContext context, ServerLevel level, double x, double y, double z) {
@@ -217,20 +213,43 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
         }
     }
 
-    private void spawnParticles(ServerLevel level, double x, double y, double z, boolean inWater) {
-        // 根据水下状态选择粒子类型
-        var particleType = inWater ? ParticleTypes.BUBBLE : ParticleTypes.CLOUD;
-        level.sendParticles(particleType, x, y, z, 15, 0.5, 0.5, 0.5, 0.1);
+    /**
+     * 钓鱼成功时的粒子效果
+     */
+    private void spawnFishingParticles(ServerLevel level, double x, double y, double z, boolean inLava) {
+        if (inLava) {
+            // 熔岩钓鱼粒子效果
+            level.sendParticles(ParticleTypes.LAVA, x, y, z, 10, 0.3, 0.3, 0.3, 0.1);
+            level.sendParticles(ParticleTypes.FLAME, x, y, z, 5, 0.2, 0.2, 0.2, 0.05);
+            level.playSound(null, new BlockPos((int) x, (int) y, (int) z),
+                    SoundEvents.LAVA_POP, SoundSource.BLOCKS, 1.0F, 1.2F);
+        } else {
+            // 水中钓鱼粒子效果
+            level.sendParticles(ParticleTypes.BUBBLE, x, y, z, 15, 0.5, 0.5, 0.5, 0.1);
+            level.playSound(null, new BlockPos((int) x, (int) y, (int) z),
+                    SoundEvents.BUCKET_FILL_FISH, SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+    }
+
+    /**
+     * 实体捕获时的粒子效果
+     */
+    private void spawnEntityCaptureParticles(ServerLevel level, double x, double y, double z, boolean inLava) {
+        if (inLava) {
+            // 熔岩环境中的实体捕获
+            level.sendParticles(ParticleTypes.LAVA, x, y, z, 8, 0.4, 0.4, 0.4, 0.1);
+            level.sendParticles(ParticleTypes.SMOKE, x, y, z, 5, 0.3, 0.3, 0.3, 0.05);
+        } else {
+            // 水环境中的实体捕获
+            level.sendParticles(ParticleTypes.CLOUD, x, y, z, 15, 0.5, 0.5, 0.5, 0.1);
+        }
         level.playSound(null, new BlockPos((int) x, (int) y, (int) z),
                 SoundEvents.BUCKET_FILL_FISH, SoundSource.BLOCKS, 1.0F, 1.0F);
     }
 
     protected boolean isEntityWhitelisted(EntityType<?> type) {
         ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
-        boolean result = CreateFisheryCommonConfig.isEntityWhitelisted(id);
-        if (id.toString().equals("minecraft:breeze")) {
-        }
-        return result;
+        return CreateFisheryCommonConfig.isEntityWhitelisted(id);
     }
 
     protected boolean isEntityBlacklisted(EntityType<?> type) {
