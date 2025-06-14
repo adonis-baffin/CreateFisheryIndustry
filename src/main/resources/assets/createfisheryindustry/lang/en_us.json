@@ -53,7 +53,7 @@
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "When in contraption:",
   "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "Captures nearby fish, or other small creatures, and items along the path. Also gains fishing loot from the current biome over time. Grants experience nuggets when fishing triggers or creatures are captured.",
 
-  "block.createfisheryindustry.mesh_trap.tooltip.summary": "Automatically collects nearby items, captures fish, or other small creatures, and stores them",
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "Automatically collects nearby items, captures fish or other small creatures, and stores them. Note that the mesh trap does not have the ability to obtain fishing loot.",
   "block.createfisheryindustry.mesh_trap.tooltip.condition1": "When used on entity:",
   "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": " Capture specified entity, gain its loot and experience nuggets.",
   "block.createfisheryindustry.mesh_trap.tooltip.condition2": "When right-clicked:",

@@ -49,7 +49,7 @@
   "block.createfisheryindustry.frame_trap.tooltip.condition1": "随动态结构移动时：",
   "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "可以捕获触碰到的鱼类，或其他种类的小型生物，并收集路径上的物品。此外，还会随时间获得当前生物群系的钓鱼战利品。每当钓鱼触发或捕获生物时，获得经验颗粒。",
 
-  "block.createfisheryindustry.mesh_trap.tooltip.summary": "自动收集周边的物品，捕获鱼类或其他小型生物，并存储",
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "自动收集周边的物品，捕获鱼类或其他小型生物，并存储。注意捕获网并没有获取钓鱼战利品的能力。",
   "block.createfisheryindustry.mesh_trap.tooltip.condition1": "对实体使用时",
   "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "捕获可以被捕捉的实体，获得其掉落物和经验",
   "block.createfisheryindustry.mesh_trap.tooltip.condition2": "右键点击时：",

@@ -61,6 +61,16 @@ public class FrameTrapContext {
         int adjustedMaxTime = (int) (baseMaxCatchTime * cooldownMultiplier);
 
         this.timeUntilCatch = Mth.nextInt(fishingHook.getRandom(), adjustedMinTime, adjustedMaxTime);
+
+        // 添加调试信息
+        com.adonis.createfisheryindustry.CreateFisheryMod.LOGGER.debug(
+                "Reset fishing context - Environment: {}, Multiplier: {}, Time: {} (base: {}-{})",
+                isLavaEnvironment ? "LAVA" : "WATER",
+                cooldownMultiplier,
+                this.timeUntilCatch,
+                baseMinCatchTime,
+                baseMaxCatchTime
+        );
     }
 
     public boolean visitNewPosition(ServerLevel level, BlockPos pos) {
@@ -204,7 +214,17 @@ public class FrameTrapContext {
                 CreateFisheryCommonConfig.getLavaFishingSuccessRate() :
                 CreateFisheryCommonConfig.getFishingSuccessRate();
 
-        return fishingHook.getRandom().nextFloat() < successRate;
+        boolean result = fishingHook.getRandom().nextFloat() < successRate;
+
+        // 添加调试信息
+        com.adonis.createfisheryindustry.CreateFisheryMod.LOGGER.debug(
+                "Fishing attempt - Environment: {}, Success rate: {}, Result: {}",
+                isLavaEnvironment ? "LAVA" : "WATER",
+                successRate,
+                result
+        );
+
+        return result;
     }
 
     public void invalidate(ServerLevel level) {
