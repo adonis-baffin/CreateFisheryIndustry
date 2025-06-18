@@ -1,0 +1,135 @@
+{
+  "block.createfisheryindustry.frame_trap": "Piège à cadre",
+  "block.createfisheryindustry.mesh_trap": "Piège à filet",
+  "block.createfisheryindustry.trap_nozzle": "Buse piège",
+  "block.createfisheryindustry.smart_mesh": "Filet intelligent",
+  "item.createfisheryindustry.zinc_sheet": "Plaque de zinc",
+  "item.createfisheryindustry.pneumatic_mechanism": "Mécanisme pneumatique",
+  "item.createfisheryindustry.incomplete_pneumatic_mechanism": "Mécanisme pneumatique incomplet",
+  "item.createfisheryindustry.waxed_cardboard": "Carton ciré",
+  "item.createfisheryindustry.waxed_leather": "Cuir ciré",
+  "item.createfisheryindustry.worn_harpoon": "Harpon usé",
+  "item.createfisheryindustry.harpoon_pouch": "Pochette à harpons",
+  "item.createfisheryindustry.pneumatic_harpoon_gun": "Fusil à harpon pneumatique",
+
+  "item.createfisheryindustry.waxed_cardboard.tooltip.summary": "Objet de test. Il sera publié dans le prochain nouveau mod 'Create: Over the Sea' dans le futur. Restez à l'écoute.",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "Un ancien harpon usé perdu dans les profondeurs ; polissez-le pour restaurer son éclat d'antan",
+  "item.createfisheryindustry.copper_diving_leggings": "Jambières de plongée en cuivre",
+  "item.createfisheryindustry.netherite_diving_leggings": "Jambières de plongée en nétherite",
+  "item.createfisheryindustry.harpoon": "Harpon",
+  "entity.createfisheryindustry.harpoon": "Harpon",
+  "itemGroup.createfisheryindustry.base": "Create: Industrie de la pêche",
+  "itemGroup.createfisheryindustry.fishery_tab": "Create: Industrie de la pêche",
+
+  "create.gui.goggles.mesh_trap_contents": "Contenu du piège à filet",
+  "create.gui.goggles.inventory.empty": "Vide",
+  "create.gui.goggles.trap_nozzle_contents": "Contenu de la buse piège",
+  "create.gui.goggles.smart_mesh_contents": "Contenu du filet intelligent",
+
+  "block.createfisheryindustry.mechanical_peeler": "Éplucheur mécanique",
+  "create.gui.goggles.mechanical_peeler_contents": "Sous-produits de l'éplucheur",
+  "gui.goggles.inventory.empty": "Vide",
+
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
+  "tooltip.keyShift": "Maj",
+  "tooltip.holdForDescription": "Maintenez [%s] pour le résumé",
+
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "Jambières de plongée en cuivre utilisées avec des bottes de plongée pour ressentir une sensation de marche lunaire sous l'eau.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "Quand portées :",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "Le porteur gagne une capacité de super saut dans l'eau, jusqu'à quatre blocs de haut, sans dégâts de chute à l'atterrissage.",
+
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Jambières de plongée en nétherite utilisées avec des bottes de plongée pour ressentir une sensation de marche lunaire sous l'eau ou dans les mers de lave.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "Quand portées :",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "Le porteur gagne une capacité de super saut dans l'eau ou la lave, jusqu'à quatre blocs de haut, sans dégâts de chute à l'atterrissage.",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Contient jusqu'à 4 harpons. Renouvelle automatiquement un harpon dans la main principale après lancement et privilégie le stockage des harpons ramassés dans la pochette.",
+
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "Alimenté par air comprimé. Tire un harpon qui attire les entités touchées vers vous ou vous attire vers les blocs. Peut collecter les objets à distance.",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "Clic droit :",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "Tire un harpon, clic droit à nouveau pour le récupérer",
+
+  "block.createfisheryindustry.frame_trap.tooltip.summary": "Composant pour pêcher sur les machines.",
+  "block.createfisheryindustry.frame_trap.tooltip.condition1": "Quand dans une machine :",
+  "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "Capture les poissons proches, ou d'autres petites créatures, et les objets le long du chemin. Obtient aussi du butin de pêche du biome actuel au fil du temps. Accorde des pépites d'expérience quand la pêche se déclenche ou que des créatures sont capturées.",
+
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "Collecte automatiquement les objets proches, capture les poissons ou d'autres petites créatures, et les stocke. Notez que le piège à filet n'a pas la capacité d'obtenir du butin de pêche.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "Quand utilisé sur une entité :",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "Capture l'entité spécifiée, obtient son butin et des pépites d'expérience.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition2": "Clic droit :",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour2": "Extrait les objets, jusqu'à une pile à la fois.",
+
+  "block.createfisheryindustry.trap_nozzle.tooltip.summary": "Se fixe à l'avant d'un ventilateur encapsulé pour distribuer son effet sur les entités dans toutes les directions.",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "Quand attaché à un ventilateur encapsulé :",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "Collecte automatiquement les objets proches, capture les poissons ou d'autres petites créatures, et les stocke",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "Clic droit :",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "Extrait les objets, jusqu'à une pile à la fois.",
+
+  "block.createfisheryindustry.smart_mesh.tooltip.summary": "Le filet intelligent collecte automatiquement les objets proches et les stocke.",
+  "block.createfisheryindustry.smart_mesh.tooltip.condition1": "Clic droit avec la main vide :",
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "Extrait les objets, jusqu'à une pile à la fois.",
+
+  "block.createfisheryindustry.smart_beehive": "Ruche intelligente",
+  "block.createfisheryindustry.smart_beehive.tooltip.summary": "Bloc de test, les fonctions sont encore en développement. Ce bloc ne fait pas partie du contenu du mod 'Create: Industrie de la pêche'. Il sera publié dans le prochain nouveau mod 'Create: Dinner' dans le futur. Restez à l'écoute.",
+  "createfisheryindustry.smart_beehive.mode": "Mode ruche",
+  "createfisheryindustry.smart_beehive.mode.honey_fluid": "Fluide de miel",
+  "createfisheryindustry.smart_beehive.mode.honeycomb": "Rayon de miel",
+  "create.createfisheryindustry.smart_beehive.mode.honey_fluid": "Fluide de miel",
+  "create.createfisheryindustry.smart_beehive.mode.honeycomb": "Rayon de miel",
+  "create.createfisheryindustry.smart_beehive.full": "La ruche est pleine !",
+  "create.createfisheryindustry.smart_beehive.empty": "L'inventaire de la ruche est vide !",
+  "create.createfisheryindustry.smart_beehive.contents": "Contenu de la ruche",
+  "create.createfisheryindustry.smart_beehive.bees": "%d/%d abeilles",
+  "create.createfisheryindustry.smart_beehive.fluid": "%s : %d mB",
+  "create.createfisheryindustry.smart_beehive.fluid_empty": "Pas de fluide",
+  "create.createfisheryindustry.smart_beehive.mode_label": "Mode : ",
+  "fluid.create.honey": "Miel",
+
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "Un composant mécanique pour traiter les recettes d'épluchage et interagir avec certaines entités",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "Quand alimenté par contrainte",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "Traite les recettes d'épluchage, similaire à une scie mécanique. Peut tondre les moutons ou récolter les écailles des tortues et tatous. Peut écorcer des arbres entiers, enlever la rouille et la cire des blocs, et récolter les amas d'améthyste matures.",
+
+  "item.createfisheryindustry.chains": "Chaînes",
+  "item.createfisheryindustry.fish_skin": "Peau de poisson",
+  "item.createfisheryindustry.roasted_fish_skin": "Peau de poisson grillée",
+  "item.createfisheryindustry.cod_steak": "Steak de morue",
+  "item.createfisheryindustry.salmon_steak": "Steak de saumon",
+  "item.createfisheryindustry.cooked_cod_steak": "Steak de morue cuit",
+  "item.createfisheryindustry.cooked_salmon_steak": "Steak de saumon cuit",
+
+  "recipe.createfisheryindustry.peeling": "Épluchage",
+
+  "gui.goggles.kinetic_stats": "Statistiques cinétiques",
+  "create.gui.goggles.speed": "Vitesse : %s tr/min",
+  "create.gui.goggles.peeler_input": "Entrée :",
+  "create.gui.goggles.peeler_outputs": "Sorties stockées :",
+  "create.gui.goggles.peeler_stored_outputs": "Sorties stockées :",
+
+  "block.createfisheryindustry.smart_nozzle": "Buse intelligente",
+
+  "create.gui.goggles.smart_nozzle_contents": "Contenu de la buse intelligente",
+
+  "create_fishery.smart_mesh.extracted": "Extrait %s x %s",
+  "create_fishery.smart_mesh.extraction_failed": "Extraction échouée, veuillez réessayer",
+  "create_fishery.smart_mesh.empty": "Le filet intelligent est vide",
+
+  "create_fishery.mesh_trap.extracted": "Extrait %s x %s",
+  "create_fishery.mesh_trap.extraction_failed": "Extraction échouée, veuillez réessayer",
+  "create_fishery.mesh_trap.empty": "Le piège à filet est vide",
+
+  "create_fishery.trap_nozzle.extracted": "Extrait %s x %s",
+  "create_fishery.trap_nozzle.extraction_failed": "Extraction échouée, veuillez réessayer",
+  "create_fishery.trap_nozzle.empty": "La buse piège est vide",
+
+  "create_fishery.smart_nozzle.extracted": "Extrait %s x %s",
+  "create_fishery.smart_nozzle.extraction_failed": "Extraction échouée, veuillez réessayer",
+  "create_fishery.smart_nozzle.empty": "La buse intelligente est vide",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "Buse intelligente avec capacité de filtrage qui peut collecter automatiquement les objets proches correspondant aux critères du filtre.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "Quand attachée à un ventilateur encapsulé :",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "Collecte automatiquement les objets proches correspondant au filtre et les stocke. Le flux d'air n'affecte que les objets filtrés.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "Clic droit :",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Extrait les objets, jusqu'à une pile à la fois.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Emplacement de filtre :",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Placez un objet dans l'emplacement de filtre pour ne collecter que ce type d'objet. Le flux d'air ignorera complètement les objets non correspondants."
+}

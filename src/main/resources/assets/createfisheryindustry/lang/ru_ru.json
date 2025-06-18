@@ -1,0 +1,135 @@
+{
+  "block.createfisheryindustry.frame_trap": "Рамочная ловушка",
+  "block.createfisheryindustry.mesh_trap": "Сетчатая ловушка",
+  "block.createfisheryindustry.trap_nozzle": "Ловушечное сопло",
+  "block.createfisheryindustry.smart_mesh": "Умная сеть",
+  "item.createfisheryindustry.zinc_sheet": "Цинковый лист",
+  "item.createfisheryindustry.pneumatic_mechanism": "Пневматический механизм",
+  "item.createfisheryindustry.incomplete_pneumatic_mechanism": "Незавершённый пневматический механизм",
+  "item.createfisheryindustry.waxed_cardboard": "Вощёный картон",
+  "item.createfisheryindustry.waxed_leather": "Вощёная кожа",
+  "item.createfisheryindustry.worn_harpoon": "Изношенный гарпун",
+  "item.createfisheryindustry.harpoon_pouch": "Мешок для гарпунов",
+  "item.createfisheryindustry.pneumatic_harpoon_gun": "Пневматическое гарпунное ружьё",
+
+  "item.createfisheryindustry.waxed_cardboard.tooltip.summary": "Тестовый предмет. Будет выпущен в грядущем новом моде 'Create: Over the Sea' в будущем. Следите за обновлениями.",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "Древний изношенный гарпун, затерянный в глубинах; отполируйте его, чтобы восстановить былой блеск",
+  "item.createfisheryindustry.copper_diving_leggings": "Медные водолазные поножи",
+  "item.createfisheryindustry.netherite_diving_leggings": "Незеритовые водолазные поножи",
+  "item.createfisheryindustry.harpoon": "Гарпун",
+  "entity.createfisheryindustry.harpoon": "Гарпун",
+  "itemGroup.createfisheryindustry.base": "Create: Рыболовная промышленность",
+  "itemGroup.createfisheryindustry.fishery_tab": "Create: Рыболовная промышленность",
+
+  "create.gui.goggles.mesh_trap_contents": "Содержимое сетчатой ловушки",
+  "create.gui.goggles.inventory.empty": "Пусто",
+  "create.gui.goggles.trap_nozzle_contents": "Содержимое ловушечного сопла",
+  "create.gui.goggles.smart_mesh_contents": "Содержимое умной сети",
+
+  "block.createfisheryindustry.mechanical_peeler": "Механический очиститель",
+  "create.gui.goggles.mechanical_peeler_contents": "Побочные продукты очистителя",
+  "gui.goggles.inventory.empty": "Пусто",
+
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
+  "tooltip.keyShift": "Shift",
+  "tooltip.holdForDescription": "Удерживайте [%s] для описания",
+
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "Медные водолазные поножи используются с водолазными ботинками для ощущения лунной походки под водой.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "При ношении:",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "Носитель получает способность к супер-прыжкам в воде до четырёх блоков в высоту, без урона от падения при приземлении.",
+
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Незеритовые водолазные поножи используются с водолазными ботинками для ощущения лунной походки под водой или в лавовых морях.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "При ношении:",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "Носитель получает способность к супер-прыжкам в воде или лаве до четырёх блоков в высоту, без урона от падения при приземлении.",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Вмещает до 4 гарпунов. Автоматически пополняет гарпун в основной руке после броска и приоритетно помещает подобранные гарпуны в мешок.",
+
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "Приводится в действие сжатым воздухом. Стреляет гарпуном, который притягивает поражённых сущностей к вам или притягивает вас к блокам. Может удалённо собирать предметы.",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "При ПКМ:",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "Стреляет гарпуном, повторный ПКМ возвращает его обратно",
+
+  "block.createfisheryindustry.frame_trap.tooltip.summary": "Компонент для рыбалки на штуковинах.",
+  "block.createfisheryindustry.frame_trap.tooltip.condition1": "В составе штуковины:",
+  "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "Ловит ближайших рыб или других мелких существ и предметы на пути. Также получает рыболовную добычу из текущего биома со временем. Даёт кусочки опыта при срабатывании рыбалки или поимке существ.",
+
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "Автоматически собирает ближайшие предметы, ловит рыб или других мелких существ и хранит их. Обратите внимание, что сетчатая ловушка не имеет способности получать рыболовную добычу.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "При использовании на сущности:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "Ловит указанную сущность, получает её добычу и кусочки опыта.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition2": "При ПКМ:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour2": "Извлекает предметы, до одного стека за раз.",
+
+  "block.createfisheryindustry.trap_nozzle.tooltip.summary": "Присоединяется к передней части закрытого вентилятора для распределения его эффекта на сущности во всех направлениях.",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "При присоединении к закрытому вентилятору:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "Автоматически собирает ближайшие предметы, ловит рыб или других мелких существ и хранит их",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "При ПКМ:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "Извлекает предметы, до одного стека за раз.",
+
+  "block.createfisheryindustry.smart_mesh.tooltip.summary": "Умная сеть автоматически собирает ближайшие предметы и хранит их.",
+  "block.createfisheryindustry.smart_mesh.tooltip.condition1": "При ПКМ пустой рукой:",
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "Извлекает предметы, до одного стека за раз.",
+
+  "block.createfisheryindustry.smart_beehive": "Умный улей",
+  "block.createfisheryindustry.smart_beehive.tooltip.summary": "Тестовый блок, функции всё ещё в разработке. Этот блок не является частью содержимого мода 'Create: Рыболовная промышленность'. Будет выпущен в грядущем новом моде 'Create: Dinner' в будущем. Следите за обновлениями.",
+  "createfisheryindustry.smart_beehive.mode": "Режим улья",
+  "createfisheryindustry.smart_beehive.mode.honey_fluid": "Мёд-жидкость",
+  "createfisheryindustry.smart_beehive.mode.honeycomb": "Соты",
+  "create.createfisheryindustry.smart_beehive.mode.honey_fluid": "Мёд-жидкость",
+  "create.createfisheryindustry.smart_beehive.mode.honeycomb": "Соты",
+  "create.createfisheryindustry.smart_beehive.full": "Улей полон!",
+  "create.createfisheryindustry.smart_beehive.empty": "Инвентарь улья пуст!",
+  "create.createfisheryindustry.smart_beehive.contents": "Содержимое улья",
+  "create.createfisheryindustry.smart_beehive.bees": "%d/%d пчёл",
+  "create.createfisheryindustry.smart_beehive.fluid": "%s: %d мБ",
+  "create.createfisheryindustry.smart_beehive.fluid_empty": "Нет жидкости",
+  "create.createfisheryindustry.smart_beehive.mode_label": "Режим: ",
+  "fluid.create.honey": "Мёд",
+
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "Механический компонент для обработки рецептов очистки и взаимодействия с определёнными сущностями",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "При питании напряжением",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "Обрабатывает рецепты очистки, аналогично механической пиле. Может стричь овец или собирать щитки с черепах и броненосцев. Может снимать кору с целых деревьев, удалять ржавчину и воск с блоков, а также собирать зрелые аметистовые грозди.",
+
+  "item.createfisheryindustry.chains": "Цепи",
+  "item.createfisheryindustry.fish_skin": "Рыбья кожа",
+  "item.createfisheryindustry.roasted_fish_skin": "Жареная рыбья кожа",
+  "item.createfisheryindustry.cod_steak": "Стейк из трески",
+  "item.createfisheryindustry.salmon_steak": "Стейк из лосося",
+  "item.createfisheryindustry.cooked_cod_steak": "Приготовленный стейк из трески",
+  "item.createfisheryindustry.cooked_salmon_steak": "Приготовленный стейк из лосося",
+
+  "recipe.createfisheryindustry.peeling": "Очистка",
+
+  "gui.goggles.kinetic_stats": "Кинетическая статистика",
+  "create.gui.goggles.speed": "Скорость: %s об/мин",
+  "create.gui.goggles.peeler_input": "Вход:",
+  "create.gui.goggles.peeler_outputs": "Сохранённые выходы:",
+  "create.gui.goggles.peeler_stored_outputs": "Сохранённые выходы:",
+
+  "block.createfisheryindustry.smart_nozzle": "Умное сопло",
+
+  "create.gui.goggles.smart_nozzle_contents": "Содержимое умного сопла",
+
+  "create_fishery.smart_mesh.extracted": "Извлечено %s x %s",
+  "create_fishery.smart_mesh.extraction_failed": "Извлечение не удалось, попробуйте снова",
+  "create_fishery.smart_mesh.empty": "Умная сеть пуста",
+
+  "create_fishery.mesh_trap.extracted": "Извлечено %s x %s",
+  "create_fishery.mesh_trap.extraction_failed": "Извлечение не удалось, попробуйте снова",
+  "create_fishery.mesh_trap.empty": "Сетчатая ловушка пуста",
+
+  "create_fishery.trap_nozzle.extracted": "Извлечено %s x %s",
+  "create_fishery.trap_nozzle.extraction_failed": "Извлечение не удалось, попробуйте снова",
+  "create_fishery.trap_nozzle.empty": "Ловушечное сопло пусто",
+
+  "create_fishery.smart_nozzle.extracted": "Извлечено %s x %s",
+  "create_fishery.smart_nozzle.extraction_failed": "Извлечение не удалось, попробуйте снова",
+  "create_fishery.smart_nozzle.empty": "Умное сопло пусто",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "Умное сопло с функцией фильтрации, которое может автоматически собирать ближайшие предметы, соответствующие критериям фильтра.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "При присоединении к закрытому вентилятору:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "Автоматически собирает ближайшие предметы, соответствующие фильтру, и хранит их. Воздушный поток влияет только на отфильтрованные предметы.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "При ПКМ:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Извлекает предметы, до одного стека за раз.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Слот фильтра:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Поместите предмет в слот фильтра, чтобы собирать только этот тип предметов. Воздушный поток будет полностью игнорировать несоответствующие предметы."
+}

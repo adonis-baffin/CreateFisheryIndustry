@@ -1,0 +1,135 @@
+{
+  "block.createfisheryindustry.frame_trap": "フレームトラップ",
+  "block.createfisheryindustry.mesh_trap": "メッシュトラップ",
+  "block.createfisheryindustry.trap_nozzle": "トラップノズル",
+  "block.createfisheryindustry.smart_mesh": "スマートメッシュ",
+  "item.createfisheryindustry.zinc_sheet": "亜鉛シート",
+  "item.createfisheryindustry.pneumatic_mechanism": "空圧機構",
+  "item.createfisheryindustry.incomplete_pneumatic_mechanism": "未完成の空圧機構",
+  "item.createfisheryindustry.waxed_cardboard": "防水段ボール",
+  "item.createfisheryindustry.waxed_leather": "防水革",
+  "item.createfisheryindustry.worn_harpoon": "磨耗した銛",
+  "item.createfisheryindustry.harpoon_pouch": "銛ポーチ",
+  "item.createfisheryindustry.pneumatic_harpoon_gun": "空圧銛銃",
+
+  "item.createfisheryindustry.waxed_cardboard.tooltip.summary": "テスト用アイテム。今後の新Mod「Create: Over the Sea」でリリース予定です。お楽しみに。",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "深海で失われた古い銛。磨いて元の輝きを取り戻そう",
+  "item.createfisheryindustry.copper_diving_leggings": "銅製ダイビングレギンス",
+  "item.createfisheryindustry.netherite_diving_leggings": "ネザライト製ダイビングレギンス",
+  "item.createfisheryindustry.harpoon": "銛",
+  "entity.createfisheryindustry.harpoon": "銛",
+  "itemGroup.createfisheryindustry.base": "Create: Fishery Industry",
+  "itemGroup.createfisheryindustry.fishery_tab": "Create: Fishery Industry",
+
+  "create.gui.goggles.mesh_trap_contents": "メッシュトラップの中身",
+  "create.gui.goggles.inventory.empty": "空",
+  "create.gui.goggles.trap_nozzle_contents": "トラップノズルの中身",
+  "create.gui.goggles.smart_mesh_contents": "スマートメッシュの中身",
+
+  "block.createfisheryindustry.mechanical_peeler": "機械式ピーラー",
+  "create.gui.goggles.mechanical_peeler_contents": "ピーラーの副産物",
+  "gui.goggles.inventory.empty": "空",
+
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
+  "tooltip.keyShift": "Shift",
+  "tooltip.holdForDescription": "[%s]キーを押し続けて詳細表示",
+
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "ダイビングブーツと組み合わせて使用し、水中で月面歩行のような感覚を体験できる銅製ダイビングレギンス。",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "装備時:",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "水中で最大4ブロックまでのスーパージャンプ能力を獲得し、着地時の落下ダメージを無効化する。",
+
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "ダイビングブーツと組み合わせて使用し、水中や溶岩海で月面歩行のような感覚を体験できるネザライト製ダイビングレギンス。",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "装備時:",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "水中や溶岩中で最大4ブロックまでのスーパージャンプ能力を獲得し、着地時の落下ダメージを無効化する。",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "最大4本の銛を収納可能。投擲後に自動的にメインハンドに銛を補充し、拾った銛を優先的にポーチに格納する。",
+
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "圧縮空気で駆動。命中したエンティティを引き寄せるか、ブロックに命中した場合は自分をそちらに引き寄せる銛を発射。遠隔でアイテムを回収可能。",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "右クリック時:",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "銛を発射、再度右クリックで回収",
+
+  "block.createfisheryindustry.frame_trap.tooltip.summary": "からくり上で釣りを行うためのコンポーネント。",
+  "block.createfisheryindustry.frame_trap.tooltip.condition1": "からくり移動時:",
+  "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "経路上の魚や小型生物、アイテムを捕獲する。時間経過で現在のバイオームの釣り戦利品も獲得。釣りまたは生物捕獲時に経験値の欠片を獲得。",
+
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "近くのアイテムを自動回収し、魚や小型生物を捕獲して格納する。メッシュトラップには釣り戦利品を獲得する能力はない。",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "エンティティに使用時:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "指定したエンティティを捕獲し、そのドロップアイテムと経験値の欠片を獲得。",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition2": "右クリック時:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour2": "アイテムを取り出す。一度に最大1スタック。",
+
+  "block.createfisheryindustry.trap_nozzle.tooltip.summary": "ケース入りファンの前面に取り付けて、その効果をエンティティに全方向に分散させる。",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "ケース入りファンに装着時:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "近くのアイテムを自動回収し、魚や小型生物を捕獲して格納する",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "右クリック時:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "アイテムを取り出す。一度に最大1スタック。",
+
+  "block.createfisheryindustry.smart_mesh.tooltip.summary": "スマートメッシュは近くのアイテムを自動回収して格納する。",
+  "block.createfisheryindustry.smart_mesh.tooltip.condition1": "空手で右クリック時:",
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "アイテムを取り出す。一度に最大1スタック。",
+
+  "block.createfisheryindustry.smart_beehive": "スマート蜂の巣",
+  "block.createfisheryindustry.smart_beehive.tooltip.summary": "テスト用ブロック。機能は開発中です。このブロックは「Create: 漁業産業」の内容ではありません。今後の新Mod「Create: Dinner」でリリース予定です。お楽しみに。",
+  "createfisheryindustry.smart_beehive.mode": "蜂の巣モード",
+  "createfisheryindustry.smart_beehive.mode.honey_fluid": "蜂蜜液体",
+  "createfisheryindustry.smart_beehive.mode.honeycomb": "蜜蝋",
+  "create.createfisheryindustry.smart_beehive.mode.honey_fluid": "蜂蜜液体",
+  "create.createfisheryindustry.smart_beehive.mode.honeycomb": "蜜蝋",
+  "create.createfisheryindustry.smart_beehive.full": "蜂の巣が満杯です！",
+  "create.createfisheryindustry.smart_beehive.empty": "蜂の巣のインベントリが空です！",
+  "create.createfisheryindustry.smart_beehive.contents": "蜂の巣の内容",
+  "create.createfisheryindustry.smart_beehive.bees": "%d/%d 匹のミツバチ",
+  "create.createfisheryindustry.smart_beehive.fluid": "%s: %d mB",
+  "create.createfisheryindustry.smart_beehive.fluid_empty": "液体なし",
+  "create.createfisheryindustry.smart_beehive.mode_label": "モード: ",
+  "fluid.create.honey": "蜂蜜",
+
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "皮むきレシピを処理し、特定のエンティティと相互作用する機械コンポーネント",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "応力で駆動時",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "機械式のこぎりと同様に皮むきレシピを処理。羊の毛刈りやカメ・アルマジロの鱗甲採取が可能。木全体の樹皮除去、ブロックのサビや蝋の除去、成熟したアメジストクラスターの採取も行える。",
+
+  "item.createfisheryindustry.chains": "チェーン",
+  "item.createfisheryindustry.fish_skin": "魚の皮",
+  "item.createfisheryindustry.roasted_fish_skin": "焼き魚の皮",
+  "item.createfisheryindustry.cod_steak": "タラステーキ",
+  "item.createfisheryindustry.salmon_steak": "サケステーキ",
+  "item.createfisheryindustry.cooked_cod_steak": "焼きタラステーキ",
+  "item.createfisheryindustry.cooked_salmon_steak": "焼きサケステーキ",
+
+  "recipe.createfisheryindustry.peeling": "皮むき",
+
+  "gui.goggles.kinetic_stats": "動力統計",
+  "create.gui.goggles.speed": "速度: %s RPM",
+  "create.gui.goggles.peeler_input": "入力:",
+  "create.gui.goggles.peeler_outputs": "格納された出力:",
+  "create.gui.goggles.peeler_stored_outputs": "格納された出力:",
+
+  "block.createfisheryindustry.smart_nozzle": "スマートノズル",
+
+  "create.gui.goggles.smart_nozzle_contents": "スマートノズルの中身",
+
+  "create_fishery.smart_mesh.extracted": "%s を %s 個取り出しました",
+  "create_fishery.smart_mesh.extraction_failed": "取り出しに失敗しました。もう一度お試しください",
+  "create_fishery.smart_mesh.empty": "スマートメッシュが空です",
+
+  "create_fishery.mesh_trap.extracted": "%s を %s 個取り出しました",
+  "create_fishery.mesh_trap.extraction_failed": "取り出しに失敗しました。もう一度お試しください",
+  "create_fishery.mesh_trap.empty": "メッシュトラップが空です",
+
+  "create_fishery.trap_nozzle.extracted": "%s を %s 個取り出しました",
+  "create_fishery.trap_nozzle.extraction_failed": "取り出しに失敗しました。もう一度お試しください",
+  "create_fishery.trap_nozzle.empty": "トラップノズルが空です",
+
+  "create_fishery.smart_nozzle.extracted": "%s を %s 個取り出しました",
+  "create_fishery.smart_nozzle.extraction_failed": "取り出しに失敗しました。もう一度お試しください",
+  "create_fishery.smart_nozzle.empty": "スマートノズルが空です",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "フィルター機能付きのスマートノズル。フィルター条件に一致する近くのアイテムを自動回収する。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "ケース入りファンに装着時:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "フィルターに一致する近くのアイテムを自動回収して格納。エアフローはフィルターされたアイテムにのみ影響する。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "右クリック時:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "アイテムを取り出す。一度に最大1スタック。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "フィルタースロット:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "フィルタースロットにアイテムを配置すると、その種類のアイテムのみを回収。エアフローは一致しないアイテムを完全に無視する。"
+}

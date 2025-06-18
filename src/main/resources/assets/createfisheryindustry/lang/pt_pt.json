@@ -1,0 +1,135 @@
+{
+  "block.createfisheryindustry.frame_trap": "Armadilha de estrutura",
+  "block.createfisheryindustry.mesh_trap": "Armadilha de rede",
+  "block.createfisheryindustry.trap_nozzle": "Bocal armadilha",
+  "block.createfisheryindustry.smart_mesh": "Rede inteligente",
+  "item.createfisheryindustry.zinc_sheet": "Chapa de zinco",
+  "item.createfisheryindustry.pneumatic_mechanism": "Mecanismo pneumático",
+  "item.createfisheryindustry.incomplete_pneumatic_mechanism": "Mecanismo pneumático incompleto",
+  "item.createfisheryindustry.waxed_cardboard": "Cartão encerado",
+  "item.createfisheryindustry.waxed_leather": "Couro encerado",
+  "item.createfisheryindustry.worn_harpoon": "Arpão gasto",
+  "item.createfisheryindustry.harpoon_pouch": "Bolsa de arpões",
+  "item.createfisheryindustry.pneumatic_harpoon_gun": "Canhão de arpão pneumático",
+
+  "item.createfisheryindustry.waxed_cardboard.tooltip.summary": "Item de teste. Será lançado no próximo novo mod 'Create: Over the Sea' no futuro. Fique atento.",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "Um arpão antigo e gasto perdido nas profundezas; poli-o para restaurar o seu brilho anterior",
+  "item.createfisheryindustry.copper_diving_leggings": "Perneiras de mergulho de cobre",
+  "item.createfisheryindustry.netherite_diving_leggings": "Perneiras de mergulho de netherite",
+  "item.createfisheryindustry.harpoon": "Arpão",
+  "entity.createfisheryindustry.harpoon": "Arpão",
+  "itemGroup.createfisheryindustry.base": "Create: Indústria Pesqueira",
+  "itemGroup.createfisheryindustry.fishery_tab": "Create: Indústria Pesqueira",
+
+  "create.gui.goggles.mesh_trap_contents": "Conteúdo da armadilha de rede",
+  "create.gui.goggles.inventory.empty": "Vazio",
+  "create.gui.goggles.trap_nozzle_contents": "Conteúdo do bocal armadilha",
+  "create.gui.goggles.smart_mesh_contents": "Conteúdo da rede inteligente",
+
+  "block.createfisheryindustry.mechanical_peeler": "Descascador mecânico",
+  "create.gui.goggles.mechanical_peeler_contents": "Subprodutos do descascador",
+  "gui.goggles.inventory.empty": "Vazio",
+
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
+  "tooltip.keyShift": "Shift",
+  "tooltip.holdForDescription": "Segure [%s] para resumo",
+
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "Perneiras de mergulho de cobre usadas com botas de mergulho para experimentar uma sensação de caminhada lunar debaixo d'água.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "Quando usadas:",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "O portador ganha capacidade de super salto na água, até quatro blocos de altura, sem dano de queda ao aterrar.",
+
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Perneiras de mergulho de netherite usadas com botas de mergulho para experimentar uma sensação de caminhada lunar debaixo d'água ou em mares de lava.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "Quando usadas:",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "O portador ganha capacidade de super salto na água ou lava, até quatro blocos de altura, sem dano de queda ao aterrar.",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Contém até 4 arpões. Repõe automaticamente um arpão na mão principal após arremesso e prioriza o armazenamento de arpões apanhados na bolsa.",
+
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "Alimentado por ar comprimido. Dispara um arpão que puxa entidades atingidas em sua direção ou puxa-o em direção aos blocos. Pode coletar itens remotamente.",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "Clique direito:",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "Dispara arpão, clique direito novamente para puxá-lo de volta",
+
+  "block.createfisheryindustry.frame_trap.tooltip.summary": "Componente para pescar em mecanismos.",
+  "block.createfisheryindustry.frame_trap.tooltip.condition1": "Quando em mecanismo:",
+  "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "Captura peixes próximos, ou outras criaturas pequenas, e itens ao longo do caminho. Também obtém espólio de pesca do bioma atual ao longo do tempo. Concede pepitas de experiência quando a pesca é ativada ou criaturas são capturadas.",
+
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "Coleta automaticamente itens próximos, captura peixes ou outras criaturas pequenas, e armazena-os. Note que a armadilha de rede não tem a capacidade de obter espólio de pesca.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "Quando usada numa entidade:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "Captura a entidade especificada, obtém o seu espólio e pepitas de experiência.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition2": "Clique direito:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour2": "Extrai itens, até uma pilha de cada vez.",
+
+  "block.createfisheryindustry.trap_nozzle.tooltip.summary": "Anexa-se à frente de uma ventoinha encapsulada para distribuir o seu efeito em entidades em todas as direções.",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "Quando anexado a uma ventoinha encapsulada:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "Coleta automaticamente itens próximos, captura peixes ou outras criaturas pequenas, e armazena-os",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "Clique direito:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "Extrai itens, até uma pilha de cada vez.",
+
+  "block.createfisheryindustry.smart_mesh.tooltip.summary": "A rede inteligente coleta automaticamente itens próximos e armazena-os.",
+  "block.createfisheryindustry.smart_mesh.tooltip.condition1": "Clique direito com mão vazia:",
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "Extrai itens, até uma pilha de cada vez.",
+
+  "block.createfisheryindustry.smart_beehive": "Colmeia inteligente",
+  "block.createfisheryindustry.smart_beehive.tooltip.summary": "Bloco de teste, as funções ainda estão em desenvolvimento. Este bloco não faz parte do conteúdo do mod 'Create: Indústria Pesqueira'. Será lançado no próximo novo mod 'Create: Dinner' no futuro. Fique atento.",
+  "createfisheryindustry.smart_beehive.mode": "Modo da colmeia",
+  "createfisheryindustry.smart_beehive.mode.honey_fluid": "Fluido de mel",
+  "createfisheryindustry.smart_beehive.mode.honeycomb": "Favo de mel",
+  "create.createfisheryindustry.smart_beehive.mode.honey_fluid": "Fluido de mel",
+  "create.createfisheryindustry.smart_beehive.mode.honeycomb": "Favo de mel",
+  "create.createfisheryindustry.smart_beehive.full": "A colmeia está cheia!",
+  "create.createfisheryindustry.smart_beehive.empty": "O inventário da colmeia está vazio!",
+  "create.createfisheryindustry.smart_beehive.contents": "Conteúdo da colmeia",
+  "create.createfisheryindustry.smart_beehive.bees": "%d/%d abelhas",
+  "create.createfisheryindustry.smart_beehive.fluid": "%s: %d mB",
+  "create.createfisheryindustry.smart_beehive.fluid_empty": "Sem fluido",
+  "create.createfisheryindustry.smart_beehive.mode_label": "Modo: ",
+  "fluid.create.honey": "Mel",
+
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "Um componente mecânico para processar receitas de descascar e interagir com certas entidades",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "Quando alimentado por tensão",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "Processa receitas de descascar, similar a uma serra mecânica. Pode tosquiar ovelhas ou colher escamas de tartarugas e tatus. Pode descascar árvores inteiras, remover ferrugem e cera de blocos, e colher aglomerados de ametista maduros.",
+
+  "item.createfisheryindustry.chains": "Correntes",
+  "item.createfisheryindustry.fish_skin": "Pele de peixe",
+  "item.createfisheryindustry.roasted_fish_skin": "Pele de peixe assada",
+  "item.createfisheryindustry.cod_steak": "Bife de bacalhau",
+  "item.createfisheryindustry.salmon_steak": "Bife de salmão",
+  "item.createfisheryindustry.cooked_cod_steak": "Bife de bacalhau cozido",
+  "item.createfisheryindustry.cooked_salmon_steak": "Bife de salmão cozido",
+
+  "recipe.createfisheryindustry.peeling": "Descascar",
+
+  "gui.goggles.kinetic_stats": "Estatísticas cinéticas",
+  "create.gui.goggles.speed": "Velocidade: %s RPM",
+  "create.gui.goggles.peeler_input": "Entrada:",
+  "create.gui.goggles.peeler_outputs": "Saídas armazenadas:",
+  "create.gui.goggles.peeler_stored_outputs": "Saídas armazenadas:",
+
+  "block.createfisheryindustry.smart_nozzle": "Bocal inteligente",
+
+  "create.gui.goggles.smart_nozzle_contents": "Conteúdo do bocal inteligente",
+
+  "create_fishery.smart_mesh.extracted": "Extraído %s x %s",
+  "create_fishery.smart_mesh.extraction_failed": "Extração falhada, tente novamente",
+  "create_fishery.smart_mesh.empty": "A rede inteligente está vazia",
+
+  "create_fishery.mesh_trap.extracted": "Extraído %s x %s",
+  "create_fishery.mesh_trap.extraction_failed": "Extração falhada, tente novamente",
+  "create_fishery.mesh_trap.empty": "A armadilha de rede está vazia",
+
+  "create_fishery.trap_nozzle.extracted": "Extraído %s x %s",
+  "create_fishery.trap_nozzle.extraction_failed": "Extração falhada, tente novamente",
+  "create_fishery.trap_nozzle.empty": "O bocal armadilha está vazio",
+
+  "create_fishery.smart_nozzle.extracted": "Extraído %s x %s",
+  "create_fishery.smart_nozzle.extraction_failed": "Extração falhada, tente novamente",
+  "create_fishery.smart_nozzle.empty": "O bocal inteligente está vazio",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "Bocal inteligente com capacidade de filtro que pode coletar automaticamente itens próximos que correspondam aos critérios do filtro.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "Quando anexado a uma ventoinha encapsulada:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "Coleta automaticamente itens próximos que correspondam ao filtro e armazena-os. O fluxo de ar só afeta itens filtrados.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "Clique direito:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Extrai itens, até uma pilha de cada vez.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Ranhura do filtro:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Coloque um item na ranhura do filtro para coletar apenas esse tipo de item. O fluxo de ar ignorará completamente itens não correspondentes."
+}

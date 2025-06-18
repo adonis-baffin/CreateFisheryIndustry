@@ -1,0 +1,135 @@
+{
+  "block.createfisheryindustry.frame_trap": "框架陷阱",
+  "block.createfisheryindustry.mesh_trap": "捕獲網",
+  "block.createfisheryindustry.trap_nozzle": "陷阱噴嘴",
+  "block.createfisheryindustry.smart_mesh": "智慧濾網",
+  "item.createfisheryindustry.zinc_sheet": "鋅板",
+  "item.createfisheryindustry.pneumatic_mechanism": "氣動機構",
+  "item.createfisheryindustry.incomplete_pneumatic_mechanism": "未完成的氣動機構",
+  "item.createfisheryindustry.waxed_cardboard": "防水紙板",
+  "item.createfisheryindustry.waxed_leather": "防水皮革",
+  "item.createfisheryindustry.worn_harpoon": "破損的魚叉",
+  "item.createfisheryindustry.harpoon_pouch": "魚叉袋",
+  "item.createfisheryindustry.pneumatic_harpoon_gun": "氣動魚叉槍",
+
+  "item.createfisheryindustry.waxed_cardboard.tooltip.summary": "測試物品。將在即將推出的新模組「Create: Over the Sea」中發布。敬請期待。",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "一支在深海中迷失的古老破損魚叉；磨光它以恢復昔日的光澤",
+  "item.createfisheryindustry.copper_diving_leggings": "銅製潛水護腿",
+  "item.createfisheryindustry.netherite_diving_leggings": "獄髓潛水護腿",
+  "item.createfisheryindustry.harpoon": "魚叉",
+  "entity.createfisheryindustry.harpoon": "魚叉",
+  "itemGroup.createfisheryindustry.base": "動力機械：漁業",
+  "itemGroup.createfisheryindustry.fishery_tab": "動力機械：漁業",
+
+  "create.gui.goggles.mesh_trap_contents": "捕獲網內容物",
+  "create.gui.goggles.inventory.empty": "空",
+  "create.gui.goggles.trap_nozzle_contents": "陷阱噴嘴內容物",
+  "create.gui.goggles.smart_mesh_contents": "智慧濾網內容物",
+
+  "block.createfisheryindustry.mechanical_peeler": "動力削皮機",
+  "create.gui.goggles.mechanical_peeler_contents": "削皮機副產物",
+  "gui.goggles.inventory.empty": "空",
+
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
+  "tooltip.keyShift": "Shift",
+  "tooltip.holdForDescription": "按住 [%s] 鍵查看詳細說明",
+
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "銅製潛水護腿與潛水靴配合使用，在水中體驗如月球漫步般的感覺。",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "穿戴時：",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "穿戴者在水中獲得超級跳躍能力，最高可跳躍四格高度，著陸時不會受到摔落傷害。",
+
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "獄髓潛水護腿與潛水靴配合使用，在水中或熔岩海中體驗如月球漫步般的感覺。",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "穿戴時：",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "穿戴者在水中或熔岩中獲得超級跳躍能力，最高可跳躍四格高度，著陸時不會受到摔落傷害。",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "可容納4支魚叉。投擲魚叉後會自動補充魚叉至主手，拾取魚叉時會優先存放到魚叉袋中。",
+
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "由壓縮空氣驅動。發射魚叉將命中的實體拉向你，或將你拉向被命中的方塊。可以遠程收集物品。",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "右鍵點擊時：",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "發射魚叉，再次右鍵收回",
+
+  "block.createfisheryindustry.frame_trap.tooltip.summary": "用於移動裝置上捕魚的元件。",
+  "block.createfisheryindustry.frame_trap.tooltip.condition1": "在移動裝置中時：",
+  "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "捕獲路徑上附近的魚類、其他小型生物和物品。同時隨時間獲得當前生物群落的釣魚戰利品。觸發釣魚或捕獲生物時獲得經驗粒。",
+
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "自動收集附近的物品，捕獲魚類或其他小型生物並儲存。注意捕獲網沒有獲得釣魚戰利品的能力。",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "對實體使用時：",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "捕獲指定實體，獲得其戰利品和經驗粒。",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition2": "右鍵點擊時：",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour2": "取出物品，一次最多一組。",
+
+  "block.createfisheryindustry.trap_nozzle.tooltip.summary": "安裝在鼓風機前端，將其效果向各個方向分散到實體上。",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "安裝在鼓風機上時：",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "自動收集附近的物品，捕獲魚類或其他小型生物並儲存",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "右鍵點擊時：",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "取出物品，一次最多一組。",
+
+  "block.createfisheryindustry.smart_mesh.tooltip.summary": "智慧濾網自動收集並儲存附近的物品。",
+  "block.createfisheryindustry.smart_mesh.tooltip.condition1": "空手右鍵點擊時：",
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "取出物品，一次最多一組。",
+
+  "block.createfisheryindustry.smart_beehive": "智慧蜂巢",
+  "block.createfisheryindustry.smart_beehive.tooltip.summary": "測試方塊，功能仍在開發中。此方塊不屬於「動力機械：漁業產業」的內容。將在即將推出的新模組「Create: Dinner」中發布。敬請期待。",
+  "createfisheryindustry.smart_beehive.mode": "蜂巢模式",
+  "createfisheryindustry.smart_beehive.mode.honey_fluid": "蜂蜜流體",
+  "createfisheryindustry.smart_beehive.mode.honeycomb": "蜂巢",
+  "create.createfisheryindustry.smart_beehive.mode.honey_fluid": "蜂蜜流體",
+  "create.createfisheryindustry.smart_beehive.mode.honeycomb": "蜂巢",
+  "create.createfisheryindustry.smart_beehive.full": "蜂巢已滿！",
+  "create.createfisheryindustry.smart_beehive.empty": "蜂巢庫存為空！",
+  "create.createfisheryindustry.smart_beehive.contents": "蜂巢內容物",
+  "create.createfisheryindustry.smart_beehive.bees": "%d/%d 隻蜜蜂",
+  "create.createfisheryindustry.smart_beehive.fluid": "%s：%d mB",
+  "create.createfisheryindustry.smart_beehive.fluid_empty": "無流體",
+  "create.createfisheryindustry.smart_beehive.mode_label": "模式：",
+  "fluid.create.honey": "蜂蜜",
+
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "用於處理削皮配方和與特定實體互動的動力元件",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "由應力驅動時",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "處理削皮配方，類似於動力鋸。可為羊剪毛或從海龜和犰狳收穫鱗甲。可剝除整棵樹的樹皮、去除方塊上的鏽跡和蠟，並收穫成熟的紫水晶簇。",
+
+  "item.createfisheryindustry.chains": "鏈條",
+  "item.createfisheryindustry.fish_skin": "魚皮",
+  "item.createfisheryindustry.roasted_fish_skin": "烤魚皮",
+  "item.createfisheryindustry.cod_steak": "鱈魚排",
+  "item.createfisheryindustry.salmon_steak": "鮭魚排",
+  "item.createfisheryindustry.cooked_cod_steak": "熟鱈魚排",
+  "item.createfisheryindustry.cooked_salmon_steak": "熟鮭魚排",
+
+  "recipe.createfisheryindustry.peeling": "削皮",
+
+  "gui.goggles.kinetic_stats": "動力統計",
+  "create.gui.goggles.speed": "速度：%s RPM",
+  "create.gui.goggles.peeler_input": "輸入：",
+  "create.gui.goggles.peeler_outputs": "儲存的輸出：",
+  "create.gui.goggles.peeler_stored_outputs": "儲存的輸出：",
+
+  "block.createfisheryindustry.smart_nozzle": "智慧噴嘴",
+
+  "create.gui.goggles.smart_nozzle_contents": "智慧噴嘴內容物",
+
+  "create_fishery.smart_mesh.extracted": "取出了 %s 個 %s",
+  "create_fishery.smart_mesh.extraction_failed": "取出失敗，請重試",
+  "create_fishery.smart_mesh.empty": "智慧濾網為空",
+
+  "create_fishery.mesh_trap.extracted": "取出了 %s 個 %s",
+  "create_fishery.mesh_trap.extraction_failed": "取出失敗，請重試",
+  "create_fishery.mesh_trap.empty": "捕獲網為空",
+
+  "create_fishery.trap_nozzle.extracted": "取出了 %s 個 %s",
+  "create_fishery.trap_nozzle.extraction_failed": "取出失敗，請重試",
+  "create_fishery.trap_nozzle.empty": "陷阱噴嘴為空",
+
+  "create_fishery.smart_nozzle.extracted": "取出了 %s 個 %s",
+  "create_fishery.smart_nozzle.extraction_failed": "取出失敗，請重試",
+  "create_fishery.smart_nozzle.empty": "智慧噴嘴為空",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "具有過濾功能的智慧噴嘴，可以自動收集符合過濾條件的附近物品。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "連接到鼓風機時：",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "自動收集符合過濾條件的附近物品並儲存。氣流只影響過濾後的物品。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "右鍵點擊時：",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "取出物品，一次最多一組。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "過濾槽：",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "在過濾槽中放置物品以僅收集該類型的物品。氣流將完全忽略不匹配的物品。"
+}

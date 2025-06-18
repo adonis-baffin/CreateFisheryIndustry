@@ -1,0 +1,135 @@
+{
+  "block.createfisheryindustry.frame_trap": "프레임 함정",
+  "block.createfisheryindustry.mesh_trap": "그물 함정",
+  "block.createfisheryindustry.trap_nozzle": "함정 노즐",
+  "block.createfisheryindustry.smart_mesh": "스마트 그물",
+  "item.createfisheryindustry.zinc_sheet": "아연 판",
+  "item.createfisheryindustry.pneumatic_mechanism": "공압 장치",
+  "item.createfisheryindustry.incomplete_pneumatic_mechanism": "미완성된 공압 장치",
+  "item.createfisheryindustry.waxed_cardboard": "왁스 처리된 판지",
+  "item.createfisheryindustry.waxed_leather": "왁스 처리된 가죽",
+  "item.createfisheryindustry.worn_harpoon": "낡은 작살",
+  "item.createfisheryindustry.harpoon_pouch": "작살 주머니",
+  "item.createfisheryindustry.pneumatic_harpoon_gun": "공압 작살총",
+
+  "item.createfisheryindustry.waxed_cardboard.tooltip.summary": "테스트 아이템입니다. 향후 새로운 모드 'Create: Over the Sea'에서 출시될 예정입니다. 기대해 주세요.",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "깊은 바다에서 잃어버린 오래되고 낡은 작살; 광택을 내어 예전의 빛을 되찾으세요",
+  "item.createfisheryindustry.copper_diving_leggings": "구리 잠수복 바지",
+  "item.createfisheryindustry.netherite_diving_leggings": "네더라이트 잠수복 바지",
+  "item.createfisheryindustry.harpoon": "작살",
+  "entity.createfisheryindustry.harpoon": "작살",
+  "itemGroup.createfisheryindustry.base": "Create: 어업 산업",
+  "itemGroup.createfisheryindustry.fishery_tab": "Create: 어업 산업",
+
+  "create.gui.goggles.mesh_trap_contents": "그물 함정 내용물",
+  "create.gui.goggles.inventory.empty": "비어 있음",
+  "create.gui.goggles.trap_nozzle_contents": "함정 노즐 내용물",
+  "create.gui.goggles.smart_mesh_contents": "스마트 그물 내용물",
+
+  "block.createfisheryindustry.mechanical_peeler": "기계식 박피기",
+  "create.gui.goggles.mechanical_peeler_contents": "박피기 부산물",
+  "gui.goggles.inventory.empty": "비어 있음",
+
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
+  "tooltip.keyShift": "Shift",
+  "tooltip.holdForDescription": "[%s] 키를 눌러 설명 보기",
+
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "구리 잠수복 바지는 잠수 부츠와 함께 사용하여 물속에서 달 표면을 걷는 듯한 느낌을 경험할 수 있습니다.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "착용했을 때:",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "착용자가 물에서 최대 4블록 높이까지 슈퍼 점프 능력을 얻으며, 착지 시 낙하 피해를 받지 않습니다.",
+
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "네더라이트 잠수복 바지는 잠수 부츠와 함께 사용하여 물속이나 용암 바다에서 달 표면을 걷는 듯한 느낌을 경험할 수 있습니다.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "착용했을 때:",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "착용자가 물이나 용암에서 최대 4블록 높이까지 슈퍼 점프 능력을 얻으며, 착지 시 낙하 피해를 받지 않습니다.",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "최대 4개의 작살을 보관할 수 있습니다. 던진 후 자동으로 주 손에 작살을 보충하고, 주운 작살을 주머니에 우선적으로 저장합니다.",
+
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "압축 공기로 작동합니다. 적중한 개체를 당신 쪽으로 끌어당기거나 블록에 적중 시 당신을 그쪽으로 끌어당기는 작살을 발사합니다. 원거리에서 아이템을 수집할 수 있습니다.",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "우클릭할 때:",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "작살을 발사하고, 다시 우클릭하여 회수합니다",
+
+  "block.createfisheryindustry.frame_trap.tooltip.summary": "구조물에서 낚시를 위한 부품입니다.",
+  "block.createfisheryindustry.frame_trap.tooltip.condition1": "구조물 내에서:",
+  "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "경로상의 근처 물고기나 다른 작은 생물, 아이템들을 포획합니다. 또한 시간이 지나면서 현재 생물 군계의 낚시 전리품을 얻습니다. 낚시가 발동되거나 생물을 포획할 때 경험치 조각을 제공합니다.",
+
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "근처 아이템을 자동으로 수집하고, 물고기나 다른 작은 생물을 포획하여 저장합니다. 그물 함정은 낚시 전리품을 얻는 능력이 없다는 점에 주의하세요.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "개체에 사용할 때:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "지정된 개체를 포획하고, 그 전리품과 경험치 조각을 얻습니다.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition2": "우클릭할 때:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour2": "아이템을 추출합니다. 한 번에 최대 한 스택씩.",
+
+  "block.createfisheryindustry.trap_nozzle.tooltip.summary": "케이스 팬 앞면에 부착하여 그 효과를 모든 방향의 개체에게 분산시킵니다.",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "케이스 팬에 부착했을 때:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "근처 아이템을 자동으로 수집하고, 물고기나 다른 작은 생물을 포획하여 저장합니다",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "우클릭할 때:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "아이템을 추출합니다. 한 번에 최대 한 스택씩.",
+
+  "block.createfisheryindustry.smart_mesh.tooltip.summary": "스마트 그물은 근처 아이템을 자동으로 수집하고 저장합니다.",
+  "block.createfisheryindustry.smart_mesh.tooltip.condition1": "빈 손으로 우클릭할 때:",
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "아이템을 추출합니다. 한 번에 최대 한 스택씩.",
+
+  "block.createfisheryindustry.smart_beehive": "스마트 벌집",
+  "block.createfisheryindustry.smart_beehive.tooltip.summary": "테스트 블록으로, 기능이 아직 개발 중입니다. 이 블록은 'Create: 어업 산업' 모드의 내용이 아닙니다. 향후 새로운 모드 'Create: Dinner'에서 출시될 예정입니다. 기대해 주세요.",
+  "createfisheryindustry.smart_beehive.mode": "벌집 모드",
+  "createfisheryindustry.smart_beehive.mode.honey_fluid": "꿀 액체",
+  "createfisheryindustry.smart_beehive.mode.honeycomb": "벌집",
+  "create.createfisheryindustry.smart_beehive.mode.honey_fluid": "꿀 액체",
+  "create.createfisheryindustry.smart_beehive.mode.honeycomb": "벌집",
+  "create.createfisheryindustry.smart_beehive.full": "벌집이 가득 찼습니다!",
+  "create.createfisheryindustry.smart_beehive.empty": "벌집 인벤토리가 비어 있습니다!",
+  "create.createfisheryindustry.smart_beehive.contents": "벌집 내용물",
+  "create.createfisheryindustry.smart_beehive.bees": "%d/%d 벌",
+  "create.createfisheryindustry.smart_beehive.fluid": "%s: %d mB",
+  "create.createfisheryindustry.smart_beehive.fluid_empty": "액체 없음",
+  "create.createfisheryindustry.smart_beehive.mode_label": "모드: ",
+  "fluid.create.honey": "꿀",
+
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "박피 레시피를 처리하고 특정 개체와 상호작용하는 기계 부품입니다",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "응력으로 동력을 받을 때",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "기계 톱과 유사하게 박피 레시피를 처리합니다. 양의 털을 깎거나 거북이와 아르마딜로의 비늘을 수확할 수 있습니다. 나무 전체의 껍질을 벗기고, 블록의 녹과 왁스를 제거하며, 성숙한 자수정 덩어리를 수확할 수 있습니다.",
+
+  "item.createfisheryindustry.chains": "사슬",
+  "item.createfisheryindustry.fish_skin": "물고기 껍질",
+  "item.createfisheryindustry.roasted_fish_skin": "구운 물고기 껍질",
+  "item.createfisheryindustry.cod_steak": "대구 스테이크",
+  "item.createfisheryindustry.salmon_steak": "연어 스테이크",
+  "item.createfisheryindustry.cooked_cod_steak": "익힌 대구 스테이크",
+  "item.createfisheryindustry.cooked_salmon_steak": "익힌 연어 스테이크",
+
+  "recipe.createfisheryindustry.peeling": "박피",
+
+  "gui.goggles.kinetic_stats": "동력 통계",
+  "create.gui.goggles.speed": "속도: %s RPM",
+  "create.gui.goggles.peeler_input": "입력:",
+  "create.gui.goggles.peeler_outputs": "저장된 출력:",
+  "create.gui.goggles.peeler_stored_outputs": "저장된 출력:",
+
+  "block.createfisheryindustry.smart_nozzle": "스마트 노즐",
+
+  "create.gui.goggles.smart_nozzle_contents": "스마트 노즐 내용물",
+
+  "create_fishery.smart_mesh.extracted": "%s x %s개 추출됨",
+  "create_fishery.smart_mesh.extraction_failed": "추출 실패, 다시 시도해 주세요",
+  "create_fishery.smart_mesh.empty": "스마트 그물이 비어 있습니다",
+
+  "create_fishery.mesh_trap.extracted": "%s x %s개 추출됨",
+  "create_fishery.mesh_trap.extraction_failed": "추출 실패, 다시 시도해 주세요",
+  "create_fishery.mesh_trap.empty": "그물 함정이 비어 있습니다",
+
+  "create_fishery.trap_nozzle.extracted": "%s x %s개 추출됨",
+  "create_fishery.trap_nozzle.extraction_failed": "추출 실패, 다시 시도해 주세요",
+  "create_fishery.trap_nozzle.empty": "함정 노즐이 비어 있습니다",
+
+  "create_fishery.smart_nozzle.extracted": "%s x %s개 추출됨",
+  "create_fishery.smart_nozzle.extraction_failed": "추출 실패, 다시 시도해 주세요",
+  "create_fishery.smart_nozzle.empty": "스마트 노즐이 비어 있습니다",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "필터 기능이 있는 스마트 노즐로, 필터 조건에 맞는 근처 아이템을 자동으로 수집할 수 있습니다.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "케이스 팬에 부착했을 때:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "필터에 맞는 근처 아이템을 자동으로 수집하고 저장합니다. 공기 흐름은 필터링된 아이템에만 영향을 줍니다.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "우클릭할 때:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "아이템을 추출합니다. 한 번에 최대 한 스택씩.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "필터 슬롯:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "필터 슬롯에 아이템을 넣어 해당 유형의 아이템만 수집합니다. 공기 흐름은 일치하지 않는 아이템을 완전히 무시합니다."
+}

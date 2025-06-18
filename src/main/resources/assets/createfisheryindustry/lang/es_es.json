@@ -1,0 +1,135 @@
+{
+  "block.createfisheryindustry.frame_trap": "Trampa de Marco",
+  "block.createfisheryindustry.mesh_trap": "Trampa de Malla",
+  "block.createfisheryindustry.trap_nozzle": "Boquilla Trampa",
+  "block.createfisheryindustry.smart_mesh": "Malla Inteligente",
+  "item.createfisheryindustry.zinc_sheet": "Lámina de Cinc",
+  "item.createfisheryindustry.pneumatic_mechanism": "Mecanismo Neumático",
+  "item.createfisheryindustry.incomplete_pneumatic_mechanism": "Mecanismo Neumático Incompleto",
+  "item.createfisheryindustry.waxed_cardboard": "Cartón Encerado",
+  "item.createfisheryindustry.waxed_leather": "Cuero Encerado",
+  "item.createfisheryindustry.worn_harpoon": "Arpón Desgastado",
+  "item.createfisheryindustry.harpoon_pouch": "Bolsa de Arpones",
+  "item.createfisheryindustry.pneumatic_harpoon_gun": "Pistola de Arpón Neumática",
+
+  "item.createfisheryindustry.waxed_cardboard.tooltip.summary": "Objeto de prueba. Se lanzará en el próximo mod 'Create: Over the Sea' en el futuro. Mantente atento.",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "Un arpón antiguo y desgastado perdido en las profundidades; púlelo para restaurar su brillo anterior",
+  "item.createfisheryindustry.copper_diving_leggings": "Perneras de Buceo de Cobre",
+  "item.createfisheryindustry.netherite_diving_leggings": "Perneras de Buceo de Netherite",
+  "item.createfisheryindustry.harpoon": "Arpón",
+  "entity.createfisheryindustry.harpoon": "Arpón",
+  "itemGroup.createfisheryindustry.base": "Create: Industria Pesquera",
+  "itemGroup.createfisheryindustry.fishery_tab": "Create: Industria Pesquera",
+
+  "create.gui.goggles.mesh_trap_contents": "Contenido de la Trampa de Malla",
+  "create.gui.goggles.inventory.empty": "Vacío",
+  "create.gui.goggles.trap_nozzle_contents": "Contenido de la Boquilla Trampa",
+  "create.gui.goggles.smart_mesh_contents": "Contenido de la Malla Inteligente",
+
+  "block.createfisheryindustry.mechanical_peeler": "Pelador Mecánico",
+  "create.gui.goggles.mechanical_peeler_contents": "Subproductos del Pelador",
+  "gui.goggles.inventory.empty": "Vacío",
+
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
+  "tooltip.keyShift": "Mayús",
+  "tooltip.holdForDescription": "Mantén [%s] para el resumen",
+
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "Perneras de Buceo de Cobre usadas con botas de buceo para experimentar una sensación de caminata lunar bajo el agua.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "Cuando se llevan puestas:",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "El portador obtiene capacidad de super salto en el agua, hasta cuatro bloques de altura, sin daño por caída al aterrizar.",
+
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Perneras de Buceo de Netherite usadas con botas de buceo para experimentar una sensación de caminata lunar bajo el agua o en mares de lava.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "Cuando se llevan puestas:",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "El portador obtiene capacidad de super salto en agua o lava, hasta cuatro bloques de altura, sin daño por caída al aterrizar.",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Contiene hasta 4 arpones. Reabastece automáticamente un arpón en la mano principal después de lanzar y prioriza almacenar arpones recogidos en la bolsa.",
+
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "Impulsada por aire comprimido. Dispara un arpón que tira de las entidades golpeadas hacia ti o te tira hacia los bloques. Puede recoger objetos a distancia.",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "Cuando se hace clic derecho:",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "Dispara arpón, clic derecho de nuevo para retirarlo",
+
+  "block.createfisheryindustry.frame_trap.tooltip.summary": "Componente para pescar en artilugios.",
+  "block.createfisheryindustry.frame_trap.tooltip.condition1": "Cuando está en un artilugio:",
+  "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "Captura peces cercanos, u otras criaturas pequeñas, y objetos a lo largo del camino. También obtiene botín de pesca del bioma actual con el tiempo. Otorga pepitas de experiencia cuando se activa la pesca o se capturan criaturas.",
+
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "Recolecta automáticamente objetos cercanos, captura peces u otras criaturas pequeñas, y los almacena. Ten en cuenta que la trampa de malla no tiene la capacidad de obtener botín de pesca.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "Cuando se usa en una entidad:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "Captura la entidad especificada, obtiene su botín y pepitas de experiencia.",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition2": "Cuando se hace clic derecho:",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour2": "Extrae objetos, hasta un stack a la vez.",
+
+  "block.createfisheryindustry.trap_nozzle.tooltip.summary": "Se adhiere al frente de un Ventilador Encapsulado para distribuir su efecto en Entidades en todas las direcciones.",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "Cuando se adjunta a un ventilador encapsulado:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "Recolecta automáticamente objetos cercanos, captura peces u otras criaturas pequeñas, y los almacena",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "Cuando se hace clic derecho:",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "Extrae objetos, hasta un stack a la vez.",
+
+  "block.createfisheryindustry.smart_mesh.tooltip.summary": "La Malla Inteligente recolecta automáticamente objetos cercanos y los almacena.",
+  "block.createfisheryindustry.smart_mesh.tooltip.condition1": "Cuando se hace clic derecho con la mano vacía:",
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "Extrae objetos, hasta un stack a la vez.",
+
+  "block.createfisheryindustry.smart_beehive": "Colmena Inteligente",
+  "block.createfisheryindustry.smart_beehive.tooltip.summary": "Bloque de prueba, las funciones aún están en desarrollo. Este bloque no es parte del contenido del mod 'Create: Industria Pesquera'. Se lanzará en el próximo mod 'Create: Dinner' en el futuro. Mantente atento.",
+  "createfisheryindustry.smart_beehive.mode": "Modo de Colmena",
+  "createfisheryindustry.smart_beehive.mode.honey_fluid": "Miel Fluida",
+  "createfisheryindustry.smart_beehive.mode.honeycomb": "Panal",
+  "create.createfisheryindustry.smart_beehive.mode.honey_fluid": "Miel Fluida",
+  "create.createfisheryindustry.smart_beehive.mode.honeycomb": "Panal",
+  "create.createfisheryindustry.smart_beehive.full": "¡La colmena está llena!",
+  "create.createfisheryindustry.smart_beehive.empty": "¡El inventario de la colmena está vacío!",
+  "create.createfisheryindustry.smart_beehive.contents": "Contenido de la Colmena",
+  "create.createfisheryindustry.smart_beehive.bees": "%d/%d Abejas",
+  "create.createfisheryindustry.smart_beehive.fluid": "%s: %d mB",
+  "create.createfisheryindustry.smart_beehive.fluid_empty": "Sin Fluido",
+  "create.createfisheryindustry.smart_beehive.mode_label": "Modo: ",
+  "fluid.create.honey": "Miel",
+
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "Un componente mecánico para procesar recetas de pelado e interactuar con ciertas entidades",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "Cuando es alimentado por estrés",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "Procesa recetas de pelado, similar a una sierra mecánica. Puede esquilar ovejas o cosechar escudos de tortugas y armadillos. Puede pelar corteza de árboles enteros, eliminar óxido y cera de bloques, y cosechar racimos de amatista maduros.",
+
+  "item.createfisheryindustry.chains": "Cadenas",
+  "item.createfisheryindustry.fish_skin": "Piel de Pez",
+  "item.createfisheryindustry.roasted_fish_skin": "Piel de Pez Asada",
+  "item.createfisheryindustry.cod_steak": "Filete de Bacalao",
+  "item.createfisheryindustry.salmon_steak": "Filete de Salmón",
+  "item.createfisheryindustry.cooked_cod_steak": "Filete de Bacalao Cocinado",
+  "item.createfisheryindustry.cooked_salmon_steak": "Filete de Salmón Cocinado",
+
+  "recipe.createfisheryindustry.peeling": "Pelado",
+
+  "gui.goggles.kinetic_stats": "Estadísticas Cinéticas",
+  "create.gui.goggles.speed": "Velocidad: %s RPM",
+  "create.gui.goggles.peeler_input": "Entrada:",
+  "create.gui.goggles.peeler_outputs": "Salidas Almacenadas:",
+  "create.gui.goggles.peeler_stored_outputs": "Salidas Almacenadas:",
+
+  "block.createfisheryindustry.smart_nozzle": "Boquilla Inteligente",
+
+  "create.gui.goggles.smart_nozzle_contents": "Contenido de la Boquilla Inteligente",
+
+  "create_fishery.smart_mesh.extracted": "Extraído %s x %s",
+  "create_fishery.smart_mesh.extraction_failed": "Extracción fallida, inténtalo de nuevo",
+  "create_fishery.smart_mesh.empty": "La Malla Inteligente está vacía",
+
+  "create_fishery.mesh_trap.extracted": "Extraído %s x %s",
+  "create_fishery.mesh_trap.extraction_failed": "Extracción fallida, inténtalo de nuevo",
+  "create_fishery.mesh_trap.empty": "La Trampa de Malla está vacía",
+
+  "create_fishery.trap_nozzle.extracted": "Extraído %s x %s",
+  "create_fishery.trap_nozzle.extraction_failed": "Extracción fallida, inténtalo de nuevo",
+  "create_fishery.trap_nozzle.empty": "La Boquilla Trampa está vacía",
+
+  "create_fishery.smart_nozzle.extracted": "Extraído %s x %s",
+  "create_fishery.smart_nozzle.extraction_failed": "Extracción fallida, inténtalo de nuevo",
+  "create_fishery.smart_nozzle.empty": "La Boquilla Inteligente está vacía",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "Boquilla Inteligente con capacidad de filtro que puede recolectar automáticamente objetos cercanos que coincidan con los criterios del filtro.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "Cuando se adjunta a un ventilador encapsulado:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "Recolecta automáticamente objetos cercanos que coincidan con el filtro y los almacena. El flujo de aire solo afecta a los objetos filtrados.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "Cuando se hace clic derecho:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Extrae objetos, hasta un stack a la vez.",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Ranura de Filtro:",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Coloca un objeto en la ranura de filtro para recolectar solo ese tipo de objeto. El flujo de aire ignorará completamente los objetos que no coincidan."
+}

@@ -351,7 +351,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
 
             if (currentState == HarpoonState.FLYING) {
                 // 改进的物品检测
-                if (tickCount > 4) {
+                if (tickCount > 2) {
                     // 使用位置而不是碰撞盒来检测
                     Vec3 harpoonPos = this.position();
                     double detectionRadius = 3.0;
