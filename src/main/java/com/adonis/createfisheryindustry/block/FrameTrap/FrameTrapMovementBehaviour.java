@@ -62,7 +62,6 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
             if (!inValidFluid || fishing.timeUntilCatch > 0) return;
 
             // 检查是否启用钓鱼功能
-            // 检查是否启用钓鱼功能
             if (!CreateFisheryCommonConfig.isFishingEnabled()) {
                 return;
             }
@@ -79,17 +78,11 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
                     loots.add(wornHarpoon);
                 }
 
-                // 获取最近的玩家用于事件
-                List<ServerPlayer> players = level.getServer().getPlayerList().getPlayers();
-                ServerPlayer selectedPlayer = null;
-                if (!players.isEmpty()) {
-                    Player nearestPlayer = level.getNearestPlayer(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, -1, false);
-                    if (nearestPlayer instanceof ServerPlayer serverPlayer) {
-                        selectedPlayer = serverPlayer;
-                    }
-                }
+                // 使用FakePlayer创建FishingHook，确保ItemFishedEvent不会出现null异常
+                FrameTrapFakePlayer fakePlayer = new FrameTrapFakePlayer(level);
+                FishingHook fishingHook = new FishingHook(fakePlayer, level, 0, 0);
 
-                FishingHook fishingHook = selectedPlayer != null ? new FishingHook(selectedPlayer, level, 0, 0) : null;
+                // 触发ItemFishedEvent
                 ItemFishedEvent event = NeoForge.EVENT_BUS.post(new ItemFishedEvent(loots, 0, fishingHook));
 
                 if (!event.isCanceled()) {
@@ -100,6 +93,7 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
                     addExperienceNugget(context, level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
                     spawnFishingParticles(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, inLava);
                 }
+
                 fishing.reset(level, pos); // 使用环境感知的reset方法
             }
         }

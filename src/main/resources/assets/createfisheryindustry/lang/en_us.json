@@ -18,6 +18,7 @@
   "item.createfisheryindustry.netherite_diving_leggings": "Netherite Diving Leggings",
   "item.createfisheryindustry.harpoon": "Harpoon",
   "entity.createfisheryindustry.harpoon": "Harpoon",
+  "entity.createfisheryindustry.tethered_harpoon": "Tethered Harpoon",
   "itemGroup.createfisheryindustry.base": "Create: Fishery Industry",
   "itemGroup.createfisheryindustry.fishery_tab": "Create: Fishery Industry",
 

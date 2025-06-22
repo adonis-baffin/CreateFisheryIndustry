@@ -18,6 +18,7 @@
   "item.createfisheryindustry.netherite_diving_leggings": "下界合金潜水护腿",
   "item.createfisheryindustry.harpoon": "鱼叉",
   "entity.createfisheryindustry.harpoon": "鱼叉",
+  "entity.createfisheryindustry.tethered_harpoon": "带锁链的鱼叉",
   "itemGroup.createfisheryindustry.base": "机械动力：渔业",
   "itemGroup.createfisheryindustry.fishery_tab": "机械动力：渔业",
 

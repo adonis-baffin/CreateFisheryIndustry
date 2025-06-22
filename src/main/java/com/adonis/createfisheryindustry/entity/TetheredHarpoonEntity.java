@@ -23,6 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -69,7 +70,9 @@ public class TetheredHarpoonEntity extends AbstractArrow {
     }
 
     public TetheredHarpoonEntity(Level level, Player owner, Vec3 position) {
-        super(CreateFisheryEntityTypes.TETHERED_HARPOON.get(), owner, level, ItemStack.EMPTY, null);
+        // 修复：使用有效的ItemStack而不是ItemStack.EMPTY，避免传送门崩溃
+        super(CreateFisheryEntityTypes.TETHERED_HARPOON.get(), owner, level,
+                new ItemStack(Items.ARROW), null);
         this.owner = owner;
         this.setPos(position);
         this.setOwner(owner);
@@ -458,7 +461,16 @@ public class TetheredHarpoonEntity extends AbstractArrow {
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
-        super.addAdditionalSaveData(compound);
+        // 修复：安全的NBT保存，避免空ItemStack导致的传送门崩溃
+        try {
+            super.addAdditionalSaveData(compound);
+        } catch (IllegalStateException e) {
+            compound.putByte("pickup", (byte) this.pickup.ordinal());
+            compound.putDouble("damage", this.getBaseDamage());
+            compound.putBoolean("crit", this.isCritArrow());
+        }
+
+        // 保存自定义数据
         compound.putBoolean("Anchored", anchored);
         compound.putBoolean("Retrieving", retrieving);
         if (anchoredPos != null) {
