@@ -47,6 +47,8 @@ public class CreateFisheryMod {
     }
 
     public CreateFisheryMod(IEventBus bus, ModContainer modContainer) {
+        LOGGER.info("Initializing Create Fishery Industry Mod");
+
         REGISTRATE.registerEventListeners(bus);
 
         CreateFisheryBlocks.register();
@@ -73,33 +75,45 @@ public class CreateFisheryMod {
 
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
+
+        LOGGER.info("Create Fishery Industry Mod initialization complete");
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        LOGGER.info("Common setup starting");
         event.enqueueWork(() -> {
             BacktankInventorySupplier.register();
+            LOGGER.info("Common setup complete");
         });
     }
 
     private void onModConfigEvent(ModConfigEvent event) {
         ModConfig config = event.getConfig();
+        LOGGER.debug("Config event: {}", event.getClass().getSimpleName());
+
         if (config.getSpec() == CreateFisheryCommonConfig.CONFIG_SPEC) {
             if (event instanceof ModConfigEvent.Loading) {
+                LOGGER.info("Loading common config");
                 CreateFisheryCommonConfig.onLoad();
             } else if (event instanceof ModConfigEvent.Reloading) {
+                LOGGER.info("Reloading common config");
                 CreateFisheryCommonConfig.onReload();
             }
         } else if (stressConfigSpec != null && config.getSpec() == stressConfigSpec) {
             if (event instanceof ModConfigEvent.Loading) {
+                LOGGER.info("Loading stress config");
             } else if (event instanceof ModConfigEvent.Reloading) {
+                LOGGER.info("Reloading stress config");
             }
         }
     }
 
     private void onServerStarting(ServerStartingEvent event) {
+        LOGGER.info("Server starting - refreshing config cache");
         CreateFisheryCommonConfig.refreshCache();
     }
 
     private void onServerStopping(ServerStoppingEvent event) {
+        LOGGER.info("Server stopping");
     }
 }

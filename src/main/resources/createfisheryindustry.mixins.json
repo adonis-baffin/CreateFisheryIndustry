@@ -7,8 +7,12 @@
   "mixins": [
     "AllArmInteractionPointTypesMixin",
     "BlockMovementChecksMixin",
-    "DivingBootsItemMixin",
-    "PlayerWaterSprintMixin"
+    "accessor.LivingEntityAccessor",
+    "accessor.DivingBootsAccessor",
+    "TerrestrialUnderwaterSystemMixin",
+    "CreateBootsDisableMixin",
+    "SprintProtectionMixin",
+    "SwimmingPreventionMixin"
   ],
   "client": [],
   "injectors": {
