@@ -7,10 +7,12 @@
   "mixins": [
     "AllArmInteractionPointTypesMixin",
     "BlockMovementChecksMixin",
-    "accessor.LivingEntityAccessor",
     "accessor.DivingBootsAccessor",
-    "TerrestrialUnderwaterSystemMixin",
-    "CreateBootsDisableMixin",
+    "accessor.LivingEntityAccessor",
+    "SuperJumpMarkerMixin",
+    "DivingSystemMixin",
+    "JumpCooldownMixin",
+    "UnderwaterSprintMixin",
     "SprintProtectionMixin",
     "SwimmingPreventionMixin"
   ],
