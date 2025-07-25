@@ -37,11 +37,11 @@
 
   "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "ダイビングブーツと組み合わせて使用し、水中で月面歩行のような感覚を体験できる銅製ダイビングレギンス。",
   "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "装備時:",
-  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "水中で最大4ブロックまでのスーパージャンプ能力を獲得し、着地時の落下ダメージを無効化する。",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "水中や溶岩中でダッシュと最大4ブロックまでのスーパージャンプ能力を獲得し、着地時の落下ダメージを無効化する。",
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "ダイビングブーツと組み合わせて使用し、水中や溶岩海で月面歩行のような感覚を体験できるネザライト製ダイビングレギンス。",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "装備時:",
-  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "水中や溶岩中で最大4ブロックまでのスーパージャンプ能力を獲得し、着地時の落下ダメージを無効化する。",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "水中や溶岩中でダッシュと最大4ブロックまでのスーパージャンプ能力を獲得し、着地時の落下ダメージを無効化する。",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "最大4本の銛を収納可能。投擲後に自動的にメインハンドに銛を補充し、拾った銛を優先的にポーチに格納する。",
 

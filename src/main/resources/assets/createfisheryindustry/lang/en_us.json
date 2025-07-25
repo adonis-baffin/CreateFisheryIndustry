@@ -42,7 +42,7 @@
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Netherite Diving Leggings used with diving boots to experience a moonwalk-like feeling underwater or in lava seas.",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "When worn:",
-  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "The wearer gains super jump ability in water or lava, up to four blocks high, with no fall damage upon landing.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "The wearer gains sprint and super jump ability in water or lava, up to four blocks high, with no fall damage upon landing.",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Holds up to 4 harpoons. Automatically replenishes a harpoon to the main hand after throwing and prioritizes storing picked-up harpoons in the pouch.",
 

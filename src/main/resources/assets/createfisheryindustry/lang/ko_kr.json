@@ -37,11 +37,11 @@
 
   "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "구리 잠수복 바지는 잠수 부츠와 함께 사용하여 물속에서 달 표면을 걷는 듯한 느낌을 경험할 수 있습니다.",
   "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "착용했을 때:",
-  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "착용자가 물에서 최대 4블록 높이까지 슈퍼 점프 능력을 얻으며, 착지 시 낙하 피해를 받지 않습니다.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "착용자가 물이나 용암에서 질주와 최대 4블록 높이까지 슈퍼 점프 능력을 얻으며, 착지 시 낙하 피해를 받지 않습니다.",
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "네더라이트 잠수복 바지는 잠수 부츠와 함께 사용하여 물속이나 용암 바다에서 달 표면을 걷는 듯한 느낌을 경험할 수 있습니다.",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "착용했을 때:",
-  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "착용자가 물이나 용암에서 최대 4블록 높이까지 슈퍼 점프 능력을 얻으며, 착지 시 낙하 피해를 받지 않습니다.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "착용자가 물이나 용암에서 질주와 최대 4블록 높이까지 슈퍼 점프 능력을 얻으며, 착지 시 낙하 피해를 받지 않습니다.",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "최대 4개의 작살을 보관할 수 있습니다. 던진 후 자동으로 주 손에 작살을 보충하고, 주운 작살을 주머니에 우선적으로 저장합니다.",
 

@@ -1,5 +1,6 @@
 package com.adonis.createfisheryindustry;
 
+import com.adonis.createfisheryindustry.client.UnderwaterSprintFOVHandler;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.config.CreateFisheryStressConfig;
 import com.adonis.createfisheryindustry.recipe.CreateFisheryRecipeTypes;
@@ -12,12 +13,14 @@ import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -47,8 +50,6 @@ public class CreateFisheryMod {
     }
 
     public CreateFisheryMod(IEventBus bus, ModContainer modContainer) {
-        LOGGER.info("Initializing Create Fishery Industry Mod");
-
         REGISTRATE.registerEventListeners(bus);
 
         CreateFisheryBlocks.register();
@@ -73,47 +74,41 @@ public class CreateFisheryMod {
         bus.addListener(this::onModConfigEvent);
         bus.register(CreateFisheryBlockEntities.class);
 
+        // 注册客户端事件（仅在客户端运行）
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            NeoForge.EVENT_BUS.register(UnderwaterSprintFOVHandler.class);
+        }
+
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
-
-        LOGGER.info("Create Fishery Industry Mod initialization complete");
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-        LOGGER.info("Common setup starting");
         event.enqueueWork(() -> {
             BacktankInventorySupplier.register();
-            LOGGER.info("Common setup complete");
         });
     }
 
     private void onModConfigEvent(ModConfigEvent event) {
         ModConfig config = event.getConfig();
-        LOGGER.debug("Config event: {}", event.getClass().getSimpleName());
 
         if (config.getSpec() == CreateFisheryCommonConfig.CONFIG_SPEC) {
             if (event instanceof ModConfigEvent.Loading) {
-                LOGGER.info("Loading common config");
                 CreateFisheryCommonConfig.onLoad();
             } else if (event instanceof ModConfigEvent.Reloading) {
-                LOGGER.info("Reloading common config");
                 CreateFisheryCommonConfig.onReload();
             }
         } else if (stressConfigSpec != null && config.getSpec() == stressConfigSpec) {
             if (event instanceof ModConfigEvent.Loading) {
-                LOGGER.info("Loading stress config");
             } else if (event instanceof ModConfigEvent.Reloading) {
-                LOGGER.info("Reloading stress config");
             }
         }
     }
 
     private void onServerStarting(ServerStartingEvent event) {
-        LOGGER.info("Server starting - refreshing config cache");
         CreateFisheryCommonConfig.refreshCache();
     }
 
     private void onServerStopping(ServerStoppingEvent event) {
-        LOGGER.info("Server stopping");
     }
 }

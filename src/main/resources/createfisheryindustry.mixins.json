@@ -11,12 +11,12 @@
     "accessor.LivingEntityAccessor",
     "SuperJumpMarkerMixin",
     "DivingSystemMixin",
-    "JumpCooldownMixin",
     "UnderwaterSprintMixin",
     "SprintProtectionMixin",
     "SwimmingPreventionMixin"
   ],
-  "client": [],
+  "client": [
+  ],
   "injectors": {
     "defaultRequire": 1
   },

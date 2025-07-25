@@ -37,11 +37,11 @@
 
   "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "Perneiras de mergulho de cobre usadas com botas de mergulho para experimentar uma sensação de caminhada lunar debaixo d'água.",
   "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "Quando usadas:",
-  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "O portador ganha capacidade de super salto na água, até quatro blocos de altura, sem dano de queda ao aterrar.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "O portador ganha capacidade de corrida e super salto na água ou lava, até quatro blocos de altura, sem dano de queda ao aterrar.",
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Perneiras de mergulho de netherite usadas com botas de mergulho para experimentar uma sensação de caminhada lunar debaixo d'água ou em mares de lava.",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "Quando usadas:",
-  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "O portador ganha capacidade de super salto na água ou lava, até quatro blocos de altura, sem dano de queda ao aterrar.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "O portador ganha capacidade de corrida e super salto na água ou lava, até quatro blocos de altura, sem dano de queda ao aterrar.",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Contém até 4 arpões. Repõe automaticamente um arpão na mão principal após arremesso e prioriza o armazenamento de arpões apanhados na bolsa.",
 

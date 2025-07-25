@@ -37,11 +37,11 @@
 
   "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "Jambières de plongée en cuivre utilisées avec des bottes de plongée pour ressentir une sensation de marche lunaire sous l'eau.",
   "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "Quand portées :",
-  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "Le porteur gagne une capacité de super saut dans l'eau, jusqu'à quatre blocs de haut, sans dégâts de chute à l'atterrissage.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "Le porteur gagne une capacité de course et de super saut dans l'eau ou la lave, jusqu'à quatre blocs de haut, sans dégâts de chute à l'atterrissage.",
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Jambières de plongée en nétherite utilisées avec des bottes de plongée pour ressentir une sensation de marche lunaire sous l'eau ou dans les mers de lave.",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "Quand portées :",
-  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "Le porteur gagne une capacité de super saut dans l'eau ou la lave, jusqu'à quatre blocs de haut, sans dégâts de chute à l'atterrissage.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "Le porteur gagne une capacité de course et de super saut dans l'eau ou la lave, jusqu'à quatre blocs de haut, sans dégâts de chute à l'atterrissage.",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Contient jusqu'à 4 harpons. Renouvelle automatiquement un harpon dans la main principale après lancement et privilégie le stockage des harpons ramassés dans la pochette.",
 

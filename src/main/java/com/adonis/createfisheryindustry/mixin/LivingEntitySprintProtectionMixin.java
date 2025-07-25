@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * 简单的疾跑保护 - 只拦截 setSprinting 调用
  */
 @Mixin(value = LivingEntity.class, priority = 1200)
-public abstract class SprintProtectionMixin {
+public abstract class LivingEntitySprintProtectionMixin {
 
     @Inject(method = "setSprinting", at = @At("HEAD"), cancellable = true)
     private void protectUnderwaterSprint(boolean sprinting, CallbackInfo ci) {

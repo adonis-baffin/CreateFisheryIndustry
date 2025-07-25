@@ -37,11 +37,11 @@
 
   "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "Kupfer-Tauchbeinschutz wird mit Tauchstiefeln verwendet, um ein mondwandlerisches Gefühl unter Wasser zu erleben.",
   "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "Wenn getragen:",
-  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "Der Träger erhält Super-Sprung-Fähigkeit im Wasser, bis zu vier Blöcke hoch, ohne Fallschaden bei der Landung.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "Der Träger erhält Sprint- und Super-Sprung-Fähigkeit in Wasser oder Lava, bis zu vier Blöcke hoch, ohne Fallschaden bei der Landung.",
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Netherit-Tauchbeinschutz wird mit Tauchstiefeln verwendet, um ein mondwandlerisches Gefühl unter Wasser oder in Lavameeren zu erleben.",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "Wenn getragen:",
-  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "Der Träger erhält Super-Sprung-Fähigkeit in Wasser oder Lava, bis zu vier Blöcke hoch, ohne Fallschaden bei der Landung.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "Der Träger erhält Sprint- und Super-Sprung-Fähigkeit in Wasser oder Lava, bis zu vier Blöcke hoch, ohne Fallschaden bei der Landung.",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Hält bis zu 4 Harpunen. Ergänzt automatisch eine Harpune in der Haupthand nach dem Werfen und bevorzugt die Lagerung aufgesammelter Harpunen in der Tasche.",
 

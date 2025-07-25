@@ -37,11 +37,11 @@
 
   "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "Медные водолазные поножи используются с водолазными ботинками для ощущения лунной походки под водой.",
   "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "При ношении:",
-  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "Носитель получает способность к супер-прыжкам в воде до четырёх блоков в высоту, без урона от падения при приземлении.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "Носитель получает способность к бегу и супер-прыжкам в воде или лаве до четырёх блоков в высоту, без урона от падения при приземлении.",
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Незеритовые водолазные поножи используются с водолазными ботинками для ощущения лунной походки под водой или в лавовых морях.",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "При ношении:",
-  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "Носитель получает способность к супер-прыжкам в воде или лаве до четырёх блоков в высоту, без урона от падения при приземлении.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "Носитель получает способность к бегу и супер-прыжкам в воде или лаве до четырёх блоков в высоту, без урона от падения при приземлении.",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Вмещает до 4 гарпунов. Автоматически пополняет гарпун в основной руке после броска и приоритетно помещает подобранные гарпуны в мешок.",
 

@@ -20,16 +20,13 @@ public abstract class DivingSystemMixin {
     @Inject(method = "tick", at = @At("HEAD"))
     private void cfi_maintainCreateCompatibility(CallbackInfo ci) {
         Player player = (Player) (Object) this;
-        
+
         // 检查是否装备了完整潜水套装
         boolean hasDivingBoots = player.getItemBySlot(EquipmentSlot.FEET).getItem() instanceof DivingBootsItem;
         boolean hasDivingLeggings = player.getItemBySlot(EquipmentSlot.LEGS).getItem() instanceof CopperDivingLeggingsItem
                 || player.getItemBySlot(EquipmentSlot.LEGS).getItem() instanceof NetheriteDivingLeggingsItem;
-        
+
         if (hasDivingBoots && hasDivingLeggings && (player.isInWater() || player.isInLava())) {
-            // 当装备完整套装时，保持与Create潜水靴的基础兼容性
-            // 不需要特殊处理，让Create的DivingBootsItem继续工作
-            // 水下疾跑功能由UnderwaterSprintMixin单独处理
         }
     }
 }

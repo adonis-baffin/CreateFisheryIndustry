@@ -33,6 +33,7 @@ public class CreateFisheryCommonConfig {
     public static final ModConfigSpec.IntValue DIVING_SPRINT_DOUBLE_CLICK_WINDOW;
     public static final ModConfigSpec.BooleanValue DIVING_PREVENT_FALL_DAMAGE;
     public static final ModConfigSpec.IntValue DIVING_MIN_HUNGER_LEVEL;
+    public static final ModConfigSpec.DoubleValue DIVING_SPRINT_FOV_MULTIPLIER;
 
     private static List<ResourceLocation> cachedWhitelist = new ArrayList<>();
     private static List<ResourceLocation> cachedBlacklist = new ArrayList<>();
@@ -121,13 +122,13 @@ public class CreateFisheryCommonConfig {
 
         DIVING_BASE_JUMP_POWER = builder
                 .comment("Base jump power when wearing diving equipment in fluids",
-                        "Default: 0.8 (higher = stronger jump)")
-                .defineInRange("baseJumpPower", 0.8, 0.1, 2.0);
+                        "Default: 1.0 (higher = stronger jump)")
+                .defineInRange("baseJumpPower", 1.0, 0.1, 2.0);
 
         DIVING_SPRINT_JUMP_POWER = builder
                 .comment("Jump power when sprinting with diving equipment in fluids",
-                        "Default: 0.9 (higher = stronger jump)")
-                .defineInRange("sprintJumpPower", 0.9, 0.1, 2.0);
+                        "Default: 1.0 (higher = stronger jump)")
+                .defineInRange("sprintJumpPower", 1.0, 0.1, 2.0);
 
         DIVING_JUMP_COOLDOWN = builder
                 .comment("Cooldown between enhanced jumps in ticks (20 ticks = 1 second)",
@@ -146,13 +147,13 @@ public class CreateFisheryCommonConfig {
 
         DIVING_COPPER_SPRINT_SPEED = builder
                 .comment("Sprint speed multiplier for Copper Diving Leggings",
-                        "Default: 0.08 (higher = faster movement)")
-                .defineInRange("copperSprintSpeed", 0.08, 0.0, 0.5);
+                        "Default: 0.01 (higher = faster movement)")
+                .defineInRange("copperSprintSpeed", 0.01, 0.0, 0.5);
 
         DIVING_NETHERITE_SPRINT_SPEED = builder
                 .comment("Sprint speed multiplier for Netherite Diving Leggings",
-                        "Default: 0.12 (higher = faster movement)")
-                .defineInRange("netheriteSprintSpeed", 0.12, 0.0, 0.5);
+                        "Default: 0.01 (higher = faster movement)")
+                .defineInRange("netheriteSprintSpeed", 0.01, 0.0, 0.5);
 
         DIVING_SPRINT_HUNGER_COST = builder
                 .comment("Hunger cost per second while sprinting underwater",
@@ -178,6 +179,11 @@ public class CreateFisheryCommonConfig {
                 .comment("Minimum hunger level required for sprint/jump enhancements (0-20)",
                         "Default: 6 (3 hunger bars)")
                 .defineInRange("minHungerLevel", 6, 0, 20);
+
+        DIVING_SPRINT_FOV_MULTIPLIER = builder
+                .comment("FOV multiplier when underwater sprinting (1.0 = no effect, 1.01 = default sprint effect)",
+                        "Default: 1.01")
+                .defineInRange("sprintFovMultiplier", 1.01, 1.0, 2.0);
 
         builder.pop();
         builder.pop();
@@ -335,26 +341,25 @@ public class CreateFisheryCommonConfig {
         }
     }
 
-    // 潜水装备配置访问方法 - 修复默认值不一致问题
     public static double getDivingBaseJumpPower() {
         if (!isConfigLoaded) {
-            return 0.8; // 修复：与配置定义保持一致
+            return 1.0;
         }
         try {
             return DIVING_BASE_JUMP_POWER.get();
         } catch (IllegalStateException e) {
-            return 0.8; // 修复：与配置定义保持一致
+            return 1.0;
         }
     }
 
     public static double getDivingSprintJumpPower() {
         if (!isConfigLoaded) {
-            return 0.9;
+            return 1.0;
         }
         try {
             return DIVING_SPRINT_JUMP_POWER.get();
         } catch (IllegalStateException e) {
-            return 0.9;
+            return 1.0;
         }
     }
 
@@ -382,23 +387,34 @@ public class CreateFisheryCommonConfig {
 
     public static double getDivingCopperSprintSpeed() {
         if (!isConfigLoaded) {
-            return 0.08; // 修复：与配置定义保持一致
+            return 0.01; // 修复：与配置定义保持一致
         }
         try {
             return DIVING_COPPER_SPRINT_SPEED.get();
         } catch (IllegalStateException e) {
-            return 0.08; // 修复：与配置定义保持一致
+            return 0.01; // 修复：与配置定义保持一致
         }
     }
 
     public static double getDivingNetheriteSprintSpeed() {
         if (!isConfigLoaded) {
-            return 0.12;
+            return 0.01;
         }
         try {
             return DIVING_NETHERITE_SPRINT_SPEED.get();
         } catch (IllegalStateException e) {
-            return 0.12;
+            return 0.01;
+        }
+    }
+
+    public static double getDivingSprintFovMultiplier() {
+        if (!isConfigLoaded) {
+            return 1.01;
+        }
+        try {
+            return DIVING_SPRINT_FOV_MULTIPLIER.get();
+        } catch (IllegalStateException e) {
+            return 1.01;
         }
     }
 

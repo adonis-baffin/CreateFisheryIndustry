@@ -37,11 +37,11 @@
 
   "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "Perneras de Buceo de Cobre usadas con botas de buceo para experimentar una sensación de caminata lunar bajo el agua.",
   "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "Cuando se llevan puestas:",
-  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "El portador obtiene capacidad de super salto en el agua, hasta cuatro bloques de altura, sin daño por caída al aterrizar.",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "El portador obtiene capacidad de correr y super salto en agua o lava, hasta cuatro bloques de altura, sin daño por caída al aterrizar.",
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "Perneras de Buceo de Netherite usadas con botas de buceo para experimentar una sensación de caminata lunar bajo el agua o en mares de lava.",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "Cuando se llevan puestas:",
-  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "El portador obtiene capacidad de super salto en agua o lava, hasta cuatro bloques de altura, sin daño por caída al aterrizar.",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "El portador obtiene capacidad de correr y super salto en agua o lava, hasta cuatro bloques de altura, sin daño por caída al aterrizar.",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "Contiene hasta 4 arpones. Reabastece automáticamente un arpón en la mano principal después de lanzar y prioriza almacenar arpones recogidos en la bolsa.",
 

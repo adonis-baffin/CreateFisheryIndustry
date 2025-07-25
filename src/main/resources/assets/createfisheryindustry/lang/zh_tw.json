@@ -37,11 +37,11 @@
 
   "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "銅製潛水護腿與潛水靴配合使用，在水中體驗如月球漫步般的感覺。",
   "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "穿戴時：",
-  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "穿戴者在水中獲得超級跳躍能力，最高可跳躍四格高度，著陸時不會受到摔落傷害。",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "穿戴者在水中或熔岩中獲得衝刺和超級跳躍能力，最高可跳躍四格高度，著陸時不會受到摔落傷害。",
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "獄髓潛水護腿與潛水靴配合使用，在水中或熔岩海中體驗如月球漫步般的感覺。",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "穿戴時：",
-  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "穿戴者在水中或熔岩中獲得超級跳躍能力，最高可跳躍四格高度，著陸時不會受到摔落傷害。",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "穿戴者在水中或熔岩中獲得衝刺和超級跳躍能力，最高可跳躍四格高度，著陸時不會受到摔落傷害。",
 
   "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "可容納4支魚叉。投擲魚叉後會自動補充魚叉至主手，拾取魚叉時會優先存放到魚叉袋中。",
 
