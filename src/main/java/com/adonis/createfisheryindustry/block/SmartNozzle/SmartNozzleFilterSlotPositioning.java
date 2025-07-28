@@ -20,53 +20,54 @@ public class SmartNozzleFilterSlotPositioning extends ValueBoxTransform.Sided {
 
         // 水平朝向时，在上下左右四个面且远离喷嘴
         if (facing.getAxis().isHorizontal()) {
-            // 以原来的上表面位置为基准
-            Vec3 baseOffset;
             switch (facing) {
                 case NORTH -> {
-                    // 远离喷嘴（向南），在四个面显示
+                    // 朝北的喷嘴，过滤器远离喷嘴（向南偏移）
                     switch (side) {
-                        case UP -> { return VecHelper.voxelSpace(8, 15, 11); }    // 上表面，向喷嘴方向移动1像素与下表面对称
-                        case DOWN -> { return VecHelper.voxelSpace(8, 1, 11); }   // 下表面，向喷嘴方向移动1像素
-                        case WEST -> { return VecHelper.voxelSpace(1, 8, 11); }   // 左侧面
-                        case EAST -> { return VecHelper.voxelSpace(15, 8, 11); }  // 右侧面
+                        case UP -> { return VecHelper.voxelSpace(8, 15, 11); }    // 上表面
+                        case DOWN -> { return VecHelper.voxelSpace(8, 1, 11); }   // 下表面
+                        case WEST -> { return VecHelper.voxelSpace(1, 8, 11); }   // 西侧面（左侧）
+                        case EAST -> { return VecHelper.voxelSpace(15, 8, 11); }  // 东侧面（右侧）
                     }
                 }
                 case SOUTH -> {
+                    // 朝南的喷嘴，过滤器远离喷嘴（向北偏移）
                     switch (side) {
-                        case UP -> { return VecHelper.voxelSpace(8, 15, 5); }     // 上表面，向喷嘴方向移动1像素与下表面对称
-                        case DOWN -> { return VecHelper.voxelSpace(8, 1, 5); }    // 下表面，向喷嘴方向移动1像素
-                        case WEST -> { return VecHelper.voxelSpace(15, 8, 5); }
-                        case EAST -> { return VecHelper.voxelSpace(1, 8, 5); }
+                        case UP -> { return VecHelper.voxelSpace(8, 15, 5); }     // 上表面
+                        case DOWN -> { return VecHelper.voxelSpace(8, 1, 5); }    // 下表面
+                        case WEST -> { return VecHelper.voxelSpace(1, 8, 5); }    // 西侧面（从南看是右侧）
+                        case EAST -> { return VecHelper.voxelSpace(15, 8, 5); }   // 东侧面（从南看是左侧）
                     }
                 }
                 case WEST -> {
+                    // 朝西的喷嘴，过滤器远离喷嘴（向东偏移）
                     switch (side) {
-                        case UP -> { return VecHelper.voxelSpace(11, 15, 8); }    // 上表面，向喷嘴方向移动1像素与下表面对称
-                        case DOWN -> { return VecHelper.voxelSpace(11, 1, 8); }   // 下表面，向喷嘴方向移动1像素
-                        case NORTH -> { return VecHelper.voxelSpace(11, 8, 1); }
-                        case SOUTH -> { return VecHelper.voxelSpace(11, 8, 15); }
+                        case UP -> { return VecHelper.voxelSpace(11, 15, 8); }    // 上表面
+                        case DOWN -> { return VecHelper.voxelSpace(11, 1, 8); }   // 下表面
+                        case NORTH -> { return VecHelper.voxelSpace(11, 8, 1); }  // 北侧面
+                        case SOUTH -> { return VecHelper.voxelSpace(11, 8, 15); } // 南侧面
                     }
                 }
                 case EAST -> {
+                    // 朝东的喷嘴，过滤器远离喷嘴（向西偏移）
                     switch (side) {
-                        case UP -> { return VecHelper.voxelSpace(5, 15, 8); }     // 上表面，向喷嘴方向移动1像素与下表面对称
-                        case DOWN -> { return VecHelper.voxelSpace(5, 1, 8); }    // 下表面，向喷嘴方向移动1像素
-                        case NORTH -> { return VecHelper.voxelSpace(5, 8, 15); }
-                        case SOUTH -> { return VecHelper.voxelSpace(5, 8, 1); }
+                        case UP -> { return VecHelper.voxelSpace(5, 15, 8); }     // 上表面
+                        case DOWN -> { return VecHelper.voxelSpace(5, 1, 8); }    // 下表面
+                        case NORTH -> { return VecHelper.voxelSpace(5, 8, 1); }   // 北侧面
+                        case SOUTH -> { return VecHelper.voxelSpace(5, 8, 15); }  // 南侧面
                     }
                 }
             }
         }
-        // 垂直朝向时，在四个侧面且远离喷嘴
+        // 垂直朝向时，在四个侧面且远离喷嘴（保持原有的旋转逻辑）
         else {
             float horizontalAngle = AngleHelper.horizontalAngle(side);
             Vec3 baseLocation;
             if (facing == Direction.UP) {
-                // 朝上时，在下半部分（远离喷嘴），向喷嘴方向移动1像素与DOWN朝向对称
+                // 朝上时，在下半部分（远离喷嘴）
                 baseLocation = VecHelper.voxelSpace(8, 5, 15);
             } else {
-                // 朝下时，在上半部分（远离喷嘴），向喷嘴方向移动1像素更接近中心
+                // 朝下时，在上半部分（远离喷嘴）
                 baseLocation = VecHelper.voxelSpace(8, 11, 15);
             }
             return VecHelper.rotateCentered(baseLocation, horizontalAngle, Direction.Axis.Y);

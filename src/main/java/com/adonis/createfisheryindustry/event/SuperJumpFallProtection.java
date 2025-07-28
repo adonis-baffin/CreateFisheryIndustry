@@ -31,8 +31,6 @@ public class SuperJumpFallProtection {
 
             // 清除标记
             entity.getPersistentData().remove("CFI_SuperJumpActive");
-
-            CreateFisheryMod.LOGGER.debug("Super jump fall protection activated for: {}", entity.getName().getString());
         }
     }
 }

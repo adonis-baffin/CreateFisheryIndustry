@@ -31,18 +31,5 @@ public class SmartMeshRenderer extends SmartBlockEntityRenderer<SmartMeshBlockEn
         if (filterItem.isEmpty()) {
             return;
         }
-
-        // 渲染过滤器物品
-        renderFilterItem(filterItem, partialTicks, ms, buffer, light, overlay);
-    }
-
-    protected void renderFilterItem(ItemStack stack, float partialTicks, PoseStack ms,
-                                    MultiBufferSource buffer, int light, int overlay) {
-        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-        ms.pushPose();
-        ms.translate(0.5, 0.5, 0.5); // 居中
-        ms.scale(0.5f, 0.5f, 0.5f); // 缩小物品以适应方块
-        itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, light, overlay, ms, buffer, null, 0);
-        ms.popPose();
     }
 }
