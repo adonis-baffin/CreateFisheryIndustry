@@ -6,6 +6,7 @@ import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.adonis.createfisheryindustry.client.renderer.MechanicalPeelerRenderer;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonRenderer;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonISTER;
+import com.adonis.createfisheryindustry.client.renderer.PneumaticHarpoonTargetHandler;
 import com.adonis.createfisheryindustry.client.renderer.TetheredHarpoonRenderer;
 import com.adonis.createfisheryindustry.item.ClientHarpoonPouchTooltip;
 import com.adonis.createfisheryindustry.item.HarpoonItem;
@@ -34,6 +35,7 @@ import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 @EventBusSubscriber(modid = CreateFisheryMod.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup {
@@ -67,6 +69,10 @@ public class ClientSetup {
 
             // 注册其他程序
             PneumaticHarpoonGunChainsLineProcedure.register();
+
+            // 注册鱼叉枪目标高亮处理器
+            // 这个处理器会自动注册到 NeoForge 事件总线
+            PneumaticHarpoonTargetHandler.init();
         });
     }
 

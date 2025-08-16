@@ -21,19 +21,13 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +42,12 @@ public class TetheredHarpoonEntity extends AbstractArrow {
     private boolean anchored = false;
     private boolean retrieving = false;
     private Entity hitEntity = null;
-    private int hitTick = 0;
-    private int ignoreCollisionTicks = 5;
-    private int deathDelayTicks = 0; // 实体死亡后的延迟计数
-    private static final int MAX_DEATH_DELAY = 10; // 延迟 10 tick
-    private Entity lastHitEntity = null; // 缓存最近命中的实体
-    private Player lastHitPlayer = null; // 缓存最近命中的玩家
-    public HarpoonState currentState = HarpoonState.FLYING;
+    private int hitTick = 0; // 添加命中时的tick
+    private int deathDelayTicks = 0;
+    private static final int MAX_DEATH_DELAY = 10;
+    private Entity lastHitEntity = null;
+    private Player lastHitPlayer = null;
+    public HarpoonState currentState = HarpoonState.ANCHORED; // 默认为锚定状态，因为现在是瞬间命中
 
     private static final EntityDataAccessor<Boolean> DATA_ANCHORED = SynchedEntityData.defineId(TetheredHarpoonEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_RETRIEVING = SynchedEntityData.defineId(TetheredHarpoonEntity.class, EntityDataSerializers.BOOLEAN);
@@ -67,24 +60,23 @@ public class TetheredHarpoonEntity extends AbstractArrow {
     public TetheredHarpoonEntity(EntityType<? extends TetheredHarpoonEntity> type, Level level) {
         super(type, level);
         this.pickup = Pickup.DISALLOWED;
-        // 设置实体大小，确保它能被渲染
         this.setBoundingBox(this.makeBoundingBox());
     }
 
     public TetheredHarpoonEntity(Level level, Player owner, Vec3 position) {
-        // 修复1：使用正确的构造函数，不传递ItemStack
         this(CreateFisheryEntityTypes.TETHERED_HARPOON.get(), level);
         this.owner = owner;
         this.setPos(position);
         this.setOwner(owner);
-        // 确保实体有正确的边界框
         this.setBoundingBox(this.makeBoundingBox());
+        // 设置为无运动状态，因为是瞬间命中
+        this.setDeltaMovement(Vec3.ZERO);
+        // 设置不受重力影响
+        this.setNoGravity(true);
     }
 
-    // 添加这个方法确保实体总是被渲染
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
-        // 增加渲染距离
         double d0 = this.getBoundingBox().getSize() * 10.0D;
         if (Double.isNaN(d0)) {
             d0 = 1.0D;
@@ -93,7 +85,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         return distance < d0 * d0;
     }
 
-    // 确保实体可见
     @Override
     public boolean isInvisible() {
         return false;
@@ -112,11 +103,11 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         if (DATA_HOOKED_ENTITY.equals(key)) {
             int id = this.getEntityData().get(DATA_HOOKED_ENTITY);
             this.hitEntity = id > 0 ? this.level().getEntity(id - 1) : null;
-            this.currentState = this.hitEntity != null ? HarpoonState.HOOKED_IN_ENTITY : HarpoonState.FLYING;
+            this.currentState = this.hitEntity != null ? HarpoonState.HOOKED_IN_ENTITY : HarpoonState.ANCHORED;
         }
         if (DATA_ANCHORED.equals(key)) {
             this.anchored = this.getEntityData().get(DATA_ANCHORED);
-            this.currentState = this.anchored ? HarpoonState.ANCHORED : HarpoonState.FLYING;
+            this.currentState = this.anchored ? HarpoonState.ANCHORED : HarpoonState.HOOKED_IN_ENTITY;
         }
     }
 
@@ -153,12 +144,12 @@ public class TetheredHarpoonEntity extends AbstractArrow {
 
     public void setHitEntity(Entity entity, int tick) {
         this.hitEntity = entity;
-        this.hitTick = tick;
-        this.deathDelayTicks = 0; // 重置死亡延迟
-        this.lastHitEntity = entity; // 缓存命中实体
-        this.lastHitPlayer = this.owner; // 缓存命中玩家
+        this.hitTick = tick; // 记录命中时的tick
+        this.deathDelayTicks = 0;
+        this.lastHitEntity = entity;
+        this.lastHitPlayer = this.owner;
         this.getEntityData().set(DATA_HOOKED_ENTITY, entity != null ? entity.getId() + 1 : 0);
-        this.currentState = entity != null ? HarpoonState.HOOKED_IN_ENTITY : HarpoonState.FLYING;
+        this.currentState = entity != null ? HarpoonState.HOOKED_IN_ENTITY : HarpoonState.ANCHORED;
         if (!this.level().isClientSide && this.owner != null) {
             ItemStack harpoonGun = getHarpoonGunFromPlayer(owner);
             if (harpoonGun != null) {
@@ -225,56 +216,13 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         this.discard();
     }
 
-    public void shoot(Vec3 direction, float speed) {
-        this.shoot(direction.x, direction.y, direction.z, speed, 0.0F);
-        this.currentState = HarpoonState.FLYING;
+    public void playSound(SoundEvent sound, float volume, float pitch) {
+        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundSource(), volume, pitch);
     }
 
     @Override
     protected boolean canHitEntity(Entity entity) {
         return entity != owner && entity.isAlive() && super.canHitEntity(entity);
-    }
-
-    @Override
-    protected void onHitEntity(EntityHitResult result) {
-        if (!this.level().isClientSide) {
-            Entity target = result.getEntity();
-            if (target instanceof LivingEntity living) {
-                // 先设置状态，确保事件触发前状态正确
-                this.setHitEntity(living, this.tickCount);
-                // 再造成伤害
-                living.hurt(this.damageSources().trident(this, owner != null ? owner : this), 7.0F); // 降低伤害
-                if (owner instanceof Player player) {
-                    living.setLastHurtByPlayer(player); // 记录玩家为击杀者
-                }
-                this.playSound(SoundEvents.TRIDENT_HIT, 1.0F, 1.0F);
-            }
-        }
-    }
-
-    @Override
-    protected void onHitBlock(BlockHitResult result) {
-        super.onHitBlock(result);
-        if (!this.level().isClientSide) {
-            BlockPos pos = result.getBlockPos();
-            this.setAnchored(pos);
-            this.playSound(SoundEvents.TRIDENT_HIT_GROUND, 1.0F, 1.0F);
-        }
-    }
-
-    private void checkCollision() {
-        HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-        if (hitResult.getType() != HitResult.Type.MISS) {
-            this.onHit(hitResult);
-        } else {
-            Vec3 start = this.position();
-            Vec3 end = start.add(this.getDeltaMovement());
-            ClipContext clipContext = new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this);
-            hitResult = level().clip(clipContext);
-            if (hitResult.getType() == HitResult.Type.BLOCK) {
-                this.onHit(hitResult);
-            }
-        }
     }
 
     public void pullLootToPlayer(Entity deadEntity) {
@@ -299,10 +247,10 @@ public class TetheredHarpoonEntity extends AbstractArrow {
 
         LootParams params = paramsBuilder.create(LootContextParamSets.ENTITY);
         LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(lootTableKey);
-        long tetherEndTime = serverLevel.getGameTime() + 200; // 10秒后结束牵引（20 tick/秒 * 10秒）
+        long tetherEndTime = serverLevel.getGameTime() + 200;
+
         for (ItemStack item : lootTable.getRandomItems(params)) {
             ItemEntity drop = new ItemEntity(level(), deadEntity.getX(), deadEntity.getY(), deadEntity.getZ(), item);
-            // 添加牵引标记
             CompoundTag tag = drop.getPersistentData();
             tag.putBoolean("HarpoonTethered", true);
             tag.putInt("TetherPlayerId", player.getId());
@@ -311,7 +259,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             double dy = player.getY() - drop.getY();
             double dz = player.getZ() - drop.getZ();
             double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            drop.setDeltaMovement(dx * 0.2, dy * 0.2 + Math.sqrt(distance) * 0.1, dz * 0.2); // 初始速度
+            drop.setDeltaMovement(dx * 0.2, dy * 0.2 + Math.sqrt(distance) * 0.1, dz * 0.2);
             drop.setPickUpDelay(10);
             level().addFreshEntity(drop);
         }
@@ -319,7 +267,6 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         int xp = ((LivingEntity) deadEntity).getExperienceReward(serverLevel, this);
         if (xp > 0) {
             ExperienceOrb orb = new ExperienceOrb(level(), deadEntity.getX(), deadEntity.getY(), deadEntity.getZ(), xp);
-            // 添加牵引标记
             CompoundTag tag = orb.getPersistentData();
             tag.putBoolean("HarpoonTethered", true);
             tag.putInt("TetherPlayerId", player.getId());
@@ -328,7 +275,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             double dy = player.getY() - orb.getY();
             double dz = player.getZ() - orb.getZ();
             double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            orb.setDeltaMovement(dx * 0.2, dy * 0.2 + Math.sqrt(distance) * 0.1, dz * 0.2); // 初始速度
+            orb.setDeltaMovement(dx * 0.2, dy * 0.2 + Math.sqrt(distance) * 0.1, dz * 0.2);
             level().addFreshEntity(orb);
         }
     }
@@ -343,6 +290,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                 return;
             }
 
+            // 处理命中实体的情况
             if (currentState == HarpoonState.HOOKED_IN_ENTITY) {
                 if (hitEntity != null && hitEntity.isAlive() && hitEntity.level().dimension() == this.level().dimension()) {
                     Vec3 targetPos = hitEntity.position().add(0, hitEntity.getBbHeight() * 0.5, 0);
@@ -359,6 +307,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                 return;
             }
 
+            // 处理锚定在方块的情况
             if (currentState == HarpoonState.ANCHORED) {
                 if (anchoredPos != null && !level().isEmptyBlock(anchoredPos)) {
                     this.setDeltaMovement(Vec3.ZERO);
@@ -369,80 +318,13 @@ public class TetheredHarpoonEntity extends AbstractArrow {
                 return;
             }
 
-            if (tickCount <= ignoreCollisionTicks) {
-                return;
-            }
-
-            if (currentState == HarpoonState.FLYING) {
-                // 改进的物品检测
-                if (tickCount > 2) {
-                    // 使用位置而不是碰撞盒来检测
-                    Vec3 harpoonPos = this.position();
-                    double detectionRadius = 3.0;
-
-                    // 获取附近所有实体，然后筛选ItemEntity
-                    List<Entity> allEntities = level().getEntities(this,
-                            this.getBoundingBox().inflate(detectionRadius * 2));
-
-                    List<ItemEntity> nearbyItems = new ArrayList<>();
-                    int entityCount = 0;
-
-                    for (Entity entity : allEntities) {
-                        entityCount++;
-                        if (entity instanceof ItemEntity item) {
-                            double distance = item.position().distanceTo(harpoonPos);
-                            if (distance <= detectionRadius && !item.isRemoved() && item.isAlive()) {
-                                nearbyItems.add(item);
-                            }
-                        }
-                    }
-
-                    if (!nearbyItems.isEmpty()) {
-                        // 使用 getOwner() 而不是 owner 字段
-                        Entity ownerEntity = this.getOwner();
-                        if (ownerEntity instanceof Player player) {
-
-                            long tetherEndTime = level().getGameTime() + 200;
-                            for (ItemEntity item : nearbyItems) {
-                                CompoundTag tag = item.getPersistentData();
-                                tag.putBoolean("HarpoonTethered", true);
-                                tag.putInt("TetherPlayerId", player.getId());
-                                tag.putLong("TetherEndTime", tetherEndTime);
-
-                                // 初始速度
-                                Vec3 itemPos = item.position();
-                                Vec3 playerPos = player.position();
-                                Vec3 direction = playerPos.subtract(itemPos).normalize();
-                                item.setDeltaMovement(direction.scale(0.5));
-                                item.setPickUpDelay(10);
-                            }
-
-                            this.playSound(SoundEvents.FISHING_BOBBER_RETRIEVE, 1.0F, 1.0F);
-                            this.startRetrieving();
-                            return;
-                        }
-                    }
-                }
-
-                // 碰撞检测
-                this.checkCollision();
-                if (hitEntity != null) {
-                    this.currentState = HarpoonState.HOOKED_IN_ENTITY;
-                    this.setDeltaMovement(Vec3.ZERO);
-                    return;
-                }
-                if (anchoredPos != null) {
-                    this.currentState = HarpoonState.ANCHORED;
-                    this.setDeltaMovement(Vec3.ZERO);
-                    return;
-                }
-            }
-
+            // 超时移除
             if (tickCount > 400) {
                 startRetrieving();
             }
         }
     }
+
     @Override
     public void playerTouch(Player entity) {
         if (this.ownedBy(entity) || this.getOwner() == null) {
@@ -465,6 +347,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         super.readAdditionalSaveData(compound);
         anchored = compound.getBoolean("Anchored");
         retrieving = compound.getBoolean("Retrieving");
+        hitTick = compound.getInt("HitTick"); // 读取hitTick
         if (compound.contains("AnchoredX")) {
             anchoredPos = new BlockPos(
                     compound.getInt("AnchoredX"),
@@ -475,14 +358,13 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         int hookedId = compound.getInt("HookedEntity");
         if (hookedId > 0 && this.level() instanceof ServerLevel serverLevel) {
             this.hitEntity = serverLevel.getEntity(hookedId);
-            this.lastHitEntity = this.hitEntity; // 恢复缓存
-            this.currentState = this.hitEntity != null ? HarpoonState.HOOKED_IN_ENTITY : HarpoonState.FLYING;
+            this.lastHitEntity = this.hitEntity;
+            this.currentState = this.hitEntity != null ? HarpoonState.HOOKED_IN_ENTITY : HarpoonState.ANCHORED;
         }
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
-        // 修复：安全的NBT保存，避免空ItemStack导致的传送门崩溃
         try {
             super.addAdditionalSaveData(compound);
         } catch (IllegalStateException e) {
@@ -491,9 +373,9 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             compound.putBoolean("crit", this.isCritArrow());
         }
 
-        // 保存自定义数据
         compound.putBoolean("Anchored", anchored);
         compound.putBoolean("Retrieving", retrieving);
+        compound.putInt("HitTick", hitTick); // 保存hitTick
         if (anchoredPos != null) {
             compound.putInt("AnchoredX", anchoredPos.getX());
             compound.putInt("AnchoredY", anchoredPos.getY());
