@@ -5,105 +5,135 @@ import com.adonis.createfisheryindustry.entity.TetheredHarpoonEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.Model;
-import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class TetheredHarpoonRenderer extends EntityRenderer<TetheredHarpoonEntity> {
-    public static final ModelLayerLocation HARPOON_LAYER = new ModelLayerLocation(
-            CreateFisheryMod.asResource("harpoon"), "main"
-    );
 
-    private static final ResourceLocation HARPOON_TEXTURE =
-            CreateFisheryMod.asResource("textures/entity/harpoon1.png");
+    private static final ModelResourceLocation MODEL_LOCATION =
+            ModelResourceLocation.standalone(CreateFisheryMod.asResource("entity/harpoon"));
 
-    private final HarpoonModel model;
+    private BakedModel cachedModel;
 
     public TetheredHarpoonRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new HarpoonModel(context.bakeLayer(HARPOON_LAYER));
     }
 
     @Override
     public void render(TetheredHarpoonEntity entity, float entityYaw, float partialTicks,
                        PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight) {
+
+        // 加载模型
+        if (cachedModel == null) {
+            var modelManager = Minecraft.getInstance().getModelManager();
+            cachedModel = modelManager.getModel(MODEL_LOCATION);
+
+            if (cachedModel == modelManager.getMissingModel()) {
+                CreateFisheryMod.LOGGER.error("Failed to load harpoon model!");
+                return;
+            }
+        }
+
         poseStack.pushPose();
 
-        // 应用旋转变换
-        poseStack.mulPose(Axis.YP.rotationDegrees(
-                Mth.lerp(partialTicks, entity.yRotO, entity.getYRot()) - 90.0F));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(
-                Mth.lerp(partialTicks, entity.xRotO, entity.getXRot()) + 90.0F));
+        // 计算鱼叉的实际朝向
+        // 这是关键部分 - 我们需要根据鱼叉的速度向量来计算旋转，而不是使用实体的rotation
+
+        // 获取插值后的位置
+        double x = Mth.lerp(partialTicks, entity.xo, entity.getX());
+        double y = Mth.lerp(partialTicks, entity.yo, entity.getY());
+        double z = Mth.lerp(partialTicks, entity.zo, entity.getZ());
+
+        // 获取速度向量来计算朝向
+        float yaw, pitch;
+
+        if (!entity.isAnchored() && entity.getHitEntity() == null) {
+            // 如果鱼叉还在飞行中，根据速度向量计算朝向
+            double deltaX = entity.getX() - entity.xo;
+            double deltaY = entity.getY() - entity.yo;
+            double deltaZ = entity.getZ() - entity.zo;
+
+            // 如果有速度，根据速度计算朝向
+            if (deltaX * deltaX + deltaZ * deltaZ > 0.0001) {
+                yaw = (float)(Mth.atan2(deltaX, deltaZ) * (180.0 / Math.PI));
+                double horizontalDistance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+                pitch = (float)(Mth.atan2(deltaY, horizontalDistance) * (180.0 / Math.PI));
+            } else {
+                // 如果速度太小，使用实体的旋转
+                yaw = Mth.lerp(partialTicks, entity.yRotO, entity.getYRot());
+                pitch = Mth.lerp(partialTicks, entity.xRotO, entity.getXRot());
+            }
+        } else {
+            // 如果已经锚定或击中目标，使用实体的当前旋转
+            yaw = Mth.lerp(partialTicks, entity.yRotO, entity.getYRot());
+            pitch = Mth.lerp(partialTicks, entity.xRotO, entity.getXRot());
+        }
+
+        // 应用旋转 - 与原版三叉戟相同的旋转方式
+        poseStack.mulPose(Axis.YP.rotationDegrees(yaw - 0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(pitch));
+
+        // 如果你的模型默认是垂直的，添加这个旋转使其水平
+        poseStack.mulPose(Axis.XP.rotationDegrees(180F));
+
+        // 可选：飞行时的旋转动画（如果你想要螺旋效果）
+        if (!entity.isAnchored() && entity.getHitEntity() == null) {
+            float spin = (entity.tickCount + partialTicks) * 0F;
+            poseStack.mulPose(Axis.ZP.rotationDegrees(spin));
+        }
+
+        // 缩放
+        float scale = 0.8F;
+        poseStack.scale(scale, scale, scale);
+
+        // 居中模型 - 根据你的模型尺寸调整
+        poseStack.translate(-0.5, -0.6, -0.75);
 
         // 渲染模型
-        VertexConsumer vertexConsumer = buffer.getBuffer(
-                RenderType.entityCutout(this.getTextureLocation(entity)));
-        this.model.renderToBuffer(poseStack, vertexConsumer, packedLight,
-                OverlayTexture.NO_OVERLAY, -1);
+        VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.entityCutout(InventoryMenu.BLOCK_ATLAS));
+
+        PoseStack.Pose pose = poseStack.last();
+        RandomSource random = RandomSource.create(42L);
+        ModelData modelData = ModelData.EMPTY;
+
+        // 渲染所有面
+        for (Direction direction : Direction.values()) {
+            List<BakedQuad> quads = cachedModel.getQuads(null, direction, random, modelData, null);
+            for (BakedQuad quad : quads) {
+                vertexConsumer.putBulkData(pose, quad, 1.0F, 1.0F, 1.0F, 1.0F, packedLight, OverlayTexture.NO_OVERLAY);
+            }
+        }
+
+        // 渲染无面向的四边形
+        List<BakedQuad> quads = cachedModel.getQuads(null, null, random, modelData, null);
+        for (BakedQuad quad : quads) {
+            vertexConsumer.putBulkData(pose, quad, 1.0F, 1.0F, 1.0F, 1.0F, packedLight, OverlayTexture.NO_OVERLAY);
+        }
 
         poseStack.popPose();
+
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }
 
     @NotNull
     @Override
     public ResourceLocation getTextureLocation(@NotNull TetheredHarpoonEntity entity) {
-        return HARPOON_TEXTURE;
-    }
-
-    // 自定义模型类 - 基于三叉戟模型结构
-    public static class HarpoonModel extends Model {
-        private final ModelPart root;
-
-        public HarpoonModel(ModelPart root) {
-            super(RenderType::entitySolid); // 与三叉戟保持一致
-            this.root = root;
-        }
-
-        public static LayerDefinition createBodyLayer() {
-            MeshDefinition meshdefinition = new MeshDefinition();
-            PartDefinition partdefinition = meshdefinition.getRoot();
-
-            // 基于三叉戟的结构，主杆部分保持一致
-            PartDefinition poleDefinition = partdefinition.addOrReplaceChild("pole",
-                    CubeListBuilder.create()
-                            .texOffs(0, 6)
-                            .addBox(-0.5F, 2.0F, -0.5F, 1.0F, 25.0F, 1.0F),
-                    PartPose.ZERO);
-
-//            // 鱼叉尖端 - 主要的尖锐部分
-//            poleDefinition.addOrReplaceChild("main_spike",
-//                    CubeListBuilder.create()
-//                            .texOffs(0, 0)
-//                            .addBox(-0.5F, -4.0F, -0.5F, 1.0F, 6.0F, 1.0F),
-//                    PartPose.ZERO);
-//
-//            // 单个倒钩 - 向后倾斜，位于鱼叉尖端
-//            poleDefinition.addOrReplaceChild("barb",
-//                    CubeListBuilder.create()
-//                            .texOffs(4, 0)
-//                            .addBox(-0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F),
-//                    PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F,
-//                            0.7854F, 0.0F, 0.0F)); // 45度向后倾斜
-
-            return LayerDefinition.create(meshdefinition, 32, 32);
-        }
-
-        @Override
-        public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight,
-                                   int packedOverlay, int color) {
-            root.render(poseStack, buffer, packedLight, packedOverlay, color);
-        }
+        return InventoryMenu.BLOCK_ATLAS;
     }
 }

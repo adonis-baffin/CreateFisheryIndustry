@@ -67,15 +67,36 @@ public class TetheredHarpoonEntity extends AbstractArrow {
     public TetheredHarpoonEntity(EntityType<? extends TetheredHarpoonEntity> type, Level level) {
         super(type, level);
         this.pickup = Pickup.DISALLOWED;
+        // 设置实体大小，确保它能被渲染
+        this.setBoundingBox(this.makeBoundingBox());
     }
 
     public TetheredHarpoonEntity(Level level, Player owner, Vec3 position) {
-        // 修复：使用有效的ItemStack而不是ItemStack.EMPTY，避免传送门崩溃
-        super(CreateFisheryEntityTypes.TETHERED_HARPOON.get(), owner, level,
-                new ItemStack(Items.ARROW), null);
+        // 修复1：使用正确的构造函数，不传递ItemStack
+        this(CreateFisheryEntityTypes.TETHERED_HARPOON.get(), level);
         this.owner = owner;
         this.setPos(position);
         this.setOwner(owner);
+        // 确保实体有正确的边界框
+        this.setBoundingBox(this.makeBoundingBox());
+    }
+
+    // 添加这个方法确保实体总是被渲染
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        // 增加渲染距离
+        double d0 = this.getBoundingBox().getSize() * 10.0D;
+        if (Double.isNaN(d0)) {
+            d0 = 1.0D;
+        }
+        d0 *= 64.0D * getViewScale();
+        return distance < d0 * d0;
+    }
+
+    // 确保实体可见
+    @Override
+    public boolean isInvisible() {
+        return false;
     }
 
     @Override

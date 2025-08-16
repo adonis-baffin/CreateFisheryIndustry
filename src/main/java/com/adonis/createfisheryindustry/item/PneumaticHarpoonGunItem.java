@@ -196,8 +196,6 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
     @Nullable
     @Override
     public HumanoidModel.ArmPose getArmPose(ItemStack stack, AbstractClientPlayer player, InteractionHand hand) {
-        // This method is part of CustomArmPoseItem and is expected to only be called on the client.
-        // The AbstractClientPlayer parameter itself signals this.
         return player.getUsedItemHand() == hand ? HumanoidModel.ArmPose.BOW_AND_ARROW : HumanoidModel.ArmPose.ITEM;
     }
 

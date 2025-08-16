@@ -48,7 +48,6 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
             renderItems(be, partialTicks, ms, buffer, light, overlay);
             renderShaft(be, partialTicks, ms, buffer, light, overlay);
         } catch (Exception e) {
-            CreateFisheryMod.LOGGER.error("Error rendering MechanicalPeeler at {}", be.getBlockPos(), e);
         }
     }
 
@@ -81,7 +80,6 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
             if (facing.getAxis().isHorizontal()) {
                 superBuffer = CachedBuffers.partial(CreateFisheryPartialModels.THRESHER_BLADE, blockState);
                 if (superBuffer == null) {
-                    CreateFisheryMod.LOGGER.warn("THRESHER_BLADE model is null for horizontal facing");
                     return;
                 }
                 superBuffer.rotateCentered(AngleHelper.rad(AngleHelper.horizontalAngle(facing)), Direction.UP);
@@ -98,7 +96,6 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
 
                 superBuffer = CachedBuffers.partialFacingVertical(CreateFisheryPartialModels.THRESHER_BLADE, blockState, horizontalFacing);
                 if (superBuffer == null) {
-                    CreateFisheryMod.LOGGER.warn("THRESHER_BLADE model is null for vertical facing");
                     return;
                 }
 
@@ -115,7 +112,6 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
                     .overlay(overlay)
                     .renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
         } catch (Exception e) {
-            CreateFisheryMod.LOGGER.error("Error rendering rotating part for MechanicalPeeler", e);
         }
     }
 
@@ -137,7 +133,6 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
                         .renderInto(ms, buffer.getBuffer(RenderType.solid()));
             }
         } catch (Exception e) {
-            CreateFisheryMod.LOGGER.error("Error rendering shaft for MechanicalPeeler", e);
         }
     }
 
@@ -281,7 +276,6 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
         }
 
         if (superBuffer == null) {
-            CreateFisheryMod.LOGGER.warn("THRESHER_BLADE model is null in contraption rendering");
             return;
         }
 
@@ -395,7 +389,6 @@ public class MechanicalPeelerRenderer extends SafeBlockEntityRenderer<Mechanical
                         .renderInto(matrices.getViewProjection(), buffer.getBuffer(RenderType.solid()));
             }
         } catch (Exception e) {
-            CreateFisheryMod.LOGGER.error("Error rendering shaft for MechanicalPeeler in contraption", e);
         }
     }
 }
