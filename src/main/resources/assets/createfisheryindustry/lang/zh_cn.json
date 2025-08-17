@@ -131,5 +131,29 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "右键点击时：",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "提取物品，一次最多一组。",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "过滤槽：",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "在过滤槽中放置物品以仅收集该类型的物品。气流将完全忽略不匹配的物品。"
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "在过滤槽中放置物品以仅收集该类型的物品。气流将完全忽略不匹配的物品。",
+
+  "create_fishery.pneumatic_harpoon_gun.insufficient_air": "气压不足，无法发射",
+  "create_fishery.pneumatic_harpoon_gun.must_aim_entity": "潜行时必须瞄准实体",
+  "create_fishery.pneumatic_harpoon_gun.no_valid_target": "没有有效目标",
+  "create_fishery.pneumatic_harpoon_gun.target_too_far": "目标太远",
+  "create_fishery.pneumatic_harpoon_gun.reloading": "鱼叉枪正在装填",
+  "create_fishery.pneumatic_harpoon_gun.pulled_item": "拉取了 %s 个物品",
+  "create_fishery.pneumatic_harpoon_gun.hooked_entity": "钩住了 %s",
+  "create_fishery.pneumatic_harpoon_gun.anchored_block": "锚定在方块上",
+  "create_fishery.pneumatic_harpoon_gun.released": "鱼叉已收回",
+
+  "create_fishery.harpoon.tooltip": "可配合气动鱼叉枪使用",
+  "create_fishery.harpoon.tooltip.controls": "操作方式：",
+  "create_fishery.harpoon.tooltip.shoot": "右键：发射鱼叉",
+  "create_fishery.harpoon.tooltip.retract": "右键（已钩住）：收回鱼叉",
+  "create_fishery.harpoon.tooltip.sneak": "潜行+右键：仅瞄准实体发射",
+
+  "create_fishery.harpoon.damage": "伤害：%s",
+  "create_fishery.harpoon.range": "射程：%s 格",
+  "create_fishery.harpoon.air_consumption": "气压消耗：每次 %s",
+  "create_fishery.harpoon.pull_strength": "牵引力：%s",
+
+  "death.attack.harpoon": "%1$s 被 %2$s 用鱼叉击杀",
+  "death.attack.harpoon.item": "%1$s 被 %2$s 使用 %3$s 的鱼叉击杀"
 }

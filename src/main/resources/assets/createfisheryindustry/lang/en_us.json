@@ -133,6 +133,29 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "When right-clicked:",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Extracts items, up to one stack at a time.",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Filter Slot:",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Place an item in the filter slot to collect only that type of item. Air flow will ignore non-matching items completely."
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Place an item in the filter slot to collect only that type of item. Air flow will ignore non-matching items completely.",
 
+  "create_fishery.pneumatic_harpoon_gun.insufficient_air": "Insufficient air to shoot",
+  "create_fishery.pneumatic_harpoon_gun.must_aim_entity": "Must aim at entity while sneaking",
+  "create_fishery.pneumatic_harpoon_gun.no_valid_target": "No valid target",
+  "create_fishery.pneumatic_harpoon_gun.target_too_far": "Target is too far",
+  "create_fishery.pneumatic_harpoon_gun.reloading": "Harpoon gun is reloading",
+  "create_fishery.pneumatic_harpoon_gun.pulled_item": "Pulled %s item(s)",
+  "create_fishery.pneumatic_harpoon_gun.hooked_entity": "Hooked %s",
+  "create_fishery.pneumatic_harpoon_gun.anchored_block": "Anchored to block",
+  "create_fishery.pneumatic_harpoon_gun.released": "Harpoon released",
+
+  "create_fishery.harpoon.tooltip": "Can be used with Pneumatic Harpoon Gun",
+  "create_fishery.harpoon.tooltip.controls": "Controls:",
+  "create_fishery.harpoon.tooltip.shoot": "Right Click: Shoot harpoon",
+  "create_fishery.harpoon.tooltip.retract": "Right Click (hooked): Retract harpoon",
+  "create_fishery.harpoon.tooltip.sneak": "Sneak + Right Click: Only shoot at entities",
+
+  "create_fishery.harpoon.damage": "Damage: %s",
+  "create_fishery.harpoon.range": "Range: %s blocks",
+  "create_fishery.harpoon.air_consumption": "Air Consumption: %s per shot",
+  "create_fishery.harpoon.pull_strength": "Pull Strength: %s",
+
+  "death.attack.harpoon": "%1$s was harpooned by %2$s",
+  "death.attack.harpoon.item": "%1$s was harpooned by %2$s using %3$s"
 }

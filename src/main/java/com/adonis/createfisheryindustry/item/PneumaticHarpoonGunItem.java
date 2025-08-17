@@ -197,7 +197,7 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
             // 检查气压
             if (totalAir < LAUNCH_AIR_CONSUMPTION || backtanks.isEmpty()) {
                 if (player instanceof ServerPlayer sp) {
-                    sp.displayClientMessage(Component.literal("Insufficient air to shoot"), true);
+                    sp.displayClientMessage(Component.translatable("create_fishery.pneumatic_harpoon_gun.insufficient_air"), true);
                 }
                 return InteractionResultHolder.fail(itemstack);
             }
@@ -208,7 +208,7 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
             // 如果玩家蹲下且没有瞄准实体，则不发射
             if (player.isShiftKeyDown() && !(hitResult instanceof EntityHitResult)) {
                 if (player instanceof ServerPlayer sp) {
-                    sp.displayClientMessage(Component.literal("Must aim at entity while sneaking"), true);
+                    sp.displayClientMessage(Component.translatable("create_fishery.pneumatic_harpoon_gun.must_aim_entity"), true);
                 }
                 return InteractionResultHolder.fail(itemstack);
             }
@@ -304,7 +304,6 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
         return InteractionResultHolder.sidedSuccess(itemstack, world.isClientSide());
     }
 
-    // --- BAR METHODS (保持不变) ---
     @Override
     public boolean isBarVisible(ItemStack stack) {
         if (FMLEnvironment.dist == Dist.CLIENT) {

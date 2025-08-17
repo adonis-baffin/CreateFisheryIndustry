@@ -21,7 +21,6 @@ public class CreateFisheryEntityTypes {
                             .updateInterval(20)
                             .build("harpoon"));
 
-    // 新增：栓系鱼叉实体
     public static final DeferredHolder<EntityType<?>, EntityType<TetheredHarpoonEntity>> TETHERED_HARPOON =
             ENTITY_TYPES.register("tethered_harpoon",
                     () -> EntityType.Builder.<TetheredHarpoonEntity>of(TetheredHarpoonEntity::new, MobCategory.MISC)

@@ -42,11 +42,9 @@ public class ClientSetup {
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        // 首先初始化 PartialModels - 这必须在任何使用它们的代码之前完成
         CreateFisheryPartialModels.init();
 
         event.enqueueWork(() -> {
-            // 设置方块渲染层
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.FRAME_TRAP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.MESH_TRAP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.TRAP_NOZZLE.get(), RenderType.cutout());
@@ -67,11 +65,8 @@ public class ClientSetup {
                     (stack, level, entity, seed) -> HarpoonPouchItem.getFullnessDisplay(stack)
             );
 
-            // 注册其他程序
             PneumaticHarpoonGunChainsLineProcedure.register();
 
-            // 注册鱼叉枪目标高亮处理器
-            // 这个处理器会自动注册到 NeoForge 事件总线
             PneumaticHarpoonTargetHandler.init();
         });
     }
@@ -96,8 +91,6 @@ public class ClientSetup {
         }, CreateFisheryItems.HARPOON.get());
     }
 
-    // 删除原来的 registerLayerDefinitions 方法，因为我们不再使用 Java 模型
-    // 改为注册额外的模型资源
     @SubscribeEvent
     public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
         event.register(ModelResourceLocation.standalone(
