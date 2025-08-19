@@ -155,5 +155,11 @@
   "create_fishery.harpoon.pull_strength": "牵引力：%s",
 
   "death.attack.harpoon": "%1$s 被 %2$s 用鱼叉击杀",
-  "death.attack.harpoon.item": "%1$s 被 %2$s 使用 %3$s 的鱼叉击杀"
+  "death.attack.harpoon.item": "%1$s 被 %2$s 使用 %3$s 的鱼叉击杀",
+
+  "createfisheryindustry.ponder.frame_trap.header": "使用捕鱼框",
+  "createfisheryindustry.ponder.frame_trap.text_1": "像风帆一样，捕鱼框会自行依附在动态结构上",
+  "createfisheryindustry.ponder.frame_trap.text_2": "当捕鱼框作为动态结构的一部分移动时……",
+  "createfisheryindustry.ponder.frame_trap.text_3": "它会收集触碰到的掉落物，并捕捉路径上的小型生物",
+  "createfisheryindustry.ponder.frame_trap.text_4": "并自动存储到该结构相接的容器中"
 }
