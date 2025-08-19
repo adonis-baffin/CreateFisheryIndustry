@@ -22,7 +22,8 @@ public class CreateFisheryPonderPlugin implements PonderPlugin {
         
         // 注册Frame Trap场景
         helper.forComponents(CreateFisheryBlocks.FRAME_TRAP.getId())
-                .addStoryBoard("frame_trap", FrameTrapScenes::frameTrap);
+                .addStoryBoard("frame_trap", FrameTrapScenes::frameTrap)
+                .addStoryBoard("frame_trap_underwater", FrameTrapScenes::frameTrapUnderwater);
         
         // 后续可以添加其他方块的场景
         // helper.forComponents(CreateFisheryBlocks.MESH_TRAP.getId())

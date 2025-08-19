@@ -162,6 +162,10 @@
   "createfisheryindustry.ponder.frame_trap.header": "Using the Frame Trap",
   "createfisheryindustry.ponder.frame_trap.text_1": "Like sails, Frame Traps will attach themselves to moving contraptions",
   "createfisheryindustry.ponder.frame_trap.text_2": "When Frame Traps move as part of a contraption...",
-  "createfisheryindustry.ponder.frame_trap.text_3": "It will collect items it touches and capture small creatures in its path",
-  "createfisheryindustry.ponder.frame_trap.text_4": "And automatically store them in connected containers"
+  "createfisheryindustry.ponder.frame_trap.text_3": "It will collect items it touches and capture small creatures in its path，each time capturing creature provides experience nugget",
+  "createfisheryindustry.ponder.frame_trap.text_4": "And automatically store them in connected containers",
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "Using Frame Traps Underwater",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "When Frame Traps move underwater as part of a contraption...",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "They have a chance to obtain fishing loot over time, along with experience orbs",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "Enchanted books and other fishing loot will be stored here"
 }

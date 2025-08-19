@@ -148,4 +148,98 @@ public class FrameTrapScenes {
 
         scene.markAsFinished();
     }
+
+    public static void frameTrapUnderwater(SceneBuilder builder, SceneBuildingUtil util) {
+        CreateSceneBuilder scene = new CreateSceneBuilder(builder);
+
+        scene.title("frame_trap_underwater", "createfisheryindustry.ponder.frame_trap_underwater.header");
+        scene.configureBasePlate(0, 0, 5);
+
+        // 先显示基础平台
+        scene.world().showSection(util.select().layer(0), Direction.UP);
+        scene.idle(5);
+
+        // 定义各个选择区域
+        BlockPos bearingPos = util.grid().at(2, 1, 2);
+        BlockPos barrelPos = util.grid().at(2, 2, 2);
+
+        // 8个捕鱼框的位置
+        Selection frameTrapPositions = util.select()
+                .position(1, 2, 2).add(util.select().position(3, 2, 2))  // 第二层2个
+                .add(util.select().position(1, 3, 2))                      // 第三层3个
+                .add(util.select().position(2, 3, 2))
+                .add(util.select().position(3, 3, 2))
+                .add(util.select().position(1, 4, 2))                      // 第四层3个
+                .add(util.select().position(2, 4, 2))
+                .add(util.select().position(3, 4, 2));
+
+        Selection bearingSelection = util.select().position(bearingPos);
+        Selection barrelSelection = util.select().position(barrelPos);
+
+        // 显示除了Frame Trap之外的所有方块
+        Selection everythingElse = util.select()
+                .layers(1, 5)
+                .substract(frameTrapPositions);
+
+        scene.world().showSection(everythingElse, Direction.DOWN);
+        scene.idle(10);
+
+        // 逐个显示Frame Trap方块（按层级）
+        // 第二层2个
+        scene.world().showSection(util.select().position(1, 2, 2), Direction.DOWN);
+        scene.idle(3);
+        scene.world().showSection(util.select().position(3, 2, 2), Direction.DOWN);
+        scene.idle(5);
+
+        // 第三层3个
+        scene.world().showSection(util.select().position(1, 3, 2), Direction.DOWN);
+        scene.idle(3);
+        scene.world().showSection(util.select().position(2, 3, 2), Direction.DOWN);
+        scene.idle(3);
+        scene.world().showSection(util.select().position(3, 3, 2), Direction.DOWN);
+        scene.idle(5);
+
+        // 第四层3个
+        scene.world().showSection(util.select().position(1, 4, 2), Direction.DOWN);
+        scene.idle(3);
+        scene.world().showSection(util.select().position(2, 4, 2), Direction.DOWN);
+        scene.idle(3);
+        scene.world().showSection(util.select().position(3, 4, 2), Direction.DOWN);
+        scene.idle(10);
+
+        // Text 5: 当捕鱼框在水下随着动态结构移动时
+        scene.overlay().showText(80)
+                .attachKeyFrame()
+                .text("createfisheryindustry.ponder.frame_trap_underwater.text_1")
+                .pointAt(util.vector().centerOf(1, 3, 2))
+                .placeNearTarget();
+        scene.idle(80);
+
+        // 创建包含所有Frame Trap、轴承和木桶的动态结构
+        Selection movingParts = frameTrapPositions
+                .add(bearingSelection)
+                .add(barrelSelection);
+
+        ElementLink<WorldSectionElement> contraption = scene.world().makeSectionIndependent(movingParts);
+        scene.world().configureCenterOfRotation(contraption, util.vector().centerOf(2, 2, 2));
+
+        // 绕y轴以2，2，2为中心旋转360度
+        scene.world().rotateSection(contraption, 0, 180, 0, 100);
+        scene.idle(60);
+
+        // Text 6: 有概率随时间获得钓鱼战利品，同时获得经验颗粒
+        scene.overlay().showText(100)
+                .attachKeyFrame()
+                .colored(PonderPalette.GREEN)
+                .text("createfisheryindustry.ponder.frame_trap_underwater.text_2")
+                .pointAt(util.vector().centerOf(2, 2, 2))
+                .placeNearTarget();
+        scene.idle(100);
+
+        scene.overlay().showControls(util.vector().centerOf(2, 2, 2), Pointing.UP, 60)
+                .withItem(new ItemStack(Items.ENCHANTED_BOOK));
+        scene.idle(60);
+
+        scene.markAsFinished();
+    }
 }
