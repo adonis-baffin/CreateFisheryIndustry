@@ -131,5 +131,38 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "Clique direito:",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Extrai itens, até uma pilha de cada vez.",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Ranhura do filtro:",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Coloque um item na ranhura do filtro para coletar apenas esse tipo de item. O fluxo de ar ignorará completamente itens não correspondentes."
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Coloque um item na ranhura do filtro para coletar apenas esse tipo de item. O fluxo de ar ignorará completamente itens não correspondentes.",
+
+  "createfisheryindustry.ponder.frame_trap.header": "Usando armadilhas de quadro",
+  "createfisheryindustry.ponder.frame_trap.text_1": "Armadilhas de quadro se anexam a engenhocas em movimento",
+  "createfisheryindustry.ponder.frame_trap.text_2": "Quando armadilhas de quadro se movem como parte de uma engenhoca animada...",
+  "createfisheryindustry.ponder.frame_trap.text_3": "...elas coletarão itens e capturarão pequenas criaturas em seu caminho",
+  "createfisheryindustry.ponder.frame_trap.text_4": "Criaturas capturadas fornecem pepitas de experiência",
+  "createfisheryindustry.ponder.frame_trap.text_5": "Itens coletados são automaticamente armazenados em inventários conectados",
+
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "Usando armadilhas de quadro debaixo d'água",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "Quando armadilhas de quadro se movem debaixo d'água como parte de uma engenhoca...",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "...elas têm uma chance de obter espólio de pesca ao longo do tempo",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "Orbes de experiência são gerados junto com o espólio",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "Configurando armadilhas de malha",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "Clique com o botão direito em pequenas criaturas segurando uma armadilha de malha para capturá-las",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "Capturar criaturas produz seus drops e pepitas de experiência",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "Quando colocadas, armadilhas de malha coletam automaticamente itens próximos e capturam criaturas",
+  "createfisheryindustry.ponder.mesh_trap.text_4": "Clique com o botão direito para extrair manualmente itens armazenados",
+  "createfisheryindustry.ponder.mesh_trap.text_5": "Inventários adjacentes receberão itens automaticamente",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "Processando itens com o descascador mecânico",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "Descascadores mecânicos voltados para cima podem processar uma variedade de itens",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "O item processado sempre se move contra a entrada rotacional do descascador",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "Subprodutos são armazenados internamente e podem ser extraídos usando automação",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "Descascar e colher com o descascador mecânico",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "Quando recebe força rotacional, um descascador mecânico removerá a casca de troncos diretamente à sua frente",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "Descascadores mecânicos podem interagir com entidades para colher recursos",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "Eles podem colher aglomerados de ametista e remover oxidação de blocos de cobre",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "Usando descascadores mecânicos em engenhocas",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "Quando descascadores se movem como parte de uma engenhoca animada...",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...eles processarão quaisquer blocos nos quais a engenhoca os fizer colidir"
 }

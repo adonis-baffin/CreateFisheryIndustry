@@ -131,5 +131,38 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "우클릭할 때:",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "아이템을 추출합니다. 한 번에 최대 한 스택씩.",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "필터 슬롯:",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "필터 슬롯에 아이템을 넣어 해당 유형의 아이템만 수집합니다. 공기 흐름은 일치하지 않는 아이템을 완전히 무시합니다."
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "필터 슬롯에 아이템을 넣어 해당 유형의 아이템만 수집합니다. 공기 흐름은 일치하지 않는 아이템을 완전히 무시합니다.",
+
+  "createfisheryindustry.ponder.frame_trap.header": "프레임 덫 사용하기",
+  "createfisheryindustry.ponder.frame_trap.text_1": "프레임 덫은 움직이는 구조물에 부착됩니다.",
+  "createfisheryindustry.ponder.frame_trap.text_2": "프레임 덫이 움직이는 구조물의 일부면...",
+  "createfisheryindustry.ponder.frame_trap.text_3": "...경로상의 아이템을 수집하고 작은 생물을 포획합니다.",
+  "createfisheryindustry.ponder.frame_trap.text_4": "포획된 생물은 경험치 조각을 제공합니다.",
+  "createfisheryindustry.ponder.frame_trap.text_5": "수집된 아이템은 연결된 보관함에 자동으로 저장됩니다.",
+
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "수중에서 프레임 덫 사용하기",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "프레임 덫이 수중에서 구조물의 일부로 움직일 때...",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "...시간이 지나면서 낚시 전리품을 얻을 확률이 있습니다.",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "전리품과 함께 경험치 구슬이 생성됩니다.",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "그물 덫 설치하기",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "그물 덫을 들고 작은 생물을 우클릭하여 포획합니다.",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "생물을 포획하면 드롭 아이템과 경험치 조각을 얻습니다.",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "설치하면, 그물 덫은 근처의 아이템을 자동으로 수집하고 생물을 포획합니다.",
+  "createfisheryindustry.ponder.mesh_trap.text_4": "우클릭으로 저장된 아이템을 수동으로 꺼낼 수 있습니다.",
+  "createfisheryindustry.ponder.mesh_trap.text_5": "인접한 보관함이 자동으로 아이템을 받습니다.",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "기계 박피기로 아이템 가공하기",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "위를 바라보는 기계 박피기는 다양한 아이템을 가공합니다.",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "가공되는 아이템은 언제나 박피기 동력의 반대로 움직입니다.",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "부산물은 내부에 저장되며 자동화로 추출할 수 있습니다.",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "기계 박피기로 껍질 벗기기와 수확하기",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "동력을 받으면 기계 박피기는 앞에 있는 원목의 껍질을 벗깁니다.",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "기계 박피기는 엔티티와 상호작용하여 자원을 수확할 수 있습니다.",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "자수정 군집을 수확하고 구리 블록의 산화를 제거할 수 있습니다.",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "구조물에서의 기계 박피기",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "박피기가 움직이는 구조물의 일부면...",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...구조물이 부딪히는 모든 블록을 처리합니다."
 }

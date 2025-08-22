@@ -3,6 +3,7 @@ package com.adonis.createfisheryindustry;
 import com.adonis.createfisheryindustry.client.UnderwaterSprintFOVHandler;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.config.CreateFisheryStressConfig;
+import com.adonis.createfisheryindustry.event.HarpoonDropHandler;
 import com.adonis.createfisheryindustry.recipe.CreateFisheryRecipeTypes;
 import com.adonis.createfisheryindustry.registry.*;
 import com.mojang.logging.LogUtils;
@@ -81,6 +82,7 @@ public class CreateFisheryMod {
 
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
+        NeoForge.EVENT_BUS.register(HarpoonDropHandler.class);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

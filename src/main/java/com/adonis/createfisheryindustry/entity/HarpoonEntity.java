@@ -41,11 +41,6 @@ public class HarpoonEntity extends AbstractArrow {
         this.entityData.set(ID_FOIL, pickupItemStack.hasFoil());
     }
 
-    @Override
-    public ItemStack getPickupItem() {
-        return super.getPickupItem(); // 调用 AbstractArrow 的 getPickupItem()
-    }
-
     public HarpoonEntity(Level level, double x, double y, double z, ItemStack pickupItemStack) {
         super(CreateFisheryEntityTypes.HARPOON.get(), x, y, z, level, pickupItemStack, pickupItemStack);
         this.entityData.set(ID_LOYALTY, this.getLoyaltyFromItem(pickupItemStack));
@@ -109,7 +104,7 @@ public class HarpoonEntity extends AbstractArrow {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         Entity entity = result.getEntity();
-        float f = 7.0F; // 基础伤害为7
+        float f = 7.0F;
         Entity entity1 = this.getOwner();
         DamageSource damagesource = this.damageSources().trident(this, (entity1 == null ? this : entity1));
         Level var7 = this.level();
@@ -121,7 +116,6 @@ public class HarpoonEntity extends AbstractArrow {
             if (entity.getType() == EntityType.ENDERMAN) {
                 return;
             }
-            var netting = this.level();
             if (var7 instanceof ServerLevel serverlevel) {
                 EnchantmentHelper.doPostAttackEffectsWithItemSource(serverlevel, entity, damagesource, this.getWeaponItem());
             }
@@ -149,23 +143,25 @@ public class HarpoonEntity extends AbstractArrow {
 
     @Override
     protected boolean tryPickup(Player player) {
+        // 忠诚附魔的特殊处理
         if (this.isNoPhysics() && this.ownedBy(player)) {
-            // 忠诚附魔的鱼叉直接返回手中，不进入鱼叉袋
-            return super.tryPickup(player);
+            return super.tryPickup(player) || player.getInventory().add(this.getPickupItem());
         }
 
+        // 普通拾取
         ItemStack pickupItem = this.getPickupItem();
+
+        // 优先尝试放入鱼叉袋
         if (HarpoonPouchEventHandler.tryInsertHarpoonToPouch(player, pickupItem)) {
+            this.playSound(SoundEvents.ITEM_PICKUP, 0.2F,
+                    ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            player.take(this, 1);
             this.discard();
             return true;
         }
 
-        // 如果鱼叉袋无法处理，尝试添加到玩家库存
-        boolean added = player.getInventory().add(pickupItem);
-        if (added) {
-            this.discard();
-        }
-        return added;
+        // 鱼叉袋无法处理，使用默认逻辑
+        return super.tryPickup(player);
     }
 
     @Override

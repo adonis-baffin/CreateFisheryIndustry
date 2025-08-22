@@ -165,6 +165,24 @@
   "createfisheryindustry.ponder.frame_trap_underwater.header": "在水下使用捕鱼框",
   "createfisheryindustry.ponder.frame_trap_underwater.text_1": "当捕鱼框在水下随着动态结构移动时……",
   "createfisheryindustry.ponder.frame_trap_underwater.text_2": "有概率随时间获得钓鱼战利品，同时获得经验颗粒",
-  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "附魔书和其他钓鱼战利品将被存储在这里"
+
+  "createfisheryindustry.ponder.mesh_trap.header": "使用捕获网",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "手持捕获网右击小型生物来捕获它们，捕获成功后会获得其战利品和经验颗粒",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "捕获网会自动吸取附近的掉落物，捕获附近的生物。右键捕获网可以提取其中存储的物品",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "如果有相邻的容器，捕获网会自动将物品输出到容器中",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "使用动力切削机处理物品",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "面朝上的动力切削机可以处理各种物品",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "处理过后的物品的弹出方向始终与物品的输入方向相反",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "动力切削机的副产物会被储存在其中，可以通过其他物流元件提取",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "使用动力切削机处理方块与实体",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "向其通入旋转力后，动力切削机可以对前方的树木去皮",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "也可以给羊剪羊毛，或获取乌龟和犰狳的鳞甲",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "还能收获紫水晶簇，以及给铜除锈",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "在动态结构中使用动力切削机",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "当动力切削机作为动态结构的一部分移动时……",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "……它会处理前方的方块或实体"
 
 }

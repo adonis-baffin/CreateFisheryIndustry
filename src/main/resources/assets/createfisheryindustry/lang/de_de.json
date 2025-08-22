@@ -131,5 +131,38 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "Wenn R-Klick:",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Entnimmt Gegenstände, bis zu einem Stapel gleichzeitig.",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Filter-Slot:",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Platziere einen Gegenstand im Filter-Slot, um nur diesen Gegenstandstyp zu sammeln. Luftstrom wird nicht passende Gegenstände vollständig ignorieren."
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Platziere einen Gegenstand im Filter-Slot, um nur diesen Gegenstandstyp zu sammeln. Luftstrom wird nicht passende Gegenstände vollständig ignorieren.",
+
+  "createfisheryindustry.ponder.frame_trap.header": "Rahmenfallen verwenden",
+  "createfisheryindustry.ponder.frame_trap.text_1": "Rahmenfallen heften sich an bewegende Vorrichtungen an",
+  "createfisheryindustry.ponder.frame_trap.text_2": "Wann immer Rahmenfallen als Teil einer animierten Vorrichtung bewegt werden...",
+  "createfisheryindustry.ponder.frame_trap.text_3": "...sammeln sie Items und fangen kleine Kreaturen auf ihrem Weg",
+  "createfisheryindustry.ponder.frame_trap.text_4": "Gefangene Kreaturen liefern Erfahrungsnuggets",
+  "createfisheryindustry.ponder.frame_trap.text_5": "Gesammelte Items werden automatisch in verbundenen Behältern gespeichert",
+
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "Rahmenfallen unter Wasser verwenden",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "Wenn Rahmenfallen unter Wasser als Teil einer Vorrichtung bewegt werden...",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "...haben sie eine Chance, über Zeit Angelbeute zu erhalten",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "Erfahrungskugeln werden zusammen mit der Beute generiert",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "Netzfallen einrichten",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "Rechtsklicke kleine Kreaturen während du eine Netzfalle hältst, um sie zu fangen",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "Das Fangen von Kreaturen liefert ihre Drops und Erfahrungsnuggets",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "Wenn platziert, sammeln Netzfallen automatisch nahe Items und fangen Kreaturen",
+  "createfisheryindustry.ponder.mesh_trap.text_4": "Rechtsklicke um gespeicherte Items manuell zu entnehmen",
+  "createfisheryindustry.ponder.mesh_trap.text_5": "Angrenzende Behälter erhalten Items automatisch",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "Items mit dem mechanischen Schäler verarbeiten",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "Nach oben schauende mechanische Schäler können eine Vielzahl an Items verarbeiten",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "Die verarbeiteten Items bewegen sich immer entgegen der Rotationsrichtung des Schälers",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "Nebenprodukte werden intern gespeichert und können durch Automatisierung entnommen werden",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "Entrinden und Ernten mit dem mechanischen Schäler",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "Wenn Rotationsenergie gegeben wird, entrindet ein mechanischer Schäler Stämme direkt vor ihm",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "Mechanische Schäler können mit Entitäten interagieren um Ressourcen zu ernten",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "Sie können Amethysthaufen ernten und Oxidation von Kupferblöcken entfernen",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "Mechanische Schäler auf Vorrichtungen verwenden",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "Wann immer Schäler als Teil einer animierten Vorrichtung bewegt werden...",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...verarbeiten sie alle Blöcke, in welche die Vorrichtung sie fährt"
 }

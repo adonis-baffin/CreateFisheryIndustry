@@ -159,13 +159,36 @@
   "death.attack.harpoon": "%1$s was harpooned by %2$s",
   "death.attack.harpoon.item": "%1$s was harpooned by %2$s using %3$s",
 
-  "createfisheryindustry.ponder.frame_trap.header": "Using the Frame Trap",
-  "createfisheryindustry.ponder.frame_trap.text_1": "Like sails, Frame Traps will attach themselves to moving contraptions",
-  "createfisheryindustry.ponder.frame_trap.text_2": "When Frame Traps move as part of a contraption...",
-  "createfisheryindustry.ponder.frame_trap.text_3": "It will collect items it touches and capture small creatures in its path，each time capturing creature provides experience nugget",
-  "createfisheryindustry.ponder.frame_trap.text_4": "And automatically store them in connected containers",
+  "createfisheryindustry.ponder.frame_trap.header": "Using Frame Traps",
+  "createfisheryindustry.ponder.frame_trap.text_1": "Frame Traps will attach themselves to moving contraptions",
+  "createfisheryindustry.ponder.frame_trap.text_2": "Whenever Frame Traps are moved as part of an animated Contraption...",
+  "createfisheryindustry.ponder.frame_trap.text_3": "...they will collect items and capture small creatures in their path",
+  "createfisheryindustry.ponder.frame_trap.text_4": "Captured creatures provide Experience Nuggets",
+  "createfisheryindustry.ponder.frame_trap.text_5": "Collected items are automatically stored in attached inventories",
+
   "createfisheryindustry.ponder.frame_trap_underwater.header": "Using Frame Traps Underwater",
-  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "When Frame Traps move underwater as part of a contraption...",
-  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "They have a chance to obtain fishing loot over time, along with experience orbs",
-  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "Enchanted books and other fishing loot will be stored here"
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "When Frame Traps move underwater as part of a Contraption...",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "...they have a chance to obtain fishing loot over time",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "Experience orbs are generated alongside the loot",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "Setting up Mesh Traps",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "Right-Click small creatures while holding a Mesh Trap to capture them",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "Capturing creatures yields their drops and Experience Nuggets",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "When placed, Mesh Traps automatically collect nearby items and capture creatures",
+  "createfisheryindustry.ponder.mesh_trap.text_4": "Right-Click to extract stored items manually",
+  "createfisheryindustry.ponder.mesh_trap.text_5": "Adjacent inventories will receive items automatically",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "Processing Items with the Mechanical Peeler",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "Upward facing Mechanical Peelers can process a variety of items",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "The processed item always moves against the rotational input to the peeler",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "Byproducts are stored internally and can be extracted using automation",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "Stripping and Harvesting with the Mechanical Peeler",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "When given Rotational Force, a Mechanical Peeler will strip bark from logs directly in front of it",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "Mechanical Peelers can also interact with entities to harvest resources",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "They can harvest amethyst clusters and remove oxidation from copper blocks",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "Using Mechanical Peelers on Contraptions",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "Whenever Peelers are moved as part of an animated Contraption...",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...they will process any blocks the contraption runs them into"
 }

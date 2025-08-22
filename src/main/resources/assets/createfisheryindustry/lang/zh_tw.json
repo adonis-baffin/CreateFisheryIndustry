@@ -131,5 +131,38 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "右鍵點擊時：",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "取出物品，一次最多一組。",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "過濾槽：",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "在過濾槽中放置物品以僅收集該類型的物品。氣流將完全忽略不匹配的物品。"
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "在過濾槽中放置物品以僅收集該類型的物品。氣流將完全忽略不匹配的物品。",
+
+  "createfisheryindustry.ponder.frame_trap.header": "使用框架陷阱",
+  "createfisheryindustry.ponder.frame_trap.text_1": "框架陷阱會附著在移動的裝置上",
+  "createfisheryindustry.ponder.frame_trap.text_2": "若在運動裝置中使用框架陷阱…",
+  "createfisheryindustry.ponder.frame_trap.text_3": "…它會收集物品並捕獲路徑上的小型生物",
+  "createfisheryindustry.ponder.frame_trap.text_4": "捕獲的生物會提供經驗碎塊",
+  "createfisheryindustry.ponder.frame_trap.text_5": "收集的物品會自動儲存在連接的容器中",
+
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "在水下使用框架陷阱",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "當框架陷阱在水下作為裝置的一部分移動時…",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "…它們有機會隨時間獲得釣魚戰利品",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "經驗球會與戰利品一同生成",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "設置網狀陷阱",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "手持網狀陷阱對小型生物按右鍵來捕獲它們",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "捕獲生物會產生它們的掉落物和經驗碎塊",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "放置後，網狀陷阱會自動收集附近的物品並捕獲生物",
+  "createfisheryindustry.ponder.mesh_trap.text_4": "按右鍵手動提取儲存的物品",
+  "createfisheryindustry.ponder.mesh_trap.text_5": "相鄰的容器會自動接收物品",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "使用機械剝皮器處理物品",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "面朝上方的機械剝皮器可以加工各種物品",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "處理後的物品總是逆著機械剝皮器的轉向移動",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "副產品儲存在內部，可以用自動化裝置提取",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "使用機械剝皮器剝皮和收穫",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "向其輸入動力後，機械剝皮器會剝去它面前原木的樹皮",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "機械剝皮器可以與實體互動來收穫資源",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "它們可以收穫紫水晶簇並去除銅塊的氧化",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "在裝置中使用機械剝皮器",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "若在運動裝置中使用機械剝皮器…",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "…它會處理裝置移動路徑上的方塊"
 }

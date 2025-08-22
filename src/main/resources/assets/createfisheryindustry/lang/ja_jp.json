@@ -131,5 +131,38 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "右クリック時:",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "アイテムを取り出す。一度に最大1スタック。",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "フィルタースロット:",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "フィルタースロットにアイテムを配置すると、その種類のアイテムのみを回収。エアフローは一致しないアイテムを完全に無視する。"
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "フィルタースロットにアイテムを配置すると、その種類のアイテムのみを回収。エアフローは一致しないアイテムを完全に無視する。",
+
+  "createfisheryindustry.ponder.frame_trap.header": "フレームトラップの使い方",
+  "createfisheryindustry.ponder.frame_trap.text_1": "フレームトラップは動くからくりに取り付けられます",
+  "createfisheryindustry.ponder.frame_trap.text_2": "フレームトラップを組み込んだからくりを動かすと...",
+  "createfisheryindustry.ponder.frame_trap.text_3": "...アイテムを収集し、経路上の小さな生物を捕獲します",
+  "createfisheryindustry.ponder.frame_trap.text_4": "捕獲した生物から経験値ナゲットを獲得できます",
+  "createfisheryindustry.ponder.frame_trap.text_5": "収集したアイテムは接続されたインベントリに自動的に格納されます",
+
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "水中でのフレームトラップの使い方",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "フレームトラップを組み込んだからくりを水中で動かすと...",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "...時間の経過とともに釣りの戦利品を獲得する可能性があります",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "戦利品と一緒に経験値オーブも生成されます",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "メッシュトラップの設置",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "メッシュトラップを持って小さな生物を右クリックすると捕獲できます",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "生物を捕獲すると、ドロップアイテムと経験値ナゲットを獲得できます",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "設置すると、メッシュトラップは近くのアイテムを自動収集し、生物を捕獲します",
+  "createfisheryindustry.ponder.mesh_trap.text_4": "右クリックで格納されたアイテムを手動で取り出せます",
+  "createfisheryindustry.ponder.mesh_trap.text_5": "隣接するインベントリにアイテムを自動的に送ります",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "メカニカルピーラーによるアイテム加工",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "上向きのメカニカルピーラーは、様々なアイテムを加工できます",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "加工したアイテムは、常にピーラーの回転方向とは逆に移動します",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "副産物は内部に保存され、自動化装置で取り出せます",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "メカニカルピーラーによる剥ぎ取りと収穫",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "メカニカルピーラーは回転力を供給すると、目の前の原木の樹皮を剥ぎ取ります",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "メカニカルピーラーはエンティティと相互作用して資源を収穫できます",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "アメジストクラスターの収穫や銅ブロックの酸化除去もできます",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "からくりに組み込んでのメカニカルピーラーの使い方",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "メカニカルピーラーを組み込んだからくりを動かすと...",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...メカニカルピーラーは通過するブロックを加工します"
 }

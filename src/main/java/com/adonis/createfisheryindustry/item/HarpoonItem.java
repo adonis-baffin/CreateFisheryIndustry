@@ -1,6 +1,8 @@
 package com.adonis.createfisheryindustry.item;
 
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -13,9 +15,11 @@ import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -30,7 +34,8 @@ import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
-public class HarpoonItem extends Item implements net.minecraft.world.item.ProjectileItem {
+// 注意：实现的是 ProjectileItem 而不是 net.minecraft.world.item.ProjectileItem
+public class HarpoonItem extends Item implements ProjectileItem {
     public static final int THROW_THRESHOLD_TIME = 10;
     public static final float BASE_DAMAGE = 6.0F;
     public static final float SHOOT_POWER = 2.5F;
@@ -41,8 +46,12 @@ public class HarpoonItem extends Item implements net.minecraft.world.item.Projec
 
     public static ItemAttributeModifiers createAttributes() {
         return ItemAttributeModifiers.builder()
-                .add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 6.0, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_ID, -2.9, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
+                .add(Attributes.ATTACK_DAMAGE,
+                        new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 6.0, AttributeModifier.Operation.ADD_VALUE),
+                        EquipmentSlotGroup.MAINHAND)
+                .add(Attributes.ATTACK_SPEED,
+                        new AttributeModifier(BASE_ATTACK_SPEED_ID, -2.9, AttributeModifier.Operation.ADD_VALUE),
+                        EquipmentSlotGroup.MAINHAND)
                 .build();
     }
 
@@ -76,7 +85,7 @@ public class HarpoonItem extends Item implements net.minecraft.world.item.Projec
                             HarpoonEntity harpoon = new HarpoonEntity(level, player, stack);
                             harpoon.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, SHOOT_POWER, 1.0F);
                             if (player.hasInfiniteMaterials()) {
-                                harpoon.pickup = net.minecraft.world.entity.projectile.AbstractArrow.Pickup.CREATIVE_ONLY;
+                                harpoon.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
                             }
                             level.addFreshEntity(harpoon);
                             level.playSound(null, harpoon, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -140,10 +149,11 @@ public class HarpoonItem extends Item implements net.minecraft.world.item.Projec
         return 1;
     }
 
+    // 这个方法只被发射器等方块调用，不影响Q键掉落
     @Override
-    public Projectile asProjectile(Level level, net.minecraft.core.Position pos, ItemStack stack, net.minecraft.core.Direction direction) {
+    public Projectile asProjectile(Level level, Position pos, ItemStack stack, Direction direction) {
         HarpoonEntity harpoon = new HarpoonEntity(level, pos.x(), pos.y(), pos.z(), stack.copyWithCount(1));
-        harpoon.pickup = net.minecraft.world.entity.projectile.AbstractArrow.Pickup.ALLOWED;
+        harpoon.pickup = AbstractArrow.Pickup.ALLOWED;
         return harpoon;
     }
 

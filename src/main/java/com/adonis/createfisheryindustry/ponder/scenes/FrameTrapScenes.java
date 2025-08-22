@@ -217,7 +217,6 @@ public class FrameTrapScenes {
 
         // 创建包含所有Frame Trap、轴承和木桶的动态结构
         Selection movingParts = frameTrapPositions
-                .add(bearingSelection)
                 .add(barrelSelection);
 
         ElementLink<WorldSectionElement> contraption = scene.world().makeSectionIndependent(movingParts);

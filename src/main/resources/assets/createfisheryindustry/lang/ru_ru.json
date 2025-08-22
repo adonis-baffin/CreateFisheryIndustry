@@ -131,5 +131,38 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "При ПКМ:",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Извлекает предметы, до одного стека за раз.",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Слот фильтра:",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Поместите предмет в слот фильтра, чтобы собирать только этот тип предметов. Воздушный поток будет полностью игнорировать несоответствующие предметы."
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Поместите предмет в слот фильтра, чтобы собирать только этот тип предметов. Воздушный поток будет полностью игнорировать несоответствующие предметы.",
+
+  "createfisheryindustry.ponder.frame_trap.header": "Использование каркасных ловушек",
+  "createfisheryindustry.ponder.frame_trap.text_1": "Каркасные ловушки присоединяются к движущимся штуковинам",
+  "createfisheryindustry.ponder.frame_trap.text_2": "Когда каркасные ловушки движутся как часть штуковины...",
+  "createfisheryindustry.ponder.frame_trap.text_3": "...они будут собирать предметы и ловить маленьких существ на своём пути",
+  "createfisheryindustry.ponder.frame_trap.text_4": "Пойманные существа дают самородки опыта",
+  "createfisheryindustry.ponder.frame_trap.text_5": "Собранные предметы автоматически помещаются в подключённые инвентари",
+
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "Использование каркасных ловушек под водой",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "Когда каркасные ловушки движутся под водой как часть штуковины...",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "...они имеют шанс получить рыболовную добычу со временем",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "Вместе с добычей генерируются сферы опыта",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "Установка сетчатых ловушек",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "ПКМ по маленьким существам с сетчатой ловушкой в руке, чтобы поймать их",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "Поимка существ даёт их дроп и самородки опыта",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "При установке сетчатые ловушки автоматически собирают близлежащие предметы и ловят существ",
+  "createfisheryindustry.ponder.mesh_trap.text_4": "ПКМ для извлечения хранящихся предметов вручную",
+  "createfisheryindustry.ponder.mesh_trap.text_5": "Смежные инвентари будут получать предметы автоматически",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "Обработка предметов механическими чистилками",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "Направленные вверх механические чистилки могут обрабатывать множество предметов",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "Обработанные предметы всегда движутся против подаваемого на чистилку вращения",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "Побочные продукты хранятся внутри и могут быть извлечены автоматизацией",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "Снятие коры и сбор урожая механическими чистилками",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "При подаче вращения, механическая чистилка будет снимать кору с брёвен прямо перед ней",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "Механические чистилки могут взаимодействовать с существами для сбора ресурсов",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "Они могут собирать аметистовые кластеры и удалять окисление с медных блоков",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "Использование механических чистилок на штуковинах",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "Когда чистилки движутся как часть штуковины...",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...они будут обрабатывать блоки, на которые штуковина их наталкивает"
 }

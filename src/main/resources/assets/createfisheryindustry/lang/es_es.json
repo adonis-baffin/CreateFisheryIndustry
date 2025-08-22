@@ -131,5 +131,38 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "Cuando se hace clic derecho:",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Extrae objetos, hasta un stack a la vez.",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Ranura de Filtro:",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Coloca un objeto en la ranura de filtro para recolectar solo ese tipo de objeto. El flujo de aire ignorará completamente los objetos que no coincidan."
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Coloca un objeto en la ranura de filtro para recolectar solo ese tipo de objeto. El flujo de aire ignorará completamente los objetos que no coincidan.",
+
+  "createfisheryindustry.ponder.frame_trap.header": "Usar trampas de marco",
+  "createfisheryindustry.ponder.frame_trap.text_1": "Las trampas de marco se adhieren a los artefactos en movimiento",
+  "createfisheryindustry.ponder.frame_trap.text_2": "Cuando las trampas de marco se mueven como parte de un artefacto animado...",
+  "createfisheryindustry.ponder.frame_trap.text_3": "...recolectarán objetos y capturarán criaturas pequeñas en su camino",
+  "createfisheryindustry.ponder.frame_trap.text_4": "Las criaturas capturadas proporcionan pepitas de experiencia",
+  "createfisheryindustry.ponder.frame_trap.text_5": "Los objetos recolectados se almacenan automáticamente en los inventarios conectados",
+
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "Usar trampas de marco bajo el agua",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "Cuando las trampas de marco se mueven bajo el agua como parte de un artefacto...",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "...tienen la posibilidad de obtener botín de pesca con el tiempo",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "Se generan orbes de experiencia junto con el botín",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "Configurar trampas de malla",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "Haz clic derecho en criaturas pequeñas mientras sostienes una trampa de malla para capturarlas",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "Capturar criaturas produce sus objetos y pepitas de experiencia",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "Una vez colocadas, las trampas de malla recolectan automáticamente objetos cercanos y capturan criaturas",
+  "createfisheryindustry.ponder.mesh_trap.text_4": "Haz clic derecho para extraer manualmente los objetos almacenados",
+  "createfisheryindustry.ponder.mesh_trap.text_5": "Los inventarios adyacentes recibirán objetos automáticamente",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "Procesar objetos con el pelador mecánico",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "Los peladores mecánicos orientados hacia arriba pueden procesar una variedad de objetos",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "El objeto procesado siempre se mueve en contra de la fuerza rotacional del pelador",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "Los subproductos se almacenan internamente y pueden extraerse mediante automatización",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "Descortezar y cosechar con el pelador mecánico",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "Cuando se le da una fuerza rotacional, un pelador mecánico descortezará los troncos directamente frente a él",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "Los peladores mecánicos pueden interactuar con entidades para cosechar recursos",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "Pueden cosechar cúmulos de amatista y eliminar la oxidación de los bloques de cobre",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "Usar peladores mecánicos en artefactos",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "Cuando los peladores se mueven como parte de un artefacto animado...",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...procesarán cualquier bloque con el que el artefacto los haga chocar"
 }

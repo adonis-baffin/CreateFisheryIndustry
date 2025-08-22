@@ -131,5 +131,38 @@
   "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "Clic droit :",
   "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "Extrait les objets, jusqu'à une pile à la fois.",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "Emplacement de filtre :",
-  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Placez un objet dans l'emplacement de filtre pour ne collecter que ce type d'objet. Le flux d'air ignorera complètement les objets non correspondants."
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "Placez un objet dans l'emplacement de filtre pour ne collecter que ce type d'objet. Le flux d'air ignorera complètement les objets non correspondants.",
+
+  "createfisheryindustry.ponder.frame_trap.header": "Utilisation des pièges à cadre",
+  "createfisheryindustry.ponder.frame_trap.text_1": "Les pièges à cadre s'attachent aux machines en mouvement",
+  "createfisheryindustry.ponder.frame_trap.text_2": "Quand les pièges à cadre sont déplacés dans une machine...",
+  "createfisheryindustry.ponder.frame_trap.text_3": "...ils collecteront les objets et captureront les petites créatures sur leur chemin",
+  "createfisheryindustry.ponder.frame_trap.text_4": "Les créatures capturées fournissent des pépites d'expérience",
+  "createfisheryindustry.ponder.frame_trap.text_5": "Les objets collectés sont automatiquement stockés dans les inventaires connectés",
+
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "Utilisation des pièges à cadre sous l'eau",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "Quand les pièges à cadre se déplacent sous l'eau dans une machine...",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "...ils ont une chance d'obtenir du butin de pêche au fil du temps",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_3": "Des orbes d'expérience sont générés avec le butin",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "Installation des pièges à filet",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "Clic droit sur les petites créatures avec un piège à filet pour les capturer",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "Capturer des créatures donne leurs objets et des pépites d'expérience",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "Une fois placés, les pièges à filet collectent automatiquement les objets proches et capturent les créatures",
+  "createfisheryindustry.ponder.mesh_trap.text_4": "Clic droit pour extraire manuellement les objets stockés",
+  "createfisheryindustry.ponder.mesh_trap.text_5": "Les inventaires adjacents recevront automatiquement les objets",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "Traitement d'objets avec l'éplucheur mécanique",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "Les éplucheurs mécaniques orientés vers le haut peuvent traiter une variété d'objets",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "L'objet traité se déplace toujours contre la direction de rotation de l'éplucheur",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "Les sous-produits sont stockés à l'intérieur et peuvent être extraits par automatisation",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "Écorçage et récolte avec l'éplucheur mécanique",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "Quand de la force de rotation lui est donnée, un éplucheur mécanique écorcera les bûches directement devant lui",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "Les éplucheurs mécaniques peuvent interagir avec les entités pour récolter des ressources",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "Ils peuvent récolter les amas d'améthyste et enlever l'oxydation des blocs de cuivre",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "Utilisation des éplucheurs mécaniques sur des machines",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "Quand les éplucheurs sont déplacés dans une machine...",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...ils traiteront les blocs dans lesquels la machine les fait aller"
 }
