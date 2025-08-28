@@ -70,7 +70,6 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        // 与动力锯完全一致，仅设置 FLIPPED
         BlockState stateForPlacement = super.getStateForPlacement(context);
         Direction facing = stateForPlacement.getValue(FACING);
         return stateForPlacement.setValue(FLIPPED, facing.getAxis() == Axis.Y && context.getHorizontalDirection().getAxisDirection() == AxisDirection.NEGATIVE);
@@ -81,7 +80,6 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
         super.setPlacedBy(level, pos, state, placer, stack);
         withBlockEntityDo(level, pos, be -> be.notifyUpdate());
         level.updateNeighborsAt(pos, this);
-        // 强制更新邻近传动杆
         for (Direction dir : Direction.values()) {
             BlockPos neighborPos = pos.relative(dir);
             BlockState neighborState = level.getBlockState(neighborPos);
@@ -205,64 +203,6 @@ public class MechanicalPeelerBlock extends DirectionalAxisKineticBlock implement
                 return;
             be.insertItem(itemEntity);
         });
-    }
-
-    @Override
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (level.isClientSide) {
-            return;
-        }
-
-        Direction facing = state.getValue(FACING);
-        final double interactionDepth = 0.6;
-        final double interactionWidth = 0.8;
-        final double interactionHeight = 0.8;
-        final double offsetFromSurface = 0.1;
-
-        Vec3 min = Vec3.ZERO;
-        Vec3 max = Vec3.ZERO;
-
-        switch (facing) {
-            case UP:
-                min = new Vec3((1 - interactionWidth) / 2, 1 + offsetFromSurface, (1 - interactionHeight) / 2);
-                max = new Vec3((1 + interactionWidth) / 2, 1 + offsetFromSurface + interactionDepth, (1 + interactionHeight) / 2);
-                break;
-            case DOWN:
-                min = new Vec3((1 - interactionWidth) / 2, -offsetFromSurface - interactionDepth, (1 - interactionHeight) / 2);
-                max = new Vec3((1 + interactionWidth) / 2, -offsetFromSurface, (1 + interactionHeight) / 2);
-                break;
-            case NORTH:
-                min = new Vec3((1 - interactionWidth) / 2, (1 - interactionHeight) / 2, -offsetFromSurface - interactionDepth);
-                max = new Vec3((1 + interactionWidth) / 2, (1 + interactionHeight) / 2, -offsetFromSurface);
-                break;
-            case SOUTH:
-                min = new Vec3((1 - interactionWidth) / 2, (1 - interactionHeight) / 2, 1 + offsetFromSurface);
-                max = new Vec3((1 + interactionWidth) / 2, (1 + interactionHeight) / 2, 1 + offsetFromSurface + interactionDepth);
-                break;
-            case WEST:
-                min = new Vec3(-offsetFromSurface - interactionDepth, (1 - interactionHeight) / 2, (1 - interactionWidth) / 2);
-                max = new Vec3(-offsetFromSurface, (1 + interactionHeight) / 2, (1 + interactionWidth) / 2);
-                break;
-            case EAST:
-                min = new Vec3(1 + offsetFromSurface, (1 - interactionHeight) / 2, (1 - interactionWidth) / 2);
-                max = new Vec3(1 + offsetFromSurface + interactionDepth, (1 + interactionHeight) / 2, (1 + interactionWidth) / 2);
-                break;
-        }
-
-        AABB interactionZone = new AABB(min.x, min.y, min.z, max.x, max.y, max.z).move(pos);
-
-        List<Entity> entities = level.getEntitiesOfClass(Entity.class, interactionZone,
-                (e) -> e.isAlive() && (e instanceof Sheep || e instanceof Armadillo || e instanceof Turtle));
-
-        if (!entities.isEmpty()) {
-            withBlockEntityDo(level, pos, be -> {
-                if (be.getSpeed() != 0) {
-                    for (Entity e : entities) {
-                        be.processEntity(e);
-                    }
-                }
-            });
-        }
     }
 
     @Override
