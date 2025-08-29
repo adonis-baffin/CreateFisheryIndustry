@@ -1,7 +1,6 @@
 package com.adonis.createfisheryindustry.recipe;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
-// Removed ProcessingRecipeBuilder import as factory is not directly passed this way
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;

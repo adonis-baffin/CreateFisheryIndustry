@@ -3,7 +3,6 @@ package com.adonis.createfisheryindustry.procedures;
 import com.adonis.createfisheryindustry.entity.TetheredHarpoonEntity;
 import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -26,7 +25,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT) // <--- 这是添加的注解
+@OnlyIn(Dist.CLIENT)
 public class PneumaticHarpoonGunChainsLineProcedure {
     private static final Logger LOGGER = LoggerFactory.getLogger(PneumaticHarpoonGunChainsLineProcedure.class);
 
@@ -47,16 +46,13 @@ public class PneumaticHarpoonGunChainsLineProcedure {
 
         for (Player player : level.players()) {
             // 检查玩家是否持有鱼叉枪
-            ItemStack stack = player.getMainHandItem().getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get() ? player.getMainHandItem() : player.getOffhandItem();
+            ItemStack stack = player.getMainHandItem().getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get() ?
+                    player.getMainHandItem() : player.getOffhandItem();
             if (stack.isEmpty() || stack.getItem() != CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get()) {
                 continue;
             }
 
-            // 检查背罐
-            List<ItemStack> backtanks = BacktankUtil.getAllWithAir(player);
-            if (backtanks.isEmpty()) {
-                continue;
-            }
+            // 移除背罐检查 - 现在无论有没有背罐都渲染锁链
 
             // 获取活跃的鱼叉实体（未被收回）
             List<TetheredHarpoonEntity> hooks = level.getEntitiesOfClass(TetheredHarpoonEntity.class,
@@ -94,7 +90,7 @@ public class PneumaticHarpoonGunChainsLineProcedure {
             double camZ = minecraft.gameRenderer.getMainCamera().getPosition().z;
             poseStack.translate(-camX, -camY, -camZ);
 
-            if (chainCount > 1) { // 避免除以零，并且至少需要两个点来形成线段
+            if (chainCount > 1) {
                 for (int i = 0; i < chainCount; i++) {
                     float t = (float) i / (chainCount - 1);
                     float x = (float) Mth.lerp(t, startX, targetX);
@@ -113,15 +109,14 @@ public class PneumaticHarpoonGunChainsLineProcedure {
                     float pitch = (float) Math.toDegrees(Math.asin(-direction.y));
                     poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
                     poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
-                    poseStack.scale(0.5f, 0.5f, 0.5f); // 缩小链条模型
+                    poseStack.scale(0.5f, 0.5f, 0.5f);
                     itemRenderer.renderStatic(chains, ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, poseStack, buffer, level, 0);
                     poseStack.popPose();
                 }
             }
 
             poseStack.popPose();
-            buffer.endBatch(); // 确保在循环外调用，或者如果每个玩家独立渲染，则在玩家循环外
+            buffer.endBatch();
         }
-
     }
 }

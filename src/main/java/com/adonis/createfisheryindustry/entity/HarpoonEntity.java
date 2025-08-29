@@ -145,11 +145,34 @@ public class HarpoonEntity extends AbstractArrow {
     protected boolean tryPickup(Player player) {
         // 忠诚附魔的特殊处理
         if (this.isNoPhysics() && this.ownedBy(player)) {
+            // 如果是创造模式且成功放入鱼叉袋，就不要执行默认行为
+            if (player.hasInfiniteMaterials()) {
+                ItemStack pickupItem = this.getPickupItem();
+                if (HarpoonPouchEventHandler.tryInsertHarpoonToPouch(player, pickupItem)) {
+                    this.playSound(SoundEvents.ITEM_PICKUP, 0.2F,
+                            ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                    player.take(this, 1);
+                    this.discard();
+                    return true;
+                }
+            }
             return super.tryPickup(player) || player.getInventory().add(this.getPickupItem());
         }
 
         // 普通拾取
         ItemStack pickupItem = this.getPickupItem();
+
+        // 创造模式特殊处理
+        if (player.hasInfiniteMaterials() && this.pickup == Pickup.CREATIVE_ONLY) {
+            // 创造模式下，如果成功放入鱼叉袋，就跳过默认的创造模式行为
+            if (HarpoonPouchEventHandler.tryInsertHarpoonToPouch(player, pickupItem.copy())) {
+                this.playSound(SoundEvents.ITEM_PICKUP, 0.2F,
+                        ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                player.take(this, 1);
+                this.discard();
+                return true;
+            }
+        }
 
         // 优先尝试放入鱼叉袋
         if (HarpoonPouchEventHandler.tryInsertHarpoonToPouch(player, pickupItem)) {

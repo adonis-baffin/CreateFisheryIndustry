@@ -1,14 +1,21 @@
 package com.adonis.createfisheryindustry.block.MechanicalPeeler;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
+import com.adonis.createfisheryindustry.data.PeelerEntityProcessing;
+import com.adonis.createfisheryindustry.data.PeelerEntityProcessingManager;
 import com.adonis.createfisheryindustry.recipe.CreateFisheryRecipeTypes;
 import com.adonis.createfisheryindustry.recipe.PeelingRecipe;
+import com.adonis.createfisheryindustry.data.PeelerEntityProcessingManager;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.kinetics.saw.TreeCutter;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.DataMapHooks;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
@@ -510,12 +517,12 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
 
         if (level == null) return;
 
-        // Active entity scanning (server-side only)
         if (!level.isClientSide && level.getGameTime() % 10 == 0 && getSpeed() != 0) {
             AABB scanArea = new AABB(worldPosition).inflate(ENTITY_SCAN_RANGE);
 
+            // 更新实体过滤条件以支持数据包
             List<Entity> entities = level.getEntitiesOfClass(Entity.class, scanArea,
-                    (e) -> e.isAlive() && (e instanceof Sheep || e instanceof Armadillo || e instanceof Turtle));
+                    (e) -> e.isAlive() && (e instanceof Sheep || PeelerEntityProcessingManager.hasProcessing(e.getType())));
 
             for (Entity entity : entities) {
                 processEntity(entity);
@@ -882,17 +889,16 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         }
 
         UUID entityId = entity.getUUID();
-        boolean isArmadilloOrTurtle = entity instanceof Armadillo || entity instanceof Turtle;
 
-        if (isArmadilloOrTurtle) {
-            if (isEntityOnCooldown(entityId)) {
-                return;
-            }
+        // 检查冷却
+        if (isEntityOnCooldown(entityId)) {
+            return;
         }
 
         boolean processedSuccessfully = false;
 
-        if (entity instanceof IShearable shearableTarget) {
+        // 首先检查是否是羊（保持原版剪羊毛机制）
+        if (entity instanceof Sheep sheep && sheep instanceof IShearable shearableTarget) {
             if (shearableTarget.isShearable(null, ItemStack.EMPTY, level, entity.blockPosition())) {
                 List<ItemStack> drops = shearableTarget.onSheared(null, ItemStack.EMPTY, level, entity.blockPosition());
                 if (drops != null && !drops.isEmpty()) {
@@ -903,23 +909,45 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
                         }
                     }
                     processedSuccessfully = true;
+                    // 羊没有冷却时间，因为原版机制已经处理了
                 }
             }
         }
 
-        if (!processedSuccessfully && isArmadilloOrTurtle) {
-            if (entity instanceof Armadillo armadillo) {
-                if (tryStoreItemInSecondaryOutput(new ItemStack(Items.ARMADILLO_SCUTE))) {
-                    level.playSound(null, armadillo, SoundEvents.ARMADILLO_SCUTE_DROP, SoundSource.NEUTRAL, 1.0F, 1.0F);
-                    setEntityCooldown(entityId);
-                    processedSuccessfully = true;
+        else if (PeelerEntityProcessingManager.hasProcessing(entity.getType())) {
+            PeelerEntityProcessing processing = PeelerEntityProcessingManager.getProcessing(entity.getType());
+
+            if (processing.condition().isPresent()) {
+                // 条件检查逻辑
+            }
+
+            // 创建 ResourceKey
+            ResourceKey<LootTable> lootTableKey = ResourceKey.create(Registries.LOOT_TABLE, processing.lootTable());
+
+            // 获取战利品表
+            LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(lootTableKey);
+
+            if (lootTable != null && lootTable != LootTable.EMPTY) {
+                // 创建 LootParams - 添加 damage_source 参数
+                LootParams params = new LootParams.Builder((ServerLevel)level)
+                        .withParameter(LootContextParams.THIS_ENTITY, entity)
+                        .withParameter(LootContextParams.ORIGIN, entity.position())
+                        .withParameter(LootContextParams.DAMAGE_SOURCE, level.damageSources().generic()) // 添加这行
+                        .create(LootContextParamSets.ENTITY);
+
+                List<ItemStack> drops = lootTable.getRandomItems(params);
+
+                for (ItemStack drop : drops) {
+                    if (!tryStoreItemInSecondaryOutput(drop)) {
+                        ItemEntity itemEntity = new ItemEntity(level, entity.getX(), entity.getY() + 0.5, entity.getZ(), drop);
+                        level.addFreshEntity(itemEntity);
+                    }
                 }
-            } else if (entity instanceof Turtle turtle) {
-                if (tryStoreItemInSecondaryOutput(new ItemStack(Items.TURTLE_SCUTE))) {
-                    level.playSound(null, turtle, SoundEvents.ARMADILLO_SCUTE_DROP, SoundSource.NEUTRAL, 1.0F, 1.0F);
-                    setEntityCooldown(entityId);
-                    processedSuccessfully = true;
-                }
+
+                level.playSound(null, entity, SoundEvents.ITEM_PICKUP, SoundSource.NEUTRAL, 1.0F, 1.0F);
+
+                entityCooldowns.put(entityId, level.getGameTime() + processing.cooldownTicks());
+                processedSuccessfully = true;
             }
         }
 
@@ -929,6 +957,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             sendData();
         }
     }
+
 
     private boolean tryStoreItemInSecondaryOutput(ItemStack stackToStore) {
         if (stackToStore.isEmpty()) {
@@ -947,7 +976,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     private boolean isEntityOnCooldown(UUID entityId) {
         if (level == null) return true;
         return entityCooldowns.containsKey(entityId) &&
-                (level.getGameTime() - entityCooldowns.get(entityId)) < ARMADILLO_TURTLE_COOLDOWN_TICKS;
+                level.getGameTime() < entityCooldowns.get(entityId);
     }
 
     private void setEntityCooldown(UUID entityId) {

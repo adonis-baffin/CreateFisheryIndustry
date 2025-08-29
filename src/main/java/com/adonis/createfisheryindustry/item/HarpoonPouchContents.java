@@ -39,7 +39,9 @@ public final class HarpoonPouchContents implements TooltipComponent {
     private static Fraction computeContentWeight(List<ItemStack> content) {
         Fraction fraction = Fraction.ZERO;
         for (ItemStack stack : content) {
-            fraction = fraction.add(HARPOON_WEIGHT);
+            if (Mutable.isValidItem(stack)) {
+                fraction = fraction.add(HARPOON_WEIGHT.multiplyBy(Fraction.getFraction(stack.getCount(), 1)));
+            }
         }
         return fraction;
     }
@@ -122,19 +124,25 @@ public final class HarpoonPouchContents implements TooltipComponent {
         }
 
         private int getMaxAmountToAdd(ItemStack stack) {
-            if (stack.getItem() != CreateFisheryItems.HARPOON.get()) {
-                return 0; // 仅允许鱼叉
+            if (!isValidItem(stack)) {
+                return 0;
             }
             int remainingSlots = MAX_SLOTS - this.items.size();
             return Math.min(remainingSlots, stack.getCount());
         }
 
+        private static boolean isValidItem(ItemStack stack) {
+            return stack.getItem() == CreateFisheryItems.HARPOON.get() ||
+                    stack.getItem() == net.minecraft.world.item.Items.TRIDENT;
+        }
+
         public int tryInsert(ItemStack stack) {
-            if (stack.isEmpty() || stack.getItem() != CreateFisheryItems.HARPOON.get()) {
+            if (stack.isEmpty() || !isValidItem(stack)) {
                 return 0;
             }
             int maxAdd = Math.min(stack.getCount(), getMaxAmountToAdd(stack));
             if (maxAdd == 0) return 0;
+
             this.weight = this.weight.add(HARPOON_WEIGHT.multiplyBy(Fraction.getFraction(maxAdd, 1)));
             int stackIndex = findStackIndex(stack);
             if (stackIndex != -1) {

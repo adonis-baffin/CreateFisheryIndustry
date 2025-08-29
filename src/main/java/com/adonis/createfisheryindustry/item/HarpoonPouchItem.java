@@ -51,25 +51,37 @@ public class HarpoonPouchItem extends Item {
         if (stack.getCount() != 1 || action != ClickAction.SECONDARY) {
             return false;
         }
+
         HarpoonPouchContents contents = stack.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
         HarpoonPouchContents.Mutable mutableContents = new HarpoonPouchContents.Mutable(contents);
         ItemStack slotItem = slot.getItem();
+
         if (slotItem.isEmpty()) {
             ItemStack removed = mutableContents.removeOne();
             if (removed != null) {
                 this.playRemoveOneSound(player);
                 ItemStack remaining = slot.safeInsert(removed);
                 mutableContents.tryInsert(remaining);
+                stack.set(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), mutableContents.toImmutable());
+                return true; // 返回true表示处理了交互
             }
-        } else if (slotItem.getItem() instanceof HarpoonItem) {
+        } else if (slotItem.getItem() instanceof HarpoonItem || slotItem.getItem() == net.minecraft.world.item.Items.TRIDENT) {
             int inserted = mutableContents.tryTransfer(slot, player);
             if (inserted > 0) {
                 this.playInsertSound(player);
+                stack.set(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), mutableContents.toImmutable());
+                return true;
             }
         }
-        stack.set(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), mutableContents.toImmutable());
-        return true;
+        return false; // 只在没有任何操作时返回false
     }
+
+    // 添加辅助方法检查物品是否可以放入鱼叉袋
+    private static boolean isValidForPouch(ItemStack stack) {
+        return stack.getItem() instanceof HarpoonItem ||
+                stack.getItem() == net.minecraft.world.item.Items.TRIDENT;
+    }
+
 
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess access) {

@@ -190,5 +190,8 @@
 
   "createfisheryindustry.ponder.mechanical_peeler_copper.header": "Using Mechanical Peelers on Contraptions",
   "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "Whenever Peelers are moved as part of an animated Contraption...",
-  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...they will process any blocks the contraption runs them into"
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...they will process any blocks the contraption runs them into",
+
+  "create_fishery.harpoon_pouch.remaining": "Remaining Harpoons: %s",
+  "create_fishery.harpoon_pouch.empty": "Harpoon Pouch is empty"
 }

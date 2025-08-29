@@ -183,6 +183,9 @@
 
   "createfisheryindustry.ponder.mechanical_peeler_copper.header": "在动态结构中使用动力切削机",
   "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "当动力切削机作为动态结构的一部分移动时……",
-  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "……它会处理前方的方块或实体"
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "……它会处理前方的方块或实体",
+
+  "create_fishery.harpoon_pouch.remaining": "剩余鱼叉：%s",
+  "create_fishery.harpoon_pouch.empty": "鱼叉袋已空"
 
 }

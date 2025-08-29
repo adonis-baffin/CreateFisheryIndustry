@@ -130,7 +130,7 @@ public class CreateFisheryItems {
             .register();
 
     public static final ItemEntry<PneumaticHarpoonGunItem> PNEUMATIC_HARPOON_GUN = REGISTRATE.item("pneumatic_harpoon_gun",
-                    p -> new PneumaticHarpoonGunItem(new Item.Properties().stacksTo(1).rarity(Rarity.COMMON)))
+                    p -> new PneumaticHarpoonGunItem(new Item.Properties().stacksTo(1)))
             .onRegister(item -> {
                 ItemDescription.useKey(item, "item.createfisheryindustry.pneumatic_harpoon_gun");
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("pneumatic_harpoon_gun", net.minecraft.core.registries.Registries.ITEM));

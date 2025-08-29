@@ -3,6 +3,7 @@ package com.adonis.createfisheryindustry;
 import com.adonis.createfisheryindustry.client.UnderwaterSprintFOVHandler;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.config.CreateFisheryStressConfig;
+import com.adonis.createfisheryindustry.data.PeelerEntityProcessingManager;
 import com.adonis.createfisheryindustry.event.HarpoonDropHandler;
 import com.adonis.createfisheryindustry.recipe.CreateFisheryRecipeTypes;
 import com.adonis.createfisheryindustry.registry.*;
@@ -24,6 +25,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -45,6 +47,7 @@ public class CreateFisheryMod {
     public static final CreateFisheryStressConfig STRESS_CONFIG = new CreateFisheryStressConfig(ID);
 
     private static ModConfigSpec stressConfigSpec;
+    private static PeelerEntityProcessingManager peelerEntityManager;
 
     public static ResourceLocation asResource(String path) {
         return ResourceLocation.fromNamespaceAndPath(ID, path);
@@ -83,6 +86,7 @@ public class CreateFisheryMod {
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
         NeoForge.EVENT_BUS.register(HarpoonDropHandler.class);
+        NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -105,6 +109,11 @@ public class CreateFisheryMod {
             } else if (event instanceof ModConfigEvent.Reloading) {
             }
         }
+    }
+
+    private void addReloadListeners(AddReloadListenerEvent event) {
+        peelerEntityManager = new PeelerEntityProcessingManager();
+        event.addListener(peelerEntityManager);
     }
 
     private void onServerStarting(ServerStartingEvent event) {

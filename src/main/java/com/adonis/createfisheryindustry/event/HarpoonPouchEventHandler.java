@@ -13,7 +13,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -31,42 +33,67 @@ import java.util.UUID;
 
 @EventBusSubscriber(modid = CreateFisheryMod.ID)
 public class HarpoonPouchEventHandler {
-    // 任务队列，用于延迟补充鱼叉
     private static final List<ReplenishTask> replenishTasks = new ArrayList<>();
 
-    // 功能1：捡起鱼叉时优先进入鱼叉袋（仅限物品实体，且不允许进入鱼叉袋）
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onItemPickup(ItemEntityPickupEvent.Pre event) {
         Player player = event.getPlayer();
         ItemEntity itemEntity = event.getItemEntity();
         ItemStack stack = itemEntity.getItem();
 
-        if (stack.getItem() != CreateFisheryItems.HARPOON.get()) {
-            return; // 仅处理鱼叉
-        }
-
-        // 阻止物品实体的鱼叉进入鱼叉袋，直接允许默认拾取到库存
-        event.setCanPickup(TriState.TRUE); // 显式允许默认拾取
-    }
-
-    // 功能2：投掷鱼叉后自动补充
-    @SubscribeEvent
-    public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
-        if (!(event.getEntity() instanceof HarpoonEntity harpoon) || event.getLevel().isClientSide()) {
-            return; // 仅处理鱼叉实体且在服务器端
-        }
-
-        Player player = harpoon.getOwner() instanceof Player ? (Player) harpoon.getOwner() : null;
-        if (player == null) {
+        // 只处理鱼叉和三叉戟
+        if (stack.getItem() != CreateFisheryItems.HARPOON.get() &&
+                stack.getItem() != Items.TRIDENT) {
             return;
         }
 
-        ItemStack thrownStack = harpoon.getPickupItemStackOrigin();
-        if (thrownStack.getItem() != CreateFisheryItems.HARPOON.get()) {
-            return; // 仅处理鱼叉
+        // 检查忠诚附魔
+        Holder<Enchantment> loyalty = player.registryAccess()
+                .lookupOrThrow(Registries.ENCHANTMENT)
+                .getOrThrow(Enchantments.LOYALTY);
+
+        if (EnchantmentHelper.getItemEnchantmentLevel(loyalty, stack) > 0) {
+            // 忠诚附魔的武器可以进入鱼叉袋
+            if (tryInsertHarpoonToPouch(player, stack)) {
+                itemEntity.setItem(ItemStack.EMPTY);
+                itemEntity.discard();
+                event.setCanPickup(TriState.FALSE);
+                return;
+            }
         }
 
-        // 获取附魔的 Holder<Enchantment>
+        // 默认行为
+        event.setCanPickup(TriState.TRUE);
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
+        if (event.getLevel().isClientSide()) {
+            return;
+        }
+
+        // 获取投掷者和投掷物
+        Player player = null;
+        ItemStack thrownStack = null;
+
+        if (event.getEntity() instanceof HarpoonEntity harpoon) {
+            player = harpoon.getOwner() instanceof Player ? (Player) harpoon.getOwner() : null;
+            thrownStack = harpoon.getPickupItemStackOrigin();
+        } else if (event.getEntity() instanceof ThrownTrident trident) {
+            player = trident.getOwner() instanceof Player ? (Player) trident.getOwner() : null;
+            thrownStack = new ItemStack(Items.TRIDENT);
+        }
+
+        if (player == null || thrownStack == null) {
+            return;
+        }
+
+        // 创造模式不自动补充
+        if (player.hasInfiniteMaterials()) {
+            return;
+        }
+
+        // 检查忠诚和激流附魔
         Holder<Enchantment> loyalty = player.registryAccess()
                 .lookupOrThrow(Registries.ENCHANTMENT)
                 .getOrThrow(Enchantments.LOYALTY);
@@ -74,17 +101,15 @@ public class HarpoonPouchEventHandler {
                 .lookupOrThrow(Registries.ENCHANTMENT)
                 .getOrThrow(Enchantments.RIPTIDE);
 
-        // 检查鱼叉是否有忠诚或激流附魔
         if (EnchantmentHelper.getItemEnchantmentLevel(loyalty, thrownStack) > 0 ||
                 EnchantmentHelper.getItemEnchantmentLevel(riptide, thrownStack) > 0) {
-            return; // 有忠诚或激流附魔，不补充
+            return;
         }
 
-        // 注册延迟任务
+        // 注册延迟补充任务
         replenishTasks.add(new ReplenishTask(player.getUUID(), 1));
     }
 
-    // 服务器tick事件处理延迟任务
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         List<ReplenishTask> tasksToRemove = new ArrayList<>();
@@ -92,14 +117,18 @@ public class HarpoonPouchEventHandler {
             task.ticksRemaining--;
             if (task.ticksRemaining <= 0) {
                 Player player = event.getServer().getPlayerList().getPlayer(task.playerUUID);
-                if (player != null) {
-                    for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                if (player != null && !player.hasInfiniteMaterials()) {
+                    // 只遍历主背包（0-35），不包括盔甲槽和副手
+                    for (int i = 0; i < 36; i++) {
                         ItemStack pouch = player.getInventory().getItem(i);
                         if (pouch.getItem() == CreateFisheryItems.HARPOON_POUCH.get()) {
                             if (!CreateFisheryComponents.HARPOON_POUCH_CONTENTS.isBound()) {
                                 continue;
                             }
-                            HarpoonPouchContents contents = pouch.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+                            HarpoonPouchContents contents = pouch.getOrDefault(
+                                    CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(),
+                                    HarpoonPouchContents.EMPTY
+                            );
                             HarpoonPouchContents.Mutable mutable = new HarpoonPouchContents.Mutable(contents);
                             ItemStack replacement = mutable.removeOne();
                             if (replacement != null) {
@@ -111,17 +140,35 @@ public class HarpoonPouchEventHandler {
                                     player.getInventory().add(replacement);
                                 }
                                 pouch.set(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), mutable.toImmutable());
-                                // 同步鱼叉袋数据
+
+                                // 同步数据
                                 if (player instanceof ServerPlayer serverPlayer) {
+                                    // 计算正确的容器槽位ID
+                                    int slotId = getContainerSlotId(i);
+
                                     serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(
-                                            serverPlayer.containerMenu.containerId, serverPlayer.containerMenu.incrementStateId(), i, pouch));
-                                    // 显示剩余鱼叉数量
+                                            serverPlayer.containerMenu.containerId,
+                                            serverPlayer.containerMenu.incrementStateId(),
+                                            slotId,
+                                            pouch
+                                    ));
+
                                     int totalHarpoons = countTotalHarpoons(player);
-                                    serverPlayer.displayClientMessage(Component.literal("Remaining Harpoons:" + totalHarpoons), true);
+                                    serverPlayer.displayClientMessage(
+                                            Component.translatable("create_fishery.harpoon_pouch.remaining", totalHarpoons),
+                                            true
+                                    );
                                 }
                                 break;
                             } else {
-                                player.playSound(SoundEvents.BUNDLE_DROP_CONTENTS, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
+                                player.playSound(SoundEvents.BUNDLE_DROP_CONTENTS, 0.8F,
+                                        0.8F + player.level().getRandom().nextFloat() * 0.4F);
+                                if (player instanceof ServerPlayer serverPlayer) {
+                                    serverPlayer.displayClientMessage(
+                                            Component.translatable("create_fishery.harpoon_pouch.empty"),
+                                            true
+                                    );
+                                }
                             }
                         }
                     }
@@ -132,62 +179,27 @@ public class HarpoonPouchEventHandler {
         replenishTasks.removeAll(tasksToRemove);
     }
 
-    // 统计玩家背包中所有鱼叉袋的鱼叉数量总和
-    private static int countTotalHarpoons(Player player) {
-        int totalHarpoons = 0;
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack pouch = player.getInventory().getItem(i);
-            if (pouch.getItem() == CreateFisheryItems.HARPOON_POUCH.get()) {
-                if (!CreateFisheryComponents.HARPOON_POUCH_CONTENTS.isBound()) {
-                    continue;
-                }
-                HarpoonPouchContents contents = pouch.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
-                for (ItemStack stack : contents.items()) {
-                    if (stack.getItem() == CreateFisheryItems.HARPOON.get()) {
-                        totalHarpoons += stack.getCount();
-                    }
-                }
-            }
-        }
-        return totalHarpoons;
-    }
-
-    private static void playInsertSound(Player player) {
-        player.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
-    }
-
-    private static void playRemoveOneSound(Player player) {
-        player.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
-    }
-
-    // 延迟任务类
-    private static class ReplenishTask {
-        UUID playerUUID;
-        int ticksRemaining;
-
-        ReplenishTask(UUID playerUUID, int ticksRemaining) {
-            this.playerUUID = playerUUID;
-            this.ticksRemaining = ticksRemaining;
-        }
-    }
-
-    // 处理鱼叉实体拾取逻辑
     public static boolean tryInsertHarpoonToPouch(Player player, ItemStack stack) {
-        if (stack.getItem() != CreateFisheryItems.HARPOON.get()) {
+        // 支持鱼叉和三叉戟
+        if (stack.getItem() != CreateFisheryItems.HARPOON.get() &&
+                stack.getItem() != Items.TRIDENT) {
             return false;
         }
 
-        ItemStack originalStack = stack.copy();
         boolean handled = false;
 
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+        // 只遍历主背包
+        for (int i = 0; i < 36; i++) {
             ItemStack pouch = player.getInventory().getItem(i);
             if (pouch.getItem() == CreateFisheryItems.HARPOON_POUCH.get()) {
                 if (!CreateFisheryComponents.HARPOON_POUCH_CONTENTS.isBound()) {
                     continue;
                 }
 
-                HarpoonPouchContents contents = pouch.getOrDefault(CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(), HarpoonPouchContents.EMPTY);
+                HarpoonPouchContents contents = pouch.getOrDefault(
+                        CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(),
+                        HarpoonPouchContents.EMPTY
+                );
                 HarpoonPouchContents.Mutable mutable = new HarpoonPouchContents.Mutable(contents);
 
                 int inserted = mutable.tryInsert(stack);
@@ -197,11 +209,21 @@ public class HarpoonPouchEventHandler {
                     stack.shrink(inserted);
 
                     if (player instanceof ServerPlayer serverPlayer) {
+                        // 计算正确的容器槽位ID
+                        int slotId = getContainerSlotId(i);
+
                         serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(
-                                serverPlayer.containerMenu.containerId, serverPlayer.containerMenu.incrementStateId(), i, pouch));
-                        // 显示剩余鱼叉数量
+                                serverPlayer.containerMenu.containerId,
+                                serverPlayer.containerMenu.incrementStateId(),
+                                slotId,
+                                pouch
+                        ));
+
                         int totalHarpoons = countTotalHarpoons(player);
-                        serverPlayer.displayClientMessage(Component.literal("Remaining Harpoons:" + totalHarpoons), true);
+                        serverPlayer.displayClientMessage(
+                                Component.translatable("create_fishery.harpoon_pouch.remaining", totalHarpoons),
+                                true
+                        );
                     }
 
                     handled = true;
@@ -215,14 +237,69 @@ public class HarpoonPouchEventHandler {
         if (!stack.isEmpty() && handled) {
             if (player.getInventory().add(stack)) {
                 if (player instanceof ServerPlayer serverPlayer) {
-                    // 显示剩余鱼叉数量
                     int totalHarpoons = countTotalHarpoons(player);
-                    serverPlayer.displayClientMessage(Component.literal("Remaining Harpoons: " + totalHarpoons), true);
+                    serverPlayer.displayClientMessage(
+                            Component.translatable("create_fishery.harpoon_pouch.remaining", totalHarpoons),
+                            true
+                    );
                 }
                 return true;
             }
         }
 
         return handled;
+    }
+
+    private static int getContainerSlotId(int inventoryIndex) {
+        if (inventoryIndex < 9) {
+            // 快捷栏 (0-8) -> 容器槽位 36-44
+            return inventoryIndex + 36;
+        } else {
+            // 主背包 (9-35) -> 容器槽位 9-35
+            return inventoryIndex;
+        }
+    }
+
+    private static int countTotalHarpoons(Player player) {
+        int totalHarpoons = 0;
+        for (int i = 0; i < 36; i++) { // 只计算主背包
+            ItemStack pouch = player.getInventory().getItem(i);
+            if (pouch.getItem() == CreateFisheryItems.HARPOON_POUCH.get()) {
+                if (!CreateFisheryComponents.HARPOON_POUCH_CONTENTS.isBound()) {
+                    continue;
+                }
+                HarpoonPouchContents contents = pouch.getOrDefault(
+                        CreateFisheryComponents.HARPOON_POUCH_CONTENTS.get(),
+                        HarpoonPouchContents.EMPTY
+                );
+                for (ItemStack stack : contents.items()) {
+                    if (stack.getItem() == CreateFisheryItems.HARPOON.get() ||
+                            stack.getItem() == Items.TRIDENT) {
+                        totalHarpoons += stack.getCount();
+                    }
+                }
+            }
+        }
+        return totalHarpoons;
+    }
+
+    private static void playInsertSound(Player player) {
+        player.playSound(SoundEvents.BUNDLE_INSERT, 0.8F,
+                0.8F + player.level().getRandom().nextFloat() * 0.4F);
+    }
+
+    private static void playRemoveOneSound(Player player) {
+        player.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F,
+                0.8F + player.level().getRandom().nextFloat() * 0.4F);
+    }
+
+    private static class ReplenishTask {
+        UUID playerUUID;
+        int ticksRemaining;
+
+        ReplenishTask(UUID playerUUID, int ticksRemaining) {
+            this.playerUUID = playerUUID;
+            this.ticksRemaining = ticksRemaining;
+        }
     }
 }

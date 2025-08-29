@@ -1,0 +1,5 @@
+{
+  "entity": "minecraft:armadillo",
+  "loot_table": "createfisheryindustry:entities/peeler/armadillo",
+  "cooldown": 1200
+}
