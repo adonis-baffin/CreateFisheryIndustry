@@ -146,8 +146,13 @@ public class FrameTrapBlock extends WrenchableDirectionalBlock implements Proper
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState state = super.getStateForPlacement(context);
-        return state.setValue(FACING, state.getValue(FACING)
-                .getOpposite());
+        if (state == null) {
+            state = defaultBlockState();
+        }
+        state = state.setValue(FACING, state.getValue(FACING).getOpposite());
+
+        // 添加含水逻辑 - 这是关键修复
+        return withWater(state, context);
     }
 
     @Override

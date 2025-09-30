@@ -1,0 +1,14 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "prism:train_glass_casing"
+    }
+  ],
+  "results": [
+    {
+      "id": "prism:train_clear_glass_casing",
+      "count": 1
+    }
+  ]
+}
