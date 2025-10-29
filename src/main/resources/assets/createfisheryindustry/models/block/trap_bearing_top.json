@@ -1,0 +1,24 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
+	"render_type": "minecraft:cutout",
+	"textures": {
+		"particle": "create:block/trap_bearing_side",
+		"bearing_top": "create:block/trap_bearing_top"
+	},
+	"elements": [
+		{
+			"from": [2, 12, 2],
+			"to": [14, 14, 14],
+			"rotation": {"angle": 0, "axis": "y", "origin": [2, 12, 2]},
+			"faces": {
+				"north": {"uv": [2, 0, 14, 2], "texture": "#bearing_top"},
+				"east": {"uv": [14, 2, 16, 14], "rotation": 270, "texture": "#bearing_top"},
+				"south": {"uv": [2, 14, 14, 16], "texture": "#bearing_top"},
+				"west": {"uv": [0, 2, 2, 14], "rotation": 270, "texture": "#bearing_top"},
+				"up": {"uv": [2, 2, 14, 14], "texture": "#bearing_top"},
+				"down": {"uv": [2, 2, 14, 14], "texture": "#bearing_top"}
+			}
+		}
+	]
+}
