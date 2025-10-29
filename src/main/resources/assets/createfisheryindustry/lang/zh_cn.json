@@ -3,6 +3,7 @@
   "block.createfisheryindustry.mesh_trap": "捕获网",
   "block.createfisheryindustry.trap_nozzle": "气捕网",
   "block.createfisheryindustry.smart_mesh": "智能滤网",
+  "block.createfisheryindustry.trap_bearing": "捕鱼轴承",
   "item.createfisheryindustry.zinc_sheet": "锌板",
   "item.createfisheryindustry.pneumatic_mechanism": "气动构件",
   "item.createfisheryindustry.incomplete_pneumatic_mechanism": "未完成的气动构件",

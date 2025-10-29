@@ -6,9 +6,9 @@
 		"0": "create:block/axis_top",
 		"1": "create:block/axis",
 		"gearbox": "create:block/gearbox",
-		"particle": "create:block/trap_bearing_side",
-		"bearing_top": "create:block/trap_bearing_top",
-		"bearing_side": "create:block/trap_bearing_side"
+		"particle": "createfisheryindustry:block/trap_bearing_side",
+		"bearing_top": "createfisheryindustry:block/trap_bearing_top",
+		"bearing_side": "createfisheryindustry:block/trap_bearing_side"
 	},
 	"elements": [
 		{

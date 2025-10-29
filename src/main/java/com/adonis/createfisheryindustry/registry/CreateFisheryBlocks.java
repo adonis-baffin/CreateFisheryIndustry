@@ -8,6 +8,7 @@ import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerM
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlock;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlock;
 import com.adonis.createfisheryindustry.block.SmartNozzle.SmartNozzleBlock;
+import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingBlock;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlock;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlock;
 import com.simibubi.create.AllTags;
@@ -89,7 +90,7 @@ public class CreateFisheryBlocks {
 
     public static final BlockEntry<MechanicalPeelerBlock> MECHANICAL_PEELER = REGISTRATE
             .block("mechanical_peeler", MechanicalPeelerBlock::new)
-            .initialProperties(SharedProperties::copperMetal)
+            .initialProperties(SharedProperties::wooden)
             .properties(prop -> prop
                     .mapColor(DyeColor.GRAY)
                     .sound(SoundType.METAL)
@@ -101,6 +102,21 @@ public class CreateFisheryBlocks {
             .item()
             .tag(AllTags.AllItemTags.CONTRAPTION_CONTROLLED.tag)
             .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<TrapBearingBlock> TRAP_BEARING = REGISTRATE
+            .block("trap_bearing", TrapBearingBlock::new)
+            .initialProperties(SharedProperties::wooden)
+            .properties(prop -> prop
+                    .mapColor(DyeColor.GRAY)
+                    .sound(SoundType.METAL)
+                    .noOcclusion())
+            .transform(axeOrPickaxe())
+            .transform(CreateFisheryMod.STRESS_CONFIG.setImpact(4.0))
+            .blockstate(BlockStateGen.directionalBlockProvider(false))
+            .onRegister(block -> {})
+            .blockstate((ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models().cubeAll(ctx.getName(), prov.modLoc("block/trap_bearing"))))
+            .simpleItem()
             .register();
 
     public static void register() {}

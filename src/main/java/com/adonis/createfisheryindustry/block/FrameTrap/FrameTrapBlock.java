@@ -1,5 +1,7 @@
 package com.adonis.createfisheryindustry.block.FrameTrap;
 
+import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingBlock;
+import com.simibubi.create.content.contraptions.bearing.BearingBlock;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
@@ -150,6 +152,19 @@ public class FrameTrapBlock extends WrenchableDirectionalBlock implements Proper
             state = defaultBlockState();
         }
         state = state.setValue(FACING, state.getValue(FACING).getOpposite());
+
+        // Check for adjacent FishingBearingBlock and align FACING
+        BlockPos clickedPos = context.getClickedPos();
+        Direction facing = state.getValue(FACING);
+        for (Direction dir : Direction.values()) {
+            BlockPos neighborPos = clickedPos.relative(dir);
+            BlockState neighborState = context.getLevel().getBlockState(neighborPos);
+            if (neighborState.getBlock() instanceof TrapBearingBlock) {
+                facing = neighborState.getValue(BearingBlock.FACING); // Align to bearing's FACING
+                break;
+            }
+        }
+        state = state.setValue(FACING, facing);
 
         // 添加含水逻辑 - 这是关键修复
         return withWater(state, context);

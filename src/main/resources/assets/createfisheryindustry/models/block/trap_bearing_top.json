@@ -3,8 +3,8 @@
 	"credit": "Made with Blockbench",
 	"render_type": "minecraft:cutout",
 	"textures": {
-		"particle": "create:block/trap_bearing_side",
-		"bearing_top": "create:block/trap_bearing_top"
+		"particle": "createfisheryindustry:block/trap_bearing_side",
+		"bearing_top": "createfisheryindustry:block/trap_bearing_top"
 	},
 	"elements": [
 		{

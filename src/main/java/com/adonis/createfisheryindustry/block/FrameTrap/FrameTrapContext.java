@@ -100,7 +100,7 @@ public class FrameTrapContext {
     /**
      * 尝试获取NDU熔岩钓鱼战利品表（软依赖方式）
      */
-    private LootTable getLavaFishingLootTable(ServerLevel level, net.minecraft.server.ReloadableServerRegistries.Holder registries) {
+    public LootTable getLavaFishingLootTable(ServerLevel level, net.minecraft.server.ReloadableServerRegistries.Holder registries) {
         // 如果配置禁用NDU战利品表，直接返回默认
         if (!CreateFisheryCommonConfig.useNDULootTables()) {
             return registries.getLootTable(BuiltInLootTables.FISHING);
@@ -163,7 +163,7 @@ public class FrameTrapContext {
     /**
      * 计算开放熔岩区域
      */
-    private boolean calculateOpenLava(ServerLevel level, BlockPos pos) {
+    public boolean calculateOpenLava(ServerLevel level, BlockPos pos) {
         // 检查5x4x5区域是否为开放熔岩
         for (int x = -2; x <= 2; x++) {
             for (int z = -2; z <= 2; z++) {
