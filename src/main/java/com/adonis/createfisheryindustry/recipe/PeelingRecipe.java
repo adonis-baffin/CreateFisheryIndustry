@@ -8,6 +8,7 @@ import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
 import com.simibubi.create.foundation.utility.CreateLang;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeInput;
@@ -43,13 +44,13 @@ public class PeelingRecipe extends ProcessingRecipe<RecipeInput, PeelingRecipePa
         return ImmutableList.copyOf(getRollableResults().subList(1, getRollableResults().size()));
     }
 
-    public List<ItemStack> rollResultsFor(List<ProcessingOutput> specificOutputs) {
-        return super.rollResults(specificOutputs);
+    public List<ItemStack> rollResultsFor(List<ProcessingOutput> specificOutputs, RandomSource randomSource) {
+        return super.rollResults(specificOutputs, randomSource);
     }
 
     @Override
-    public List<ItemStack> rollResults() {
-        return super.rollResults();
+    public List<ItemStack> rollResults(RandomSource randomSource) {
+        return super.rollResults(randomSource);
     }
 
     @Override

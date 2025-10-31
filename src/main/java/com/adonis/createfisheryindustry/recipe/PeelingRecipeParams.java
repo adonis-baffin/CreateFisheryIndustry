@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.content.processing.recipe.HeatCondition;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
-import com.simibubi.create.foundation.fluid.FluidIngredient;
 import net.createmod.catnip.codecs.stream.CatnipStreamCodecBuilders;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,6 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import java.util.List;
 import java.util.function.Function;
 
 public class PeelingRecipeParams extends ProcessingRecipeParams {
@@ -34,7 +35,7 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
             NonNullList<Ingredient> ingredients,
             NonNullList<ProcessingOutput> results,
             HeatCondition requiredHeat,
-            NonNullList<FluidIngredient> fluidIngredients,
+            NonNullList<SizedFluidIngredient> fluidIngredients,
             NonNullList<FluidStack> fluidResults) {
         super();
         this.ingredients = ingredients;
@@ -49,7 +50,7 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
             NonNullList<Ingredient> ingredients,
             NonNullList<ProcessingOutput> results,
             HeatCondition requiredHeat,
-            NonNullList<FluidIngredient> fluidIngredients,
+            NonNullList<SizedFluidIngredient> fluidIngredients,
             NonNullList<FluidStack> fluidResults) {
         return new PeelingRecipeParams(ingredients, results, requiredHeat, fluidIngredients, fluidResults);
     }
@@ -58,9 +59,9 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
             PeelingRecipeSerializer.INGREDIENTS_MAP_CODEC.forGetter(p -> p.ingredients),
             PeelingRecipeSerializer.RESULTS_MAP_CODEC.forGetter(p -> p.results),
             HeatCondition.CODEC.optionalFieldOf("heatRequirement", HeatCondition.NONE).forGetter(p -> p.requiredHeat),
-            FluidIngredient.CODEC.listOf().xmap(NonNullList::copyOf, Function.identity())
+            SizedFluidIngredient.FLAT_CODEC.listOf().xmap(list -> NonNullList.copyOf(list), Function.identity())
                     .optionalFieldOf("fluidIngredients", NonNullList.create()).forGetter(p -> p.fluidIngredients),
-            FluidStack.CODEC.listOf().xmap(NonNullList::copyOf, Function.identity())
+            FluidStack.CODEC.listOf().xmap(list -> NonNullList.copyOf(list), Function.identity())
                     .optionalFieldOf("fluidResults", NonNullList.create()).forGetter(p -> p.fluidResults)
     ).apply(instance, PeelingRecipeParams::createFromCodec));
 
@@ -72,7 +73,7 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
         CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC).encode(buffer, params.results);
         // 不编码 processingDuration
         HeatCondition.STREAM_CODEC.encode(buffer, params.requiredHeat);
-        CatnipStreamCodecBuilders.nonNullList(FluidIngredient.STREAM_CODEC).encode(buffer, params.fluidIngredients);
+        CatnipStreamCodecBuilders.nonNullList(SizedFluidIngredient.STREAM_CODEC).encode(buffer, params.fluidIngredients);
         CatnipStreamCodecBuilders.nonNullList(FluidStack.STREAM_CODEC).encode(buffer, params.fluidResults);
     }
 
@@ -81,7 +82,7 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
         NonNullList<ProcessingOutput> results = CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC).decode(buffer);
         // 不解码 processingDuration
         HeatCondition heat = HeatCondition.STREAM_CODEC.decode(buffer);
-        NonNullList<FluidIngredient> fluidIngredients = CatnipStreamCodecBuilders.nonNullList(FluidIngredient.STREAM_CODEC).decode(buffer);
+        NonNullList<SizedFluidIngredient> fluidIngredients = CatnipStreamCodecBuilders.nonNullList(SizedFluidIngredient.STREAM_CODEC).decode(buffer);
         NonNullList<FluidStack> fluidResults = CatnipStreamCodecBuilders.nonNullList(FluidStack.STREAM_CODEC).decode(buffer);
         return new PeelingRecipeParams(ingredients, results, heat, fluidIngredients, fluidResults);
     }
@@ -94,7 +95,7 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
         private NonNullList<Ingredient> ingredients = NonNullList.create();
         private NonNullList<ProcessingOutput> results = NonNullList.create();
         private HeatCondition requiredHeat = HeatCondition.NONE;
-        private NonNullList<FluidIngredient> fluidIngredients = NonNullList.create();
+        private NonNullList<SizedFluidIngredient> fluidIngredients = NonNullList.create();
         private NonNullList<FluidStack> fluidResults = NonNullList.create();
 
         public Builder require(ItemLike item) {

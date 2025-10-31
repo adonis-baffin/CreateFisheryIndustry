@@ -143,12 +143,14 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         Optional<RecipeHolder<PeelingRecipe>> recipeHolder = getMatchingRecipe(new SingleRecipeInput(stackInInputSlot));
 
         if (recipeHolder.isPresent()) {
-            PeelingRecipe recipe = recipeHolder.get().value();
+            PeelingRecipe recipe = recipeHolder.get().value();  // 这里使用 get() 获取 RecipeHolder，然后 value() 获取配方
             List<ItemStack> totalPotentialSecondaryProducts = new ArrayList<>();
+            RandomSource random = level.random;
             for (int i = 0; i < stackInInputSlot.getCount(); i++) {
-                totalPotentialSecondaryProducts.addAll(recipe.rollResultsFor(recipe.getSecondaryOutputs()));
+                totalPotentialSecondaryProducts.addAll(recipe.rollResultsFor(recipe.getSecondaryOutputs(), random));
             }
             if (!canStoreAllSecondaries(totalPotentialSecondaryProducts)) {
+                // 可以在这里添加处理逻辑，如阻止处理或溢出（原代码为空）
             }
         }
 
@@ -729,7 +731,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         ItemStack inputStackForRecipe = inputInventory.getStackInSlot(INPUT_SLOT).copy();
         if (inputStackForRecipe.isEmpty() || level == null) return;
 
-        PeelingRecipe recipe = recipeHolder.value();
+        PeelingRecipe recipe = recipeHolder.value();  // 直接使用 value() 获取配方（因为这里 recipeHolder 是 RecipeHolder，不是 Optional）
         int itemsToProcess = inputStackForRecipe.getCount();
         inputInventory.setStackInSlot(INPUT_SLOT, ItemStack.EMPTY);
 
@@ -747,8 +749,9 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         List<ProcessingOutput> secondaryDefinedOutputs = definedOutputs.size() > 1 ?
                 definedOutputs.subList(1, definedOutputs.size()) : Collections.emptyList();
 
+        RandomSource random = level.random;
         for (int i = 0; i < itemsToProcess; i++) {
-            List<ItemStack> rolledPrimaryList = recipe.rollResults(Collections.singletonList(primaryDefinedOutput));
+            List<ItemStack> rolledPrimaryList = recipe.rollResults(Collections.singletonList(primaryDefinedOutput), random);
             if (!rolledPrimaryList.isEmpty()) {
                 ItemStack currentPrimaryRolledItem = rolledPrimaryList.get(0);
                 if (!currentPrimaryRolledItem.isEmpty()) {
@@ -765,7 +768,7 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             }
 
             if (!secondaryDefinedOutputs.isEmpty()) {
-                List<ItemStack> currentSecondaries = recipe.rollResults(secondaryDefinedOutputs);
+                List<ItemStack> currentSecondaries = recipe.rollResults(secondaryDefinedOutputs, random);
                 for (ItemStack secondaryStack : currentSecondaries) {
                     if (!secondaryStack.isEmpty()) {
                         ItemHelper.addToList(secondaryStack.copy(), aggregatedSecondaryOutputs);
