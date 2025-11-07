@@ -1,6 +1,7 @@
 package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
+import com.adonis.createfisheryindustry.block.FishingBearing.FishingBearingBlock;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapBlock;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapMovementBehaviour;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerGenerator;
@@ -8,7 +9,6 @@ import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerM
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlock;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlock;
 import com.adonis.createfisheryindustry.block.SmartNozzle.SmartNozzleBlock;
-import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingBlock;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlock;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlock;
 import com.simibubi.create.AllTags;
@@ -18,6 +18,7 @@ import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.material.MapColor;
 
 import static com.adonis.createfisheryindustry.CreateFisheryMod.REGISTRATE;
 import static com.simibubi.create.api.behaviour.movement.MovementBehaviour.movementBehaviour;
@@ -90,7 +91,7 @@ public class CreateFisheryBlocks {
 
     public static final BlockEntry<MechanicalPeelerBlock> MECHANICAL_PEELER = REGISTRATE
             .block("mechanical_peeler", MechanicalPeelerBlock::new)
-            .initialProperties(SharedProperties::wooden)
+            .initialProperties(SharedProperties::copperMetal)
             .properties(prop -> prop
                     .mapColor(DyeColor.GRAY)
                     .sound(SoundType.METAL)
@@ -104,19 +105,18 @@ public class CreateFisheryBlocks {
             .transform(customItemModel())
             .register();
 
-    public static final BlockEntry<TrapBearingBlock> TRAP_BEARING = REGISTRATE
-            .block("trap_bearing", TrapBearingBlock::new)
-            .initialProperties(SharedProperties::wooden)
-            .properties(prop -> prop
-                    .mapColor(DyeColor.GRAY)
-                    .sound(SoundType.METAL)
-                    .noOcclusion())
+    public static final BlockEntry<FishingBearingBlock> FISHING_BEARING = REGISTRATE
+            .block("fishing_bearing", FishingBearingBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(props -> props
+                    .noOcclusion()
+                    .mapColor(MapColor.PODZOL))
             .transform(axeOrPickaxe())
             .transform(CreateFisheryMod.STRESS_CONFIG.setImpact(4.0))
-            .blockstate(BlockStateGen.directionalBlockProvider(false))
-            .onRegister(block -> {})
-            .blockstate((ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models().cubeAll(ctx.getName(), prov.modLoc("block/trap_bearing"))))
-            .simpleItem()
+            .blockstate((ctx, prov) -> prov.directionalBlock(ctx.get(),
+                    prov.models().getExistingFile(prov.modLoc("block/fishing_bearing"))))
+            .item()
+            .transform(customItemModel())
             .register();
 
     public static void register() {}

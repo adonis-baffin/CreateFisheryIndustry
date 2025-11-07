@@ -77,6 +77,8 @@ configurations {
 }
 
 repositories {
+    mavenCentral() // Maven Central (for OkHttp, Gson, etc.)
+    
     flatDir {
         dirs 'libs'
     }
@@ -106,6 +108,10 @@ dependencies {
     localRuntime("top.theillusivec4.curios:curios-neoforge:${curios_version}+${curios_minecraft_version}")
 //    localImplementation("maven.modrinth:nether-depths-upgrade:${nether_depths_upgrade_version}")
 //    localImplementation("maven.modrinth:geckolib:${geckolib_version}")
+
+    // Claude API 相关依赖
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

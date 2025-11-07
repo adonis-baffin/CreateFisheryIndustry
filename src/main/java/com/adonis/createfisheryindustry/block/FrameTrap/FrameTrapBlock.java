@@ -1,6 +1,6 @@
 package com.adonis.createfisheryindustry.block.FrameTrap;
 
-import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingBlock;
+import com.adonis.createfisheryindustry.block.FishingBearing.FishingBearingBlock;
 import com.simibubi.create.content.contraptions.bearing.BearingBlock;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
@@ -147,26 +147,27 @@ public class FrameTrapBlock extends WrenchableDirectionalBlock implements Proper
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        BlockState state = super.getStateForPlacement(context);
-        if (state == null) {
-            state = defaultBlockState();
-        }
-        state = state.setValue(FACING, state.getValue(FACING).getOpposite());
+        // 检查点击的方块
+        BlockPos clickedPos = context.getClickedPos().relative(context.getClickedFace().getOpposite());
+        BlockState clickedState = context.getLevel().getBlockState(clickedPos);
 
-        // Check for adjacent FishingBearingBlock and align FACING
-        BlockPos clickedPos = context.getClickedPos();
-        Direction facing = state.getValue(FACING);
-        for (Direction dir : Direction.values()) {
-            BlockPos neighborPos = clickedPos.relative(dir);
-            BlockState neighborState = context.getLevel().getBlockState(neighborPos);
-            if (neighborState.getBlock() instanceof TrapBearingBlock) {
-                facing = neighborState.getValue(BearingBlock.FACING); // Align to bearing's FACING
-                break;
+        // 如果对着捕鱼轴承放置
+        if (clickedState.getBlock() instanceof FishingBearingBlock) {
+            Direction bearingFacing = clickedState.getValue(BearingBlock.FACING);
+
+            // 如果是放在轴承前方，使用轴承的朝向
+            if (context.getClickedFace() == bearingFacing) {
+                BlockState newState = defaultBlockState().setValue(FACING, bearingFacing);
+                return withWater(newState, context);
             }
         }
-        state = state.setValue(FACING, facing);
 
-        // 添加含水逻辑 - 这是关键修复
+        // 否则使用原逻辑
+        BlockState state = super.getStateForPlacement(context);
+        if (state == null) {
+            state = defaultBlockState();  // 添加空值保护
+        }
+        state = state.setValue(FACING, state.getValue(FACING).getOpposite());
         return withWater(state, context);
     }
 
