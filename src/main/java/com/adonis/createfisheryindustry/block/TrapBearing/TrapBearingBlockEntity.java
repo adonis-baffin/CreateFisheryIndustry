@@ -48,10 +48,7 @@ import java.util.*;
 public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
 
     private static final int MIN_FRAME_TRAPS = 8;
-    private static final int OPEN_WATER_THRESHOLD = 20;
-    private static final int BASE_COOLDOWN = 200;
-    private static final int COOLDOWN_REDUCTION = 5;
-    private static final int MIN_COOLDOWN = 80;
+    private static final int OPEN_WATER_LEVEL_THRESHOLD = 4;
     private static final int UPDATE_INTERVAL = 20;
     private static final int EFFECTIVE_FRAME_CAP = 64;
 
@@ -66,10 +63,15 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     private FluidType dominantFluid = FluidType.NONE;
     private List<BlockPos> activeFramePositions = new ArrayList<>();
 
+    // 等级追踪
+    private int currentFishingLevel = 0;
+    private int previousFishingLevel = 0;
+
     // 钓鱼状态
     private int fishingCooldown = 0;
     private boolean isFishing = false;
     private boolean isOpenWater = false;
+    private boolean shouldResetCooldownNextTime = false;
 
     // 定时器
     private int updateTimer = 0;
@@ -92,11 +94,25 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         super.addBehaviours(behaviours);
     }
 
+    /**
+     * 确保虚拟钓鱼工具已初始化
+     * 用于处理从 NBT 加载后虚拟工具为 null 的情况
+     */
+    private void ensureVirtualToolsInitialized() {
+        if (virtualHook == null && level instanceof ServerLevel serverLevel) {
+            fakePlayer = new TrapBearingFakePlayer(serverLevel);
+            virtualHook = new FishingHook(fakePlayer, serverLevel, 0, 0);
+        }
+    }
+
     @Override
     public void tick() {
         super.tick();
 
         if (!level.isClientSide && running) {
+            // 确保虚拟工具已初始化（处理从 NBT 加载的情况）
+            ensureVirtualToolsInitialized();
+
             // 每 20 ticks 轮询一次
             if (++updateTimer >= UPDATE_INTERVAL) {
                 updateTimer = 0;
@@ -106,8 +122,6 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             updateFishingLogic();
         }
     }
-
-
 
     @Override
     public void lazyTick() {
@@ -159,8 +173,17 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         // 判断工作模式
         determineWorkingMode();
 
-        // 更新开放水域状态：捕鱼框数量 > 20 即为开放水域
-        isOpenWater = (validFrameCount > OPEN_WATER_THRESHOLD);
+        // 计算当前等级
+        previousFishingLevel = currentFishingLevel;
+        currentFishingLevel = getFishingLevel();
+
+        // 更新开放水域状态
+        updateOpenWaterStatus();
+
+        // 检测等级变化
+        if (currentFishingLevel != previousFishingLevel) {
+            handleLevelChange();
+        }
     }
 
     /**
@@ -210,6 +233,62 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     }
 
     /**
+     * 更新开放水域状态
+     */
+    private void updateOpenWaterStatus() {
+        isOpenWater = (currentFishingLevel >= OPEN_WATER_LEVEL_THRESHOLD);
+    }
+
+    /**
+     * 处理等级变化
+     */
+    private void handleLevelChange() {
+        if (currentFishingLevel == 0) {
+            // 特殊处理：降至空闲，立即停止钓鱼
+            isFishing = false;
+            fishingCooldown = 0;
+            shouldResetCooldownNextTime = false;
+        } else if (previousFishingLevel == 0 && currentFishingLevel > 0) {
+            // 从空闲恢复到工作状态，立即开始新倒计时
+            isFishing = true;
+            fishingCooldown = calculateCooldownForLevel(currentFishingLevel);
+            shouldResetCooldownNextTime = false;
+        } else {
+            // 等级在工作范围内变化，标记下次完成后更新
+            shouldResetCooldownNextTime = true;
+        }
+    }
+
+    /**
+     * 根据等级计算随机倒计时
+     * @param level 钓鱼等级 (1-8)
+     * @return 随机倒计时（ticks）
+     */
+    private int calculateCooldownForLevel(int level) {
+        if (level <= 0) {
+            return 0;
+        }
+
+        int minTicks, maxTicks;
+
+        if (level < 4) {
+            // 等级 1-3: min随等级变化，max固定12秒
+            minTicks = (9 - level) * 20;  // 1→160, 2→140, 3→120
+            maxTicks = 240;  // 12秒
+        } else {
+            // 等级 4-8: min随等级变化，max固定9秒
+            minTicks = (9 - level) * 20;  // 4→100, 5→80, 6→60, 7→40, 8→20
+            maxTicks = 180;  // 9秒
+        }
+
+        // 在 [min, max] 之间随机
+        if (maxTicks == minTicks) {
+            return minTicks;
+        }
+        return minTicks + this.level.getRandom().nextInt(maxTicks - minTicks + 1);
+    }
+
+    /**
      * 更新钓鱼逻辑
      */
     private void updateFishingLogic() {
@@ -217,26 +296,29 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             return;
         }
 
-        // 检查有效捕鱼框数量
-        if (validFrameCount < MIN_FRAME_TRAPS) {
-            // 停止钓鱼
-            if (isFishing) {
-                isFishing = false;
-                fishingCooldown = 0;
-            }
+        // 检查等级是否为空闲（已在 handleLevelChange 中处理）
+        if (currentFishingLevel == 0) {
             return;
         }
 
-        // 启动钓鱼
+        // 确保钓鱼已启动
         if (!isFishing) {
             isFishing = true;
-            updateCooldown();
+            fishingCooldown = calculateCooldownForLevel(currentFishingLevel);
         }
 
-        // 倒计时
+        // 倒计时递减
         if (--fishingCooldown <= 0) {
             performFishing();
-            updateCooldown();
+
+            // 检查是否需要更新倒计时（因等级变化）
+            if (shouldResetCooldownNextTime) {
+                fishingCooldown = calculateCooldownForLevel(currentFishingLevel);
+                shouldResetCooldownNextTime = false;
+            } else {
+                // 等级未变，使用当前等级重新计算
+                fishingCooldown = calculateCooldownForLevel(currentFishingLevel);
+            }
         }
 
         // 显示工作粒子
@@ -246,28 +328,10 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     }
 
     /**
-     * 更新冷却时间
-     */
-    private void updateCooldown() {
-        int effectiveCount = Math.min(validFrameCount, EFFECTIVE_FRAME_CAP);
-        int extraFrames = Math.max(0, effectiveCount - MIN_FRAME_TRAPS);
-        fishingCooldown = Math.max(MIN_COOLDOWN, BASE_COOLDOWN - extraFrames * COOLDOWN_REDUCTION);
-    }
-
-    /**
      * 执行钓鱼
      */
     private void performFishing() {
-        // 成功率判定
-        double successRate = dominantFluid == FluidType.LAVA ?
-                CreateFisheryCommonConfig.getLavaFishingSuccessRate() :
-                CreateFisheryCommonConfig.getFishingSuccessRate();
-
-        if (level.getRandom().nextFloat() >= successRate) {
-            // 失败，无任何效果
-            return;
-        }
-
+        // 100% 成功，不再进行成功率判定
         successfulAttempts++;
 
         // 战利品生成
@@ -516,19 +580,13 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         super.assemble();
 
         if (running && level instanceof ServerLevel serverLevel) {
-            // 创建虚拟钓鱼工具
-            fakePlayer = new TrapBearingFakePlayer(serverLevel);
-            virtualHook = new FishingHook(fakePlayer, serverLevel, 0, 0);
+            // 使用统一的初始化方法
+            ensureVirtualToolsInitialized();
 
             // 立即轮询一次
             updateFrameTrapStates();
 
-            // 检查是否可以启动钓鱼
-            if (validFrameCount >= MIN_FRAME_TRAPS) {
-                isFishing = true;
-                updateCooldown();
-            }
-
+            // 检查是否可以启动钓鱼（在 handleLevelChange 中已处理）
             level.playSound(null, worldPosition, SoundEvents.FISHING_BOBBER_THROW,
                     SoundSource.BLOCKS, 1.0F, 1.0F);
         }
@@ -545,10 +603,13 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         waterFrameCount = 0;
         lavaFrameCount = 0;
         validFrameCount = 0;
+        currentFishingLevel = 0;
+        previousFishingLevel = 0;
         fishingCooldown = 0;
         isFishing = false;
         isOpenWater = false;
         dominantFluid = FluidType.NONE;
+        shouldResetCooldownNextTime = false;
 
         if (virtualHook != null) {
             virtualHook.discard();
@@ -562,6 +623,9 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         assembleNextTick = value;
     }
 
+    /**
+     * 计算钓鱼等级
+     */
     private int getFishingLevel() {
         if (validFrameCount < 8) return 0;  // 空闲
         if (validFrameCount < 16) return 1;
@@ -578,7 +642,7 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
      * 获取等级文本组件
      */
     private MutableComponent getLevelTextComponent() {
-        int level = getFishingLevel();
+        int level = currentFishingLevel;
         if (level == 0) {
             return CreateLang.translateDirect("trap_bearing.idle");
         } else if (level == 8) {
@@ -592,7 +656,7 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
      * 获取捕鱼框条形图组件
      */
     private MutableComponent getFrameTrapsComponent() {
-        int level = getFishingLevel();
+        int level = currentFishingLevel;
         int maxLevel = 8;
 
         return Component.empty()
@@ -605,7 +669,7 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
      */
     private MutableComponent getWorkingStateComponent() {
         // 状态 1：未满足工作条件（有效捕鱼框 < 8）
-        if (validFrameCount < MIN_FRAME_TRAPS) {
+        if (currentFishingLevel == 0) {
             // 进一步判断：如果 validFrameCount == 0，说明没有捕鱼框在流体中
             if (validFrameCount == 0) {
                 return CreateLang.translateDirect("trap_bearing.state.idle");
@@ -619,7 +683,7 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             return CreateLang.translateDirect("trap_bearing.state.lava_fishing");
         }
 
-        // 状态 3：水中捕鱼，可获取宝藏（开放水域）
+        // 状态 3：水中捕鱼，可获取宝藏（开放水域，等级 >= 4）
         if (dominantFluid == FluidType.WATER && isOpenWater) {
             return CreateLang.translateDirect("trap_bearing.state.water_fishing_treasure");
         }
@@ -683,9 +747,12 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         compound.putInt("WaterFrameCount", waterFrameCount);
         compound.putInt("LavaFrameCount", lavaFrameCount);
         compound.putInt("ValidFrameCount", validFrameCount);
+        compound.putInt("CurrentFishingLevel", currentFishingLevel);
+        compound.putInt("PreviousFishingLevel", previousFishingLevel);
         compound.putInt("FishingCooldown", fishingCooldown);
         compound.putBoolean("IsFishing", isFishing);
         compound.putBoolean("OpenWater", isOpenWater);
+        compound.putBoolean("ShouldResetCooldownNextTime", shouldResetCooldownNextTime);
         compound.putInt("TotalCaught", totalCaught);
         compound.putInt("SuccessfulAttempts", successfulAttempts);
         compound.putInt("DominantFluid", dominantFluid.ordinal());
@@ -709,9 +776,12 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         waterFrameCount = compound.getInt("WaterFrameCount");
         lavaFrameCount = compound.getInt("LavaFrameCount");
         validFrameCount = compound.getInt("ValidFrameCount");
+        currentFishingLevel = compound.getInt("CurrentFishingLevel");
+        previousFishingLevel = compound.getInt("PreviousFishingLevel");
         fishingCooldown = compound.getInt("FishingCooldown");
         isFishing = compound.getBoolean("IsFishing");
         isOpenWater = compound.getBoolean("OpenWater");
+        shouldResetCooldownNextTime = compound.getBoolean("ShouldResetCooldownNextTime");
         totalCaught = compound.getInt("TotalCaught");
         successfulAttempts = compound.getInt("SuccessfulAttempts");
         dominantFluid = FluidType.values()[compound.getInt("DominantFluid")];

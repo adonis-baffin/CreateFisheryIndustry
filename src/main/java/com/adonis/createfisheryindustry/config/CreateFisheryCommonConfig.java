@@ -19,8 +19,6 @@ public class CreateFisheryCommonConfig {
     public static final ModConfigSpec.BooleanValue ENABLE_FISHING;
     public static final ModConfigSpec.BooleanValue ENABLE_LAVA_FISHING;
     public static final ModConfigSpec.BooleanValue USE_NDU_LOOT_TABLES;
-    public static final ModConfigSpec.DoubleValue FISHING_SUCCESS_RATE;
-    public static final ModConfigSpec.DoubleValue LAVA_FISHING_SUCCESS_RATE;
 
     // 潜水装备配置
     public static final ModConfigSpec.DoubleValue DIVING_BASE_JUMP_POWER;
@@ -89,16 +87,6 @@ public class CreateFisheryCommonConfig {
                 .comment("Use Nether Depths Upgrade loot tables for lava fishing when available",
                         "If false or NDU is not installed, will fall back to default fishing loot table")
                 .define("useNDULootTables", true);
-
-        FISHING_SUCCESS_RATE = builder
-                .comment("Success rate for water fishing attempts (0.0 to 1.0)",
-                        "Default: 0.4 (40% chance)")
-                .defineInRange("fishingSuccessRate", 0.4, 0.0, 1.0);
-
-        LAVA_FISHING_SUCCESS_RATE = builder
-                .comment("Success rate for lava fishing attempts (0.0 to 1.0)",
-                        "Default: 0.3 (30% chance)")
-                .defineInRange("lavaFishingSuccessRate", 0.3, 0.0, 1.0);
 
         builder.pop();
 
@@ -281,29 +269,6 @@ public class CreateFisheryCommonConfig {
             return USE_NDU_LOOT_TABLES.get();
         } catch (IllegalStateException e) {
             return true;
-        }
-    }
-
-    // 钓鱼成功率配置
-    public static double getFishingSuccessRate() {
-        if (!isConfigLoaded) {
-            return 0.4;
-        }
-        try {
-            return FISHING_SUCCESS_RATE.get();
-        } catch (IllegalStateException e) {
-            return 0.4;
-        }
-    }
-
-    public static double getLavaFishingSuccessRate() {
-        if (!isConfigLoaded) {
-            return 0.3;
-        }
-        try {
-            return LAVA_FISHING_SUCCESS_RATE.get();
-        } catch (IllegalStateException e) {
-            return 0.3;
         }
     }
 
