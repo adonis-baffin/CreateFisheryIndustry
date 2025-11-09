@@ -73,9 +73,7 @@
   "create.trap_bearing.max_lvl": "最高等级",
   "create.trap_bearing.frame_traps": "捕鱼框",
   "create.trap_bearing.frame_traps_dots": "...... ",
-
   "create.trap_bearing.working_state": "工作状态：",
-  "create.trap_bearing.working_state_dots": "...... ",
   "create.trap_bearing.state.insufficient": "未满足工作条件",
   "create.trap_bearing.state.idle": "空转",
   "create.trap_bearing.state.water_fishing": "水中捕鱼",

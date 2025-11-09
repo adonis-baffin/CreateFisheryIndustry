@@ -78,7 +78,6 @@
   "create.trap_bearing.frame_traps": "Frame Traps",
   "create.trap_bearing.frame_traps_dots": "...... ",
   "create_fishery.trap_bearing.working_state": "Working State: %1$s",
-  "create.trap_bearing.working_state_dots": "...... ",
   "create.trap_bearing.state.insufficient": "Insufficient Conditions",
   "create.trap_bearing.state.idle": "Idling",
   "create.trap_bearing.state.water_fishing": "Water Fishing",

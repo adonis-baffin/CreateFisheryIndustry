@@ -141,6 +141,9 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         lavaFrameCount = 0;
         activeFramePositions.clear();
 
+        // 新增：重置总捕鱼框计数
+        totalFrameTraps = 0;
+
         Contraption contraption = movedContraption.getContraption();
 
         // 遍历装置上的所有方块
@@ -152,6 +155,9 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             if (!(blockInfo.state().getBlock() instanceof FrameTrapBlock)) {
                 continue;
             }
+
+            // 新增：统计总捕鱼框数量
+            totalFrameTraps++;
 
             // 转换为世界坐标
             Vec3 localVec = Vec3.atCenterOf(localPos);
@@ -670,11 +676,11 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     private MutableComponent getWorkingStateComponent() {
         // 状态 1：未满足工作条件（有效捕鱼框 < 8）
         if (currentFishingLevel == 0) {
-            // 进一步判断：如果 validFrameCount == 0，说明没有捕鱼框在流体中
-            if (validFrameCount == 0) {
+            // 进一步判断：如果总捕鱼框数量为 0，说明装置上根本没有捕鱼框
+            if (totalFrameTraps == 0) {
                 return CreateLang.translateDirect("trap_bearing.state.idle");
             }
-            // 否则是有捕鱼框但数量不足
+            // 否则是有捕鱼框但不在流体中或数量不足
             return CreateLang.translateDirect("trap_bearing.state.insufficient");
         }
 
@@ -707,7 +713,7 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
 
     @Override
     public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        super.addToTooltip(tooltip, isPlayerSneaking);
+        super.addToTooltip(tooltip, isPlayerSneaking);  // 不保存返回值
 
         if (!running) {
             return true;
@@ -736,36 +742,41 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
                         .withStyle(ChatFormatting.GRAY))
                 .forGoggles(tooltip);
 
-        return true;
+        return true;  // 必须返回 true，和老代码一样
     }
 
     @Override
     public void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(compound, registries, clientPacket);
 
+        // 无论是否 clientPacket，都保存这些用于显示的数据
         compound.putInt("TotalFrameTraps", totalFrameTraps);
         compound.putInt("WaterFrameCount", waterFrameCount);
         compound.putInt("LavaFrameCount", lavaFrameCount);
         compound.putInt("ValidFrameCount", validFrameCount);
         compound.putInt("CurrentFishingLevel", currentFishingLevel);
         compound.putInt("PreviousFishingLevel", previousFishingLevel);
-        compound.putInt("FishingCooldown", fishingCooldown);
         compound.putBoolean("IsFishing", isFishing);
         compound.putBoolean("OpenWater", isOpenWater);
-        compound.putBoolean("ShouldResetCooldownNextTime", shouldResetCooldownNextTime);
-        compound.putInt("TotalCaught", totalCaught);
-        compound.putInt("SuccessfulAttempts", successfulAttempts);
         compound.putInt("DominantFluid", dominantFluid.ordinal());
 
-        ListTag posList = new ListTag();
-        for (BlockPos pos : initialFrameTrapPositions) {
-            CompoundTag posTag = new CompoundTag();
-            posTag.putInt("X", pos.getX());
-            posTag.putInt("Y", pos.getY());
-            posTag.putInt("Z", pos.getZ());
-            posList.add(posTag);
+        // 以下数据可能只在服务端需要
+        if (!clientPacket) {
+            compound.putInt("FishingCooldown", fishingCooldown);
+            compound.putBoolean("ShouldResetCooldownNextTime", shouldResetCooldownNextTime);
+            compound.putInt("TotalCaught", totalCaught);
+            compound.putInt("SuccessfulAttempts", successfulAttempts);
+
+            ListTag posList = new ListTag();
+            for (BlockPos pos : initialFrameTrapPositions) {
+                CompoundTag posTag = new CompoundTag();
+                posTag.putInt("X", pos.getX());
+                posTag.putInt("Y", pos.getY());
+                posTag.putInt("Z", pos.getZ());
+                posList.add(posTag);
+            }
+            compound.put("InitialFrameTrapPositions", posList);
         }
-        compound.put("InitialFrameTrapPositions", posList);
     }
 
     @Override
