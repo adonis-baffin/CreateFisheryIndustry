@@ -6,9 +6,10 @@ import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapBlock;
 import com.simibubi.create.content.contraptions.bearing.MechanicalBearingBlockEntity;
 import com.simibubi.create.content.contraptions.bearing.BearingBlock;
 import com.simibubi.create.content.contraptions.Contraption;
-import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.utility.CreateLang;
 
+import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,6 +20,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -46,12 +48,11 @@ import java.util.*;
 public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
 
     private static final int MIN_FRAME_TRAPS = 8;
+    private static final int OPEN_WATER_THRESHOLD = 20;
     private static final int BASE_COOLDOWN = 200;
     private static final int COOLDOWN_REDUCTION = 5;
     private static final int MIN_COOLDOWN = 80;
     private static final int UPDATE_INTERVAL = 20;
-    private static final int MAX_FRAME_DISTANCE = 16;
-    private static final int MAX_FRAME_COUNT = 64;
     private static final int EFFECTIVE_FRAME_CAP = 64;
 
     // 静态数据（组装时确定）
@@ -106,6 +107,8 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         }
     }
 
+
+
     @Override
     public void lazyTick() {
         super.lazyTick();
@@ -136,9 +139,9 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
                 continue;
             }
 
-            // 转换为世界坐标（修复核心）
-            Vec3 localVec = Vec3.atCenterOf(localPos);  // 用中心点，避免边缘错误
-            Vec3 globalVec = movedContraption.toGlobalVector(localVec, 0);  // partialTicks=0 for server-side
+            // 转换为世界坐标
+            Vec3 localVec = Vec3.atCenterOf(localPos);
+            Vec3 globalVec = movedContraption.toGlobalVector(localVec, 0);
             BlockPos worldPos = BlockPos.containing(globalVec);
 
             // 检查流体状态
@@ -153,15 +156,11 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             }
         }
 
-        // 判断工作模式（不变）
+        // 判断工作模式
         determineWorkingMode();
 
-        // 更新开放水域状态（不变）
-        if (dominantFluid == FluidType.WATER) {
-            isOpenWater = (waterFrameCount == totalFrameTraps);
-        } else {
-            isOpenWater = false;
-        }
+        // 更新开放水域状态：捕鱼框数量 > 20 即为开放水域
+        isOpenWater = (validFrameCount > OPEN_WATER_THRESHOLD);
     }
 
     /**
@@ -512,31 +511,8 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         }
     }
 
-    /**
-     * 尝试组装，返回错误信息（如果有）
-     * @return 错误信息，如果成功则返回 null
-     */
-    public String tryAssemble() {
-        if (!scanAndValidateFrameTraps()) {
-            if (totalFrameTraps < MIN_FRAME_TRAPS) {
-                return Component.translatable(
-                        "create_fishery.gui.assembly.insufficient_frame_traps",
-                        totalFrameTraps,
-                        MIN_FRAME_TRAPS
-                ).getString();
-            }
-            return Component.translatable("create_fishery.trap_bearing.assembly_failed").getString();
-        }
-        return null;
-    }
-
     @Override
     public void assemble() {
-        if (!scanAndValidateFrameTraps()) {
-            sendData();
-            return;
-        }
-
         super.assemble();
 
         if (running && level instanceof ServerLevel serverLevel) {
@@ -582,70 +558,119 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         fakePlayer = null;
     }
 
-    /**
-     * 扫描并验证捕鱼框
-     */
-    private boolean scanAndValidateFrameTraps() {
-        Direction facing = getBlockState().getValue(BearingBlock.FACING);
-        BlockPos frontPos = worldPosition.relative(facing);
-
-        Set<BlockPos> visited = new HashSet<>();
-        Queue<BlockPos> queue = new LinkedList<>();
-
-        queue.add(frontPos);
-        visited.add(frontPos);
-
-        for (Direction dir : Direction.values()) {
-            BlockPos neighbor = frontPos.relative(dir);
-            if (!visited.contains(neighbor)) {
-                queue.add(neighbor);
-                visited.add(neighbor);
-            }
-        }
-
-        int count = 0;
-        initialFrameTrapPositions.clear();
-
-        while (!queue.isEmpty() && count < MAX_FRAME_COUNT) {
-            BlockPos current = queue.poll();
-            BlockState state = level.getBlockState(current);
-
-            if (state.getBlock() instanceof FrameTrapBlock) {
-                count++;
-                initialFrameTrapPositions.add(current);
-
-                for (Direction dir : Direction.values()) {
-                    BlockPos neighbor = current.relative(dir);
-                    if (!visited.contains(neighbor) &&
-                            neighbor.distSqr(worldPosition) <= MAX_FRAME_DISTANCE * MAX_FRAME_DISTANCE) {
-                        visited.add(neighbor);
-                        queue.add(neighbor);
-                    }
-                }
-            }
-        }
-
-        totalFrameTraps = count;
-
-        if (count < MIN_FRAME_TRAPS) {
-            return false;
-        }
-
-        return true;
-    }
-
     public void setAssembleNextTick(boolean value) {
         assembleNextTick = value;
+    }
+
+    private int getFishingLevel() {
+        if (validFrameCount < 8) return 0;  // 空闲
+        if (validFrameCount < 16) return 1;
+        if (validFrameCount < 24) return 2;
+        if (validFrameCount < 32) return 3;
+        if (validFrameCount < 40) return 4;
+        if (validFrameCount < 48) return 5;
+        if (validFrameCount < 56) return 6;
+        if (validFrameCount < 64) return 7;
+        return 8;  // 最高等级
+    }
+
+    /**
+     * 获取等级文本组件
+     */
+    private MutableComponent getLevelTextComponent() {
+        int level = getFishingLevel();
+        if (level == 0) {
+            return CreateLang.translateDirect("trap_bearing.idle");
+        } else if (level == 8) {
+            return CreateLang.translateDirect("trap_bearing.max_lvl");
+        } else {
+            return CreateLang.translateDirect("trap_bearing.lvl", String.valueOf(level));
+        }
+    }
+
+    /**
+     * 获取捕鱼框条形图组件
+     */
+    private MutableComponent getFrameTrapsComponent() {
+        int level = getFishingLevel();
+        int maxLevel = 8;
+
+        return Component.empty()
+                .append(bars(level, ChatFormatting.DARK_GREEN))
+                .append(bars(maxLevel - level, ChatFormatting.DARK_GRAY));
+    }
+
+    /**
+     * 获取工作状态组件
+     */
+    private MutableComponent getWorkingStateComponent() {
+        // 状态 1：未满足工作条件（有效捕鱼框 < 8）
+        if (validFrameCount < MIN_FRAME_TRAPS) {
+            // 进一步判断：如果 validFrameCount == 0，说明没有捕鱼框在流体中
+            if (validFrameCount == 0) {
+                return CreateLang.translateDirect("trap_bearing.state.idle");
+            }
+            // 否则是有捕鱼框但数量不足
+            return CreateLang.translateDirect("trap_bearing.state.insufficient");
+        }
+
+        // 状态 2：熔岩捕鱼
+        if (dominantFluid == FluidType.LAVA) {
+            return CreateLang.translateDirect("trap_bearing.state.lava_fishing");
+        }
+
+        // 状态 3：水中捕鱼，可获取宝藏（开放水域）
+        if (dominantFluid == FluidType.WATER && isOpenWater) {
+            return CreateLang.translateDirect("trap_bearing.state.water_fishing_treasure");
+        }
+
+        // 状态 4：水中捕鱼
+        if (dominantFluid == FluidType.WATER) {
+            return CreateLang.translateDirect("trap_bearing.state.water_fishing");
+        }
+
+        // 默认：理论上不应该到达（容错）
+        return CreateLang.translateDirect("trap_bearing.state.unknown");
+    }
+
+    /**
+     * 生成条形图
+     */
+    private MutableComponent bars(int count, ChatFormatting format) {
+        return Component.literal(Strings.repeat('|', count))
+                .withStyle(format);
     }
 
     @Override
     public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         super.addToTooltip(tooltip, isPlayerSneaking);
 
-        if (running && validFrameCount >= MIN_FRAME_TRAPS) {
-            tooltip.add(Component.translatable("create_fishery.tooltip.trap_bearing.status",
-                    validFrameCount).withStyle(ChatFormatting.AQUA));
+        if (!running) {
+            return true;
         }
+
+        // 第一行：捕鱼轴承状态
+        CreateLang.translate("trap_bearing.status", getLevelTextComponent().withStyle(ChatFormatting.GREEN))
+                .forGoggles(tooltip);
+
+        // 第二行：捕鱼框（带条形图）- 缩进
+        CreateLang.builder()
+                .add(CreateLang.translateDirect("trap_bearing.frame_traps")
+                        .withStyle(ChatFormatting.GRAY))
+                .add(CreateLang.translateDirect("trap_bearing.frame_traps_dots")
+                        .withStyle(ChatFormatting.DARK_GRAY))
+                .add(getFrameTrapsComponent())
+                .forGoggles(tooltip, 1);
+
+        // 空行
+        tooltip.add(Component.empty());
+
+        // 第三行：工作状态 - 不缩进，分离颜色
+        CreateLang.builder()
+                .add(CreateLang.translateDirect("trap_bearing.working_state"))
+                .add(getWorkingStateComponent()
+                        .withStyle(ChatFormatting.GRAY))
+                .forGoggles(tooltip);
 
         return true;
     }

@@ -20,6 +20,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -35,7 +36,6 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
     @Override
     public void tick(MovementContext context) {
         if (context.world instanceof ServerLevel level) {
-            // context.position 是 Vec3，需要转换为 BlockPos
             Vec3 positionVec = context.position;
             if (positionVec == null) {
                 return;
@@ -98,7 +98,7 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
 
             // 规则2：白名单中的实体直接捕获，不考虑大小限制
             if (CreateFisheryCommonConfig.isEntityWhitelisted(entityId)) {
-                processEntityCapture(context, level, mob);
+                processEntityCapture(context, level, mob, pos);
                 continue;
             }
 
@@ -111,7 +111,7 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
             if (width <= MAX_COLLISION_BOX_SIZE &&
                     height <= MAX_COLLISION_BOX_SIZE &&
                     depth <= MAX_COLLISION_BOX_SIZE) {
-                processEntityCapture(context, level, mob);
+                processEntityCapture(context, level, mob, pos);
             }
         }
     }
@@ -119,7 +119,7 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
     /**
      * 处理实体捕获
      */
-    private void processEntityCapture(MovementContext context, ServerLevel level, Mob mob) {
+    private void processEntityCapture(MovementContext context, ServerLevel level, Mob mob, BlockPos capturePos) {
         var lootTableKey = mob.getLootTable();
         if (lootTableKey == null) {
             return;
@@ -149,12 +149,18 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
 
         mob.setRemoved(Entity.RemovalReason.KILLED);
 
-        // 确定环境类型用于粒子效果
-        boolean inLava = level.getFluidState(BlockPos.containing(mob.getX(), mob.getY(), mob.getZ()))
-                .is(FluidTags.LAVA);
+        // 检查捕获位置的流体状态（用于粒子效果判断）
+        FluidState fluidAtCapture = level.getFluidState(capturePos);
+        boolean inWater = fluidAtCapture.is(FluidTags.WATER);
+        boolean inLava = fluidAtCapture.is(FluidTags.LAVA);
+
+        // 检查捕获位置上方是否有空气（判断水上/水下）
+        BlockPos abovePos = capturePos.above();
+        boolean underwater = level.getFluidState(abovePos).is(FluidTags.WATER);
 
         addExperienceNugget(context, level, mob.getX(), mob.getY() + 0.5, mob.getZ());
-        spawnEntityCaptureParticles(level, mob.getX(), mob.getY() + 0.5, mob.getZ(), inLava);
+        spawnEntityCaptureParticles(level, mob.getX(), mob.getY() + 0.5, mob.getZ(),
+                inWater, inLava, underwater);
     }
 
     /**
@@ -176,7 +182,8 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
     /**
      * 实体捕获时的粒子效果
      */
-    private void spawnEntityCaptureParticles(ServerLevel level, double x, double y, double z, boolean inLava) {
+    private void spawnEntityCaptureParticles(ServerLevel level, double x, double y, double z,
+                                             boolean inWater, boolean inLava, boolean underwater) {
         // 统一音效
         level.playSound(null, BlockPos.containing(x, y, z),
                 SoundEvents.BUCKET_FILL_FISH, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -187,8 +194,18 @@ public class FrameTrapMovementBehaviour implements MovementBehaviour {
                     x, y, z, 8, 0.4, 0.4, 0.4, 0.1);
             level.sendParticles(ParticleTypes.SMOKE,
                     x, y, z, 5, 0.3, 0.3, 0.3, 0.05);
+        } else if (inWater) {
+            if (underwater) {
+                // 水下捕获：使用气泡粒子
+                level.sendParticles(ParticleTypes.BUBBLE,
+                        x, y, z, 15, 0.5, 0.5, 0.5, 0.1);
+            } else {
+                // 水面上捕获：使用云粒子
+                level.sendParticles(ParticleTypes.CLOUD,
+                        x, y, z, 15, 0.5, 0.5, 0.5, 0.1);
+            }
         } else {
-            // 水环境中的实体捕获
+            // 既不在水也不在岩浆（陆地）：使用云粒子
             level.sendParticles(ParticleTypes.CLOUD,
                     x, y, z, 15, 0.5, 0.5, 0.5, 0.1);
         }
