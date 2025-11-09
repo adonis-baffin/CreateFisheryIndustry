@@ -1,7 +1,7 @@
-package com.adonis.createfisheryindustry.block.FishingBearing;
+package com.adonis.createfisheryindustry.block.TrapBearing;
 
-import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.contraptions.bearing.BearingRenderer;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
@@ -14,14 +14,14 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
-public class FishingBearingRenderer extends BearingRenderer<FishingBearingBlockEntity> {
+public class TrapBearingRenderer extends BearingRenderer<TrapBearingBlockEntity> {
 
-    public FishingBearingRenderer(BlockEntityRendererProvider.Context context) {
+    public TrapBearingRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
     }
 
     @Override
-    protected void renderSafe(FishingBearingBlockEntity be, float partialTicks, PoseStack ms,
+    protected void renderSafe(TrapBearingBlockEntity be, float partialTicks, PoseStack ms,
                               MultiBufferSource buffer, int light, int overlay) {
 
         // 如果启用了 Flywheel 可视化，跳过传统渲染
@@ -35,7 +35,7 @@ public class FishingBearingRenderer extends BearingRenderer<FishingBearingBlockE
         final Direction facing = be.getBlockState().getValue(BlockStateProperties.FACING);
 
         // 获取自定义的顶部模型
-        PartialModel top = CreateFisheryPartialModels.FISHING_BEARING_TOP;
+        PartialModel top = AllPartialModels.BEARING_TOP;
         SuperByteBuffer superBuffer = CachedBuffers.partial(top, be.getBlockState());
 
         // 计算插值角度

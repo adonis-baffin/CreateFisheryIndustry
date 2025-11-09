@@ -11,14 +11,14 @@ import java.util.stream.Collectors;
 public class CreateFisheryCommonConfig {
     public static final ModConfigSpec CONFIG_SPEC;
 
-    // Frame Trap 配置
+    // Frame Trap 实体捕获配置
     public static final ModConfigSpec.ConfigValue<List<? extends String>> WHITELIST;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
+
+    // Trap Bearing 钓鱼配置
     public static final ModConfigSpec.BooleanValue ENABLE_FISHING;
     public static final ModConfigSpec.BooleanValue ENABLE_LAVA_FISHING;
     public static final ModConfigSpec.BooleanValue USE_NDU_LOOT_TABLES;
-    public static final ModConfigSpec.DoubleValue FISHING_COOLDOWN_MULTIPLIER;
-    public static final ModConfigSpec.DoubleValue LAVA_FISHING_COOLDOWN_MULTIPLIER;
     public static final ModConfigSpec.DoubleValue FISHING_SUCCESS_RATE;
     public static final ModConfigSpec.DoubleValue LAVA_FISHING_SUCCESS_RATE;
 
@@ -44,7 +44,7 @@ public class CreateFisheryCommonConfig {
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
-        // Frame Trap 配置部分
+        // Frame Trap 实体捕获配置
         builder.comment("Frame Trap entity capture settings")
                 .push("frameTrap");
 
@@ -73,15 +73,16 @@ public class CreateFisheryCommonConfig {
 
         builder.pop();
 
-        builder.comment("Frame Trap fishing settings")
-                .push("fishing");
+        // Trap Bearing 钓鱼配置
+        builder.comment("Trap Bearing fishing settings")
+                .push("trapBearingFishing");
 
         ENABLE_FISHING = builder
-                .comment("Enable fishing functionality for Frame Trap")
+                .comment("Enable fishing functionality for Trap Bearing")
                 .define("enableFishing", true);
 
         ENABLE_LAVA_FISHING = builder
-                .comment("Enable lava fishing functionality for Frame Trap (requires lava environment)")
+                .comment("Enable lava fishing functionality (requires lava environment)")
                 .define("enableLavaFishing", true);
 
         USE_NDU_LOOT_TABLES = builder
@@ -89,26 +90,14 @@ public class CreateFisheryCommonConfig {
                         "If false or NDU is not installed, will fall back to default fishing loot table")
                 .define("useNDULootTables", true);
 
-        FISHING_COOLDOWN_MULTIPLIER = builder
-                .comment("Multiplier for normal (water) fishing cooldown time",
-                        "Lower values = faster fishing, higher values = slower fishing",
-                        "Default: 1.0 (normal speed), 0.5 = twice as fast, 2.0 = twice as slow")
-                .defineInRange("fishingCooldownMultiplier", 1.0, 0.1, 10.0);
-
-        LAVA_FISHING_COOLDOWN_MULTIPLIER = builder
-                .comment("Multiplier for lava fishing cooldown time",
-                        "Lower values = faster fishing, higher values = slower fishing",
-                        "Default: 1.5 (slower than water fishing), 0.5 = twice as fast, 2.0 = twice as slow")
-                .defineInRange("lavaFishingCooldownMultiplier", 1.5, 0.1, 10.0);
-
         FISHING_SUCCESS_RATE = builder
-                .comment("Base success rate for normal (water) fishing attempts (0.0 to 1.0)",
-                        "Default: 0.4 (40% chance), 1.0 = always succeed, 0.0 = never succeed")
+                .comment("Success rate for water fishing attempts (0.0 to 1.0)",
+                        "Default: 0.4 (40% chance)")
                 .defineInRange("fishingSuccessRate", 0.4, 0.0, 1.0);
 
         LAVA_FISHING_SUCCESS_RATE = builder
-                .comment("Base success rate for lava fishing attempts (0.0 to 1.0)",
-                        "Default: 0.3 (30% chance, harder than water fishing)")
+                .comment("Success rate for lava fishing attempts (0.0 to 1.0)",
+                        "Default: 0.3 (30% chance)")
                 .defineInRange("lavaFishingSuccessRate", 0.3, 0.0, 1.0);
 
         builder.pop();
@@ -191,7 +180,7 @@ public class CreateFisheryCommonConfig {
         CONFIG_SPEC = builder.build();
     }
 
-    // 原有的缓存和基础方法
+    // 白名单/黑名单缓存方法
     public static List<ResourceLocation> getWhitelist() {
         if (!isConfigLoaded) {
             return cachedWhitelist;
@@ -295,29 +284,6 @@ public class CreateFisheryCommonConfig {
         }
     }
 
-    // 钓鱼速率配置
-    public static double getFishingCooldownMultiplier() {
-        if (!isConfigLoaded) {
-            return 1.0;
-        }
-        try {
-            return FISHING_COOLDOWN_MULTIPLIER.get();
-        } catch (IllegalStateException e) {
-            return 1.0;
-        }
-    }
-
-    public static double getLavaFishingCooldownMultiplier() {
-        if (!isConfigLoaded) {
-            return 1.5;
-        }
-        try {
-            return LAVA_FISHING_COOLDOWN_MULTIPLIER.get();
-        } catch (IllegalStateException e) {
-            return 1.5;
-        }
-    }
-
     // 钓鱼成功率配置
     public static double getFishingSuccessRate() {
         if (!isConfigLoaded) {
@@ -341,6 +307,7 @@ public class CreateFisheryCommonConfig {
         }
     }
 
+    // 潜水装备相关方法
     public static double getDivingBaseJumpPower() {
         if (!isConfigLoaded) {
             return 1.0;
@@ -387,12 +354,12 @@ public class CreateFisheryCommonConfig {
 
     public static double getDivingCopperSprintSpeed() {
         if (!isConfigLoaded) {
-            return 0.01; // 修复：与配置定义保持一致
+            return 0.01;
         }
         try {
             return DIVING_COPPER_SPRINT_SPEED.get();
         } catch (IllegalStateException e) {
-            return 0.01; // 修复：与配置定义保持一致
+            return 0.01;
         }
     }
 

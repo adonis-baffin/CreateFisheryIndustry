@@ -1,7 +1,7 @@
 package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
-import com.adonis.createfisheryindustry.block.FishingBearing.FishingBearingBlock;
+import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingBlock;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapBlock;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapMovementBehaviour;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerGenerator;
@@ -105,8 +105,8 @@ public class CreateFisheryBlocks {
             .transform(customItemModel())
             .register();
 
-    public static final BlockEntry<FishingBearingBlock> FISHING_BEARING = REGISTRATE
-            .block("fishing_bearing", FishingBearingBlock::new)
+    public static final BlockEntry<TrapBearingBlock> TRAP_BEARING = REGISTRATE
+            .block("trap_bearing", TrapBearingBlock::new)
             .initialProperties(SharedProperties::stone)
             .properties(props -> props
                     .noOcclusion()
@@ -114,7 +114,7 @@ public class CreateFisheryBlocks {
             .transform(axeOrPickaxe())
             .transform(CreateFisheryMod.STRESS_CONFIG.setImpact(4.0))
             .blockstate((ctx, prov) -> prov.directionalBlock(ctx.get(),
-                    prov.models().getExistingFile(prov.modLoc("block/fishing_bearing"))))
+                    prov.models().getExistingFile(prov.modLoc("block/trap_bearing"))))
             .item()
             .transform(customItemModel())
             .register();

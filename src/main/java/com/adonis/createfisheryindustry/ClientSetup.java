@@ -4,7 +4,7 @@ import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshRenderer;
 import com.adonis.createfisheryindustry.block.SmartNozzle.SmartNozzleRenderer;
 import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.adonis.createfisheryindustry.client.renderer.MechanicalPeelerRenderer;
-import com.adonis.createfisheryindustry.block.FishingBearing.FishingBearingRenderer;
+import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingRenderer;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonRenderer;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonISTER;
 import com.adonis.createfisheryindustry.client.renderer.PneumaticHarpoonTargetHandler;
@@ -53,13 +53,13 @@ public class ClientSetup {
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_NOZZLE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_MESH.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.MECHANICAL_PEELER.get(), RenderType.cutoutMipped());
-            ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.FISHING_BEARING.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.TRAP_BEARING.get(), RenderType.cutoutMipped());
 
             // 方块实体渲染器注册
             BlockEntityRenderers.register(CreateFisheryBlockEntities.SMART_NOZZLE.get(), SmartNozzleRenderer::new);
             BlockEntityRenderers.register(CreateFisheryBlockEntities.SMART_MESH.get(), SmartMeshRenderer::new);
             BlockEntityRenderers.register(CreateFisheryBlockEntities.MECHANICAL_PEELER.get(), MechanicalPeelerRenderer::new);
-            BlockEntityRenderers.register(CreateFisheryBlockEntities.FISHING_BEARING.get(), FishingBearingRenderer::new);
+            BlockEntityRenderers.register(CreateFisheryBlockEntities.TRAP_BEARING.get(), TrapBearingRenderer::new);
 
             // 实体渲染器注册
             EntityRenderers.register(CreateFisheryEntityTypes.HARPOON.get(), HarpoonRenderer::new);

@@ -3,7 +3,7 @@
   "block.createfisheryindustry.mesh_trap": "捕获网",
   "block.createfisheryindustry.trap_nozzle": "气捕网",
   "block.createfisheryindustry.smart_mesh": "智能滤网",
-  "block.createfisheryindustry.fishing_bearing": "捕鱼轴承",
+  "block.createfisheryindustry.trap_bearing": "捕鱼轴承",
   "item.createfisheryindustry.zinc_sheet": "锌板",
   "item.createfisheryindustry.pneumatic_mechanism": "气动构件",
   "item.createfisheryindustry.incomplete_pneumatic_mechanism": "未完成的气动构件",
@@ -67,9 +67,11 @@
   "block.createfisheryindustry.smart_mesh.tooltip.condition1": "空手右键点击时：",
   "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "取出其中的物品，一次最多一组。",
 
-
-  "create_fishery.gui.assembly.insufficient_frame_traps": "需要至少 %2$s 个捕鱼框（找到 %1$s 个）",
-  "create_fishery.tooltip.fishing_bearing.status": "有效捕鱼框: %s",
+  "create_fishery.trap_bearing.assembled": "捕鱼轴承已组装",
+  "create_fishery.trap_bearing.disassembled": "捕鱼轴承已拆卸",
+  "create_fishery.trap_bearing.assembly_failed": "组装失败",
+  "create_fishery.gui.assembly.insufficient_frame_traps": "捕鱼框不足：%s / %s",
+  "create_fishery.tooltip.trap_bearing.status": "有效捕鱼框: %s",
 
   "item.createfisheryindustry.fish_skin": "鱼皮",
   "item.createfisheryindustry.roasted_fish_skin": "烤鱼皮",

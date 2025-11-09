@@ -3,7 +3,7 @@
   "block.createfisheryindustry.mesh_trap": "Mesh Trap",
   "block.createfisheryindustry.trap_nozzle": "Trap Nozzle",
   "block.createfisheryindustry.smart_mesh": "Smart Mesh",
-  "block.createfisheryindustry.fishing_bearing": "Fishing Bearing",
+  "block.createfisheryindustry.trap_bearing": "Trap Bearing",
   "item.createfisheryindustry.zinc_sheet": "Zinc Sheet",
   "item.createfisheryindustry.pneumatic_mechanism": "Pneumatic Mechanism",
   "item.createfisheryindustry.incomplete_pneumatic_mechanism": "Incomplete Pneumatic Mechanism",
@@ -70,6 +70,11 @@
   "block.createfisheryindustry.smart_mesh.tooltip.summary": "Smart Mesh automatically collects nearby items and stores them.",
   "block.createfisheryindustry.smart_mesh.tooltip.condition1": "When right-clicked with empty hand:",
   "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "Extracts items, up to one stack at a time.",
+
+  "create_fishery.trap_bearing.assembled": "Trap Bearing Assembled",
+  "create_fishery.trap_bearing.disassembled": "Trap Bearing Disassembled",
+  "create_fishery.trap_bearing.assembly_failed": "Assembly Failed",
+  "create_fishery.gui.assembly.insufficient_frame_traps": "Insufficient Frame Traps: %s / %s",
 
   "block.createfisheryindustry.smart_beehive": "Smart Beehive",
   "block.createfisheryindustry.smart_beehive.tooltip.summary": "Test block, the functions are still under development. This block is not part of the content of this mod 'Create: Fishery Industry'. It will be released in the upcoming new mod 'Create: Dinner' in the future. Stay tuned.",

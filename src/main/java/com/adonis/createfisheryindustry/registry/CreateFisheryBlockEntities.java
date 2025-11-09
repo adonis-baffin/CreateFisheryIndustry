@@ -1,14 +1,14 @@
 package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
-import com.adonis.createfisheryindustry.block.FishingBearing.FishingBearingBlockEntity;
+import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingBlockEntity;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartNozzle.SmartNozzleBlockEntity;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerBlockEntity;
-import com.adonis.createfisheryindustry.block.FishingBearing.FishingBearingRenderer;
-import com.adonis.createfisheryindustry.block.FishingBearing.FishingBearingVisual;
+import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingRenderer;
+import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingVisual;
 import com.adonis.createfisheryindustry.client.renderer.MechanicalPeelerRenderer;
 import com.adonis.createfisheryindustry.CFIRegistrate;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
@@ -60,11 +60,11 @@ public class CreateFisheryBlockEntities {
             .renderer(() -> MechanicalPeelerRenderer::new)
             .register();
 
-    public static final BlockEntityEntry<FishingBearingBlockEntity> FISHING_BEARING = REGISTRATE
-            .blockEntity("fishing_bearing", FishingBearingBlockEntity::new)
-            .visual(() -> FishingBearingVisual::new)
-            .validBlocks(CreateFisheryBlocks.FISHING_BEARING)
-            .renderer(() -> FishingBearingRenderer::new)
+    public static final BlockEntityEntry<TrapBearingBlockEntity> TRAP_BEARING = REGISTRATE
+            .blockEntity("fishing_bearing", TrapBearingBlockEntity::new)
+            .visual(() -> TrapBearingVisual::new)
+            .validBlocks(CreateFisheryBlocks.TRAP_BEARING)
+            .renderer(() -> TrapBearingRenderer::new)
             .register();
 
     public static void register(IEventBus bus) {

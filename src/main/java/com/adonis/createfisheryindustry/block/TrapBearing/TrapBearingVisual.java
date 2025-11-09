@@ -1,6 +1,5 @@
-package com.adonis.createfisheryindustry.block.FishingBearing;
+package com.adonis.createfisheryindustry.block.TrapBearing;
 
-import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.OrientedRotatingVisual;
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -18,12 +17,12 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.function.Consumer;
 
-public class FishingBearingVisual extends OrientedRotatingVisual<FishingBearingBlockEntity> implements SimpleDynamicVisual {
+public class TrapBearingVisual extends OrientedRotatingVisual<TrapBearingBlockEntity> implements SimpleDynamicVisual {
     final OrientedInstance topInstance;
     final Axis rotationAxis;
     final Quaternionf blockOrientation;
 
-    public FishingBearingVisual(VisualizationContext context, FishingBearingBlockEntity blockEntity, float partialTick) {
+    public TrapBearingVisual(VisualizationContext context, TrapBearingBlockEntity blockEntity, float partialTick) {
         super(context, blockEntity, partialTick, Direction.SOUTH,
                 blockEntity.getBlockState().getValue(BlockStateProperties.FACING).getOpposite(),
                 Models.partial(AllPartialModels.SHAFT_HALF));
@@ -34,7 +33,7 @@ public class FishingBearingVisual extends OrientedRotatingVisual<FishingBearingB
 
         // 🎯 关键：使用你的自定义模型
         topInstance = instancerProvider().instancer(InstanceTypes.ORIENTED,
-                        Models.partial(CreateFisheryPartialModels.FISHING_BEARING_TOP))
+                        Models.partial(AllPartialModels.BEARING_TOP))
                 .createInstance();
 
         topInstance.position(getVisualPosition())
