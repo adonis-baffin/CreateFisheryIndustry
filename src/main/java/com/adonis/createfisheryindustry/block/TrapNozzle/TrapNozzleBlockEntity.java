@@ -1,6 +1,9 @@
 package com.adonis.createfisheryindustry.block.TrapNozzle;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
+import com.adonis.createfisheryindustry.block.common.EntityCaptureHelper;
+import com.adonis.createfisheryindustry.block.common.IItemReceiver;
+import com.adonis.createfisheryindustry.block.common.InventoryReceiver;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.AllParticleTypes;
@@ -17,44 +20,32 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.ClipContext.Block;
+import net.minecraft.world.level.ClipContext.Fluid;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.ClipContext.Block;
-import net.minecraft.world.level.ClipContext.Fluid;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -66,7 +57,6 @@ public class TrapNozzleBlockEntity extends SmartBlockEntity implements IHaveGogg
     protected static final double COLLECTION_RANGE = 1.5;
     protected static final double ENTITY_PROCESSING_RANGE = 1.5;
     protected static final int PROCESSING_TIME = 10;
-    private static final double MAX_COLLISION_BOX_SIZE = 0.8;
 
     protected final ItemStackHandler inventory;
     protected int processingTicks = 0;
@@ -121,7 +111,6 @@ public class TrapNozzleBlockEntity extends SmartBlockEntity implements IHaveGogg
         }
     }
 
-    // 修改 tickNozzle 方法
     private void tickNozzle() {
         float range = calcRange();
         if (this.range != range) {
@@ -276,106 +265,28 @@ public class TrapNozzleBlockEntity extends SmartBlockEntity implements IHaveGogg
         List<Entity> entities = level.getEntitiesOfClass(Entity.class, boundingBox);
 
         for (Entity entity : entities) {
-            if (!(entity instanceof Mob mob) || !entity.isAlive()) {
+            if (!entity.isAlive()) {
                 continue;
             }
 
-            ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-
-            if (CreateFisheryCommonConfig.isEntityBlacklisted(entityId)) {
-                continue;
-            }
-
-            if (CreateFisheryCommonConfig.isEntityWhitelisted(entityId)) {
-                processEntityDrops(level, mob);
-                continue;
-            }
-
-            AABB collisionBox = entity.getBoundingBox();
-            double width = collisionBox.getXsize();
-            double height = collisionBox.getYsize();
-            double depth = collisionBox.getZsize();
-
-            if (width <= MAX_COLLISION_BOX_SIZE && height <= MAX_COLLISION_BOX_SIZE && depth <= MAX_COLLISION_BOX_SIZE) {
-                processEntityDrops(level, mob);
+            // 使用统一的实体筛选逻辑
+            if (EntityCaptureHelper.shouldCaptureEntity(entity)) {
+                processEntityDrops(level, (Mob) entity);
             }
         }
     }
 
-    // 修改 processEntityDrops 方法
     private void processEntityDrops(ServerLevel level, Mob mob) {
-        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
+        // 创建物品接收器
+        IItemReceiver receiver = new InventoryReceiver(this.inventory, level, mob.position());
 
-        var lootTableKey = mob.getLootTable();
-        if (lootTableKey == null) {
-            return;
-        }
+        // 使用统一的捕获逻辑
+        EntityCaptureHelper.captureEntity(mob, level, getBlockPos(), receiver);
 
-        LootParams.Builder paramsBuilder = new LootParams.Builder(level)
-                .withParameter(LootContextParams.THIS_ENTITY, mob)
-                .withParameter(LootContextParams.ORIGIN, mob.position())
-                .withParameter(LootContextParams.DAMAGE_SOURCE, level.damageSources().generic());
-
-        List<ServerPlayer> players = level.getServer().getPlayerList().getPlayers();
-        if (!players.isEmpty()) {
-            Player nearestPlayer = level.getNearestPlayer(mob, -1);
-            if (nearestPlayer instanceof ServerPlayer serverPlayer) {
-                paramsBuilder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, serverPlayer);
-            }
-        }
-
-        LootParams params = paramsBuilder.create(LootContextParamSets.ENTITY);
-        LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(lootTableKey);
-        List<ItemStack> loots = lootTable.getRandomItems(params);
-
-        for (ItemStack stack : loots) {
-            ItemStack remainder = stack.copy();
-            for (int i = 0; i < inventory.getSlots(); i++) {
-                remainder = inventory.insertItem(i, remainder, false);
-                if (remainder.isEmpty()) {
-                    break;
-                }
-            }
-            if (!remainder.isEmpty()) {
-                ItemEntity itemEntity = new ItemEntity(level, mob.getX(), mob.getY(), mob.getZ(), remainder);
-                level.addFreshEntity(itemEntity);
-            }
-        }
-
-        mob.setRemoved(Entity.RemovalReason.KILLED);
-        boolean inWater = getBlockState().getValue(TrapNozzleBlock.WATERLOGGED);
-        spawnParticles(level, mob.getX(), mob.getY() + 0.5, mob.getZ(), inWater);
-        addExperienceNugget(level, mob.getX(), mob.getY() + 0.5, mob.getZ());
-    }
-
-    // 新增 spawnParticles 方法
-    private void spawnParticles(ServerLevel level, double x, double y, double z, boolean inWater) {
-        var particleType = inWater ? ParticleTypes.BUBBLE : ParticleTypes.CLOUD;
-        level.sendParticles(particleType, x, y, z, 30, 0.5, 0.5, 0.5, 0.1);
-        level.playSound(null, new BlockPos((int) x, (int) y, (int) z),
-                SoundEvents.BUCKET_FILL_FISH, SoundSource.BLOCKS, 1.0F, 1.0F);
-
-    }
-
-    // 新增 addExperienceNugget 方法
-    private void addExperienceNugget(ServerLevel level, double x, double y, double z) {
-        Item expNuggetItem = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("create", "experience_nugget"));
-        if (expNuggetItem != null && expNuggetItem != BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace("air"))) {
-            ItemStack expNugget = new ItemStack(expNuggetItem, 1);
-            ItemStack remainder = expNugget.copy();
-            for (int i = 0; i < inventory.getSlots(); i++) {
-                remainder = inventory.insertItem(i, remainder, false);
-                if (remainder.isEmpty()) {
-                    break;
-                }
-            }
-            if (!remainder.isEmpty()) {
-                ItemEntity itemEntity = new ItemEntity(level, x, y, z, remainder);
-                level.addFreshEntity(itemEntity);
-            }
-        } else {
-            level.addFreshEntity(new net.minecraft.world.entity.ExperienceOrb(level, x, y, z, 1));
-        }
+        // 更新方块实体状态
+        setChanged();
+        sendData();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
     }
 
     public boolean insertItem(ItemStack stack) {

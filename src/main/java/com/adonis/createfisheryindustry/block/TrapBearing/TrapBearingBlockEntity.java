@@ -509,7 +509,15 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         if (expNuggetItem != null &&
                 expNuggetItem != BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace("air"))) {
 
-            ItemStack expNugget = new ItemStack(expNuggetItem, 1);
+            // 基础 1 个经验粒
+            int nuggetCount = 1;
+
+            // 1/6 概率额外 1 个（模拟原版钓鱼 1-6 点经验，期望 3.5）
+            if (level.getRandom().nextInt(6) == 0) {
+                nuggetCount = 2;
+            }
+
+            ItemStack expNugget = new ItemStack(expNuggetItem, nuggetCount);
 
             // 尝试插入到装置存储
             boolean inserted = tryInsertToContraption(expNugget);

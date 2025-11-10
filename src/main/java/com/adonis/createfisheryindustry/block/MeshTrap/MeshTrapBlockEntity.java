@@ -2,7 +2,9 @@ package com.adonis.createfisheryindustry.block.MeshTrap;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
-import com.adonis.createfisheryindustry.block.common.TrapBlockEntity;
+import com.adonis.createfisheryindustry.block.common.EntityCaptureHelper;
+import com.adonis.createfisheryindustry.block.common.IItemReceiver;
+import com.adonis.createfisheryindustry.block.common.InventoryReceiver;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
@@ -15,43 +17,38 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleInformation {
-    protected static final int PROCESSING_TIME = 10;
+public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInformation {
+    public static final int INVENTORY_SLOTS = 9;
+    protected static final double COLLECTION_RANGE = 1.5;
     protected static final double ENTITY_KILL_RANGE = 1.0;
-    private static final double MAX_COLLISION_BOX_SIZE = 0.8;
+    protected static final int PROCESSING_TIME = 10;
 
     // 添加自动输出相关常量
     private static final int AUTO_EXPORT_COOLDOWN = 20; // 每20tick尝试一次输出
@@ -62,13 +59,78 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
     private int beltExtractionTicks = 0;
     private final Map<Direction, TransportedItemStackHandlerBehaviour> beltHandlers = new HashMap<>();
 
+    protected final ItemStackHandler inventory;
+    protected int processingTicks = 0;
+    protected int syncCooldown = 0;
+    protected boolean queuedSync = false;
+    private static final int SYNC_RATE = 8;
+
     private final IItemHandler insertionHandler;
     private final IItemHandler extractionHandler;
 
     public MeshTrapBlockEntity(BlockPos pos, BlockState state) {
         super(CreateFisheryBlockEntities.MESH_TRAP.get(), pos, state);
+        this.inventory = createInventory();
         this.insertionHandler = new InsertionOnlyItemHandler(inventory);
         this.extractionHandler = new ExtractionOnlyItemHandler(inventory);
+    }
+
+    protected ItemStackHandler createInventory() {
+        return new ItemStackHandler(INVENTORY_SLOTS) {
+            @Override
+            protected void onContentsChanged(int slot) {
+                setChanged();
+                if (level != null && !level.isClientSide()) {
+                    level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+                    sendData();
+                }
+            }
+
+            @Override
+            public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+                return true;
+            }
+
+            @Override
+            public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+                CompoundTag nbt = super.serializeNBT(provider);
+                return nbt;
+            }
+
+            @Override
+            public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+                super.deserializeNBT(provider, nbt);
+            }
+        };
+    }
+
+    public ItemStackHandler getInventory() {
+        return inventory;
+    }
+
+    public boolean insertItem(ItemStack stack) {
+        if (stack.isEmpty() || level == null || level.isClientSide()) {
+            return false;
+        }
+
+        ItemStack remainder = stack.copy();
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            remainder = inventory.insertItem(i, remainder, false);
+            if (remainder.isEmpty()) {
+                setChanged();
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+                sendData();
+                return true;
+            }
+        }
+
+        boolean partialSuccess = stack.getCount() != remainder.getCount();
+        if (partialSuccess) {
+            setChanged();
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            sendData();
+        }
+        return partialSuccess;
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, MeshTrapBlockEntity be) {
@@ -105,7 +167,29 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
             be.extractItemsFromBelts(serverLevel);
         }
 
-        be.tick();
+        be.tickInternal();
+    }
+
+    protected void collectNearbyItems(ServerLevel level) {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+
+        AABB boundingBox = new AABB(getBlockPos()).inflate(COLLECTION_RANGE);
+        List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, boundingBox);
+
+        for (ItemEntity itemEntity : items) {
+            if (itemEntity == null || !itemEntity.isAlive()) continue;
+            ItemStack stack = itemEntity.getItem();
+            if (!stack.isEmpty()) {
+                ItemStack copy = stack.copy();
+                if (insertItem(copy)) {
+                    itemEntity.discard();
+                } else if (copy.getCount() < stack.getCount()) {
+                    itemEntity.setItem(copy);
+                }
+            }
+        }
     }
 
     // 添加新方法：从周围的传送带提取物品
@@ -313,121 +397,64 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
         List<Entity> entities = level.getEntitiesOfClass(Entity.class, boundingBox);
 
         for (Entity entity : entities) {
-            if (!(entity instanceof Mob mob) || !entity.isAlive()) {
+            if (!entity.isAlive()) {
                 continue;
             }
 
-            EntityType<?> entityType = entity.getType();
-            ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
-
-            if (entityId.toString().equals("minecraft:breeze")) {
-            }
-
-            if (CreateFisheryCommonConfig.isEntityBlacklisted(entityId)) {
-                if (entityId.toString().equals("minecraft:breeze")) {
-                }
-                continue;
-            }
-
-            if (CreateFisheryCommonConfig.isEntityWhitelisted(entityId)) {
-                if (entityId.toString().equals("minecraft:breeze")) {
-                }
-                processEntityDrops(level, mob);
-                continue;
-            }
-
-            if (entityId.toString().equals("minecraft:breeze")) {
-            }
-
-            AABB collisionBox = entity.getBoundingBox();
-            double width = collisionBox.getXsize();
-            double height = collisionBox.getYsize();
-            double depth = collisionBox.getZsize();
-
-            if (entityId.toString().equals("minecraft:breeze")) {
-            }
-
-            if (width <= MAX_COLLISION_BOX_SIZE && height <= MAX_COLLISION_BOX_SIZE && depth <= MAX_COLLISION_BOX_SIZE) {
-                if (entityId.toString().equals("minecraft:breeze")) {
-                }
-                processEntityDrops(level, mob);
-            } else if (entityId.toString().equals("minecraft:breeze")) {
+            // 使用统一的实体筛选逻辑
+            if (EntityCaptureHelper.shouldCaptureEntity(entity)) {
+                processEntityDrops(level, (Mob) entity);
             }
         }
     }
 
     private void processEntityDrops(ServerLevel level, Mob mob) {
-        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
+        // 创建物品接收器
+        IItemReceiver receiver = new InventoryReceiver(this.inventory, level, mob.position());
 
+        // 使用统一的捕获逻辑
+        EntityCaptureHelper.captureEntity(mob, level, getBlockPos(), receiver);
 
-        var lootTableKey = mob.getLootTable();
-        if (lootTableKey == null) return;
-
-        LootParams.Builder paramsBuilder = new LootParams.Builder(level)
-                .withParameter(LootContextParams.THIS_ENTITY, mob)
-                .withParameter(LootContextParams.ORIGIN, mob.position())
-                .withParameter(LootContextParams.DAMAGE_SOURCE, level.damageSources().generic());
-
-        List<ServerPlayer> players = level.getServer().getPlayerList().getPlayers();
-        if (!players.isEmpty()) {
-            Player nearestPlayer = level.getNearestPlayer(mob, -1);
-            if (nearestPlayer instanceof ServerPlayer serverPlayer) {
-                paramsBuilder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, serverPlayer);
-            }
-        }
-
-        LootParams params = paramsBuilder.create(LootContextParamSets.ENTITY);
-
-        LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(lootTableKey);
-        List<ItemStack> loots = lootTable.getRandomItems(params);
-
-        boolean allInserted = true;
-        for (ItemStack stack : loots) {
-            ItemStack remainder = stack.copy();
-            for (int i = 0; i < inventory.getSlots(); i++) {
-                remainder = inventory.insertItem(i, remainder, false);
-                if (remainder.isEmpty()) {
-                    break;
-                }
-            }
-            if (!remainder.isEmpty()) {
-                ItemEntity itemEntity = new ItemEntity(level, mob.getX(), mob.getY(), mob.getZ(), remainder);
-                level.addFreshEntity(itemEntity);
-                allInserted = false;
-            }
-        }
-
-        // 生成粒子效果（水下用气泡，陆地用云雾）
-        boolean inWater = getBlockState().getValue(MeshTrapBlock.WATERLOGGED);
-        var particleType = inWater ? ParticleTypes.BUBBLE : ParticleTypes.CLOUD;
-        level.sendParticles(particleType,
-                mob.getX(), mob.getY() + 0.5, mob.getZ(),
-                15, 0.5, 0.5, 0.5, 0.1);
-        level.playSound(null, new BlockPos((int) mob.getX(), (int) mob.getY(), (int) mob.getZ()),
-                SoundEvents.BUCKET_FILL_FISH, SoundSource.BLOCKS, 1.0F, 1.0F);
-
-
-        // 固定生成1个经验颗粒
-        Item expNuggetItem = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("create", "experience_nugget"));
-        if (expNuggetItem != null && expNuggetItem != BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace("air"))) {
-            ItemStack expNugget = new ItemStack(expNuggetItem, 1);
-            ItemStack remainder = expNugget.copy();
-            for (int i = 0; i < inventory.getSlots(); i++) {
-                remainder = inventory.insertItem(i, remainder, false);
-                if (remainder.isEmpty()) {
-                    break;
-                }
-            }
-            if (!remainder.isEmpty()) {
-                ItemEntity itemEntity = new ItemEntity(level, mob.getX(), mob.getY(), mob.getZ(), remainder);
-                level.addFreshEntity(itemEntity);
-            }
-        }
-
-        mob.setRemoved(Entity.RemovalReason.KILLED);
+        // 更新方块实体状态
         setChanged();
         sendData();
         level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+    }
+
+    public void dropInventory() {
+        if (level instanceof ServerLevel serverLevel) {
+            Vec3 pos = Vec3.atCenterOf(worldPosition);
+            for (int i = 0; i < inventory.getSlots(); i++) {
+                ItemStack stack = inventory.getStackInSlot(i);
+                if (!stack.isEmpty()) {
+                    ItemEntity itemEntity = new ItemEntity(level, pos.x, pos.y, pos.z, stack);
+                    serverLevel.addFreshEntity(itemEntity);
+                    inventory.setStackInSlot(i, ItemStack.EMPTY);
+                }
+            }
+        }
+    }
+
+    public void sendData() {
+        if (syncCooldown > 0) {
+            queuedSync = true;
+            return;
+        }
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            setChanged();
+        }
+        queuedSync = false;
+        syncCooldown = SYNC_RATE;
+    }
+
+    public void tickInternal() {
+        if (syncCooldown > 0) {
+            syncCooldown--;
+            if (syncCooldown == 0 && queuedSync) {
+                sendData();
+            }
+        }
     }
 
     @Override
@@ -456,11 +483,47 @@ public class MeshTrapBlockEntity extends TrapBlockEntity implements IHaveGoggleI
     }
 
     @Override
-    public @Nullable <T> T getCapability(net.neoforged.neoforge.capabilities.BlockCapability<T, @Nullable Direction> capability, @Nullable Direction side) {
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveAdditional(tag, provider);
+        CompoundTag inventoryTag = inventory.serializeNBT(provider);
+        tag.put("Inventory", inventoryTag);
+        tag.putInt("ProcessingTicks", processingTicks);
+    }
+
+    @Override
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.loadAdditional(tag, provider);
+        if (tag.contains("Inventory")) {
+            CompoundTag inventoryTag = tag.getCompound("Inventory");
+            inventory.deserializeNBT(provider, inventoryTag);
+        }
+        processingTicks = tag.getInt("ProcessingTicks");
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        CompoundTag tag = super.getUpdateTag(provider);
+        saveAdditional(tag, provider);
+        return tag;
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider provider) {
+        super.onDataPacket(net, pkt, provider);
+        handleUpdateTag(pkt.getTag(), provider);
+    }
+
+    @Nullable
+    public <T> T getCapability(BlockCapability<T, @Nullable Direction> capability, @Nullable Direction side) {
         if (capability == Capabilities.ItemHandler.BLOCK) {
             return (T) inventory; // 所有方向都返回完整库存，允许输入和输出
         }
-        return super.getCapability(capability, side);
+        return null;
     }
 
     private static class InsertionOnlyItemHandler implements IItemHandler {
