@@ -21,7 +21,8 @@
   "entity.createfisheryindustry.harpoon": "Harpoon",
   "entity.createfisheryindustry.tethered_harpoon": "Tethered Harpoon",
   "itemGroup.createfisheryindustry.base": "Create: Fishery Industry",
-  "itemGroup.createfisheryindustry.fishery_tab": "Create: Fishery Industry",
+  "itemGroup.createfisheryindustry.fishery_industry_tab": "Create: Fishery Industry",
+  "itemGroup.createfisheryindustry.fishery_equipment_tab": "Create: Fishery Equipment",
 
   "create.gui.goggles.mesh_trap_contents": "Mesh Trap Contents",
   "create.gui.goggles.inventory.empty": "Empty",

@@ -21,7 +21,8 @@
   "entity.createfisheryindustry.harpoon": "鱼叉",
   "entity.createfisheryindustry.tethered_harpoon": "带锁链的鱼叉",
   "itemGroup.createfisheryindustry.base": "机械动力：渔业",
-  "itemGroup.createfisheryindustry.fishery_tab": "机械动力：渔业",
+  "itemGroup.createfisheryindustry.fishery_industry_tab": "机械动力：渔业",
+  "itemGroup.createfisheryindustry.fishery_equipment_tab": "机械动力：渔业装备",
 
   "create.gui.goggles.mesh_trap_contents": "捕获网内含：",
   "create.gui.goggles.inventory.empty": "空",
