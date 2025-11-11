@@ -1,5 +1,8 @@
 package com.adonis.createfisheryindustry;
 
+import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
+import com.simibubi.create.api.registry.CreateRegistries;
+import com.simibubi.create.api.registry.registrate.SimpleBuilder;
 import com.simibubi.create.foundation.data.CreateBlockEntityBuilder;
 import com.tterrag.registrate.AbstractRegistrate;
 import com.tterrag.registrate.builders.BlockEntityBuilder;
@@ -22,6 +25,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class CFIRegistrate extends AbstractRegistrate<CFIRegistrate> {
     protected final Logger logger;
@@ -73,6 +77,21 @@ public class CFIRegistrate extends AbstractRegistrate<CFIRegistrate> {
     @Override
     public <T extends BlockEntity, P> CreateBlockEntityBuilder<T, P> blockEntity(P parent, String name, BlockEntityBuilder.BlockEntityFactory<T> factory) {
         return (CreateBlockEntityBuilder<T, P>) entry(name, callback -> CreateBlockEntityBuilder.create(this, parent, name, callback, factory));
+    }
+
+    /**
+     * 注册动态物品存储类型
+     */
+    public <T extends MountedItemStorageType<?>> SimpleBuilder<MountedItemStorageType<?>, T, CFIRegistrate> mountedItemStorage(String name, Supplier<T> supplier) {
+        return this.entry(name, callback -> {
+            SimpleBuilder<MountedItemStorageType<?>, T, CFIRegistrate> builder =
+                    new SimpleBuilder<>(this, this, name, callback, CreateRegistries.MOUNTED_ITEM_STORAGE_TYPE, supplier);
+
+            // 确保调用 byBlock 方法
+            builder.byBlock(MountedItemStorageType.REGISTRY);
+
+            return builder;
+        });
     }
 
     public ResourceLocation asResource(String path) {

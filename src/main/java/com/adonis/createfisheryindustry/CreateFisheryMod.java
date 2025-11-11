@@ -1,5 +1,7 @@
 package com.adonis.createfisheryindustry;
 
+import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapMountedStorageType;
+import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapMovementBehaviour;
 import com.adonis.createfisheryindustry.client.UnderwaterSprintFOVHandler;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.config.CreateFisheryStressConfig;
@@ -8,6 +10,8 @@ import com.adonis.createfisheryindustry.event.HarpoonDropHandler;
 import com.adonis.createfisheryindustry.recipe.CreateFisheryRecipeTypes;
 import com.adonis.createfisheryindustry.registry.*;
 import com.mojang.logging.LogUtils;
+import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
+import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
@@ -63,6 +67,11 @@ public class CreateFisheryMod {
         CreateFisheryTabs.register(bus);
         CreateFisheryComponents.register(bus);
 
+        // 注册动态存储类型
+        LOGGER.info("Registering mounted storage types...");
+        CreateFisheryMountedStorageTypes.register(bus);
+        LOGGER.info("Mounted storage types registered");
+
         SERIALIZERS.register(bus);
         TYPES.register(bus);
         CreateFisheryRecipeTypes.register(SERIALIZERS, TYPES);
@@ -92,6 +101,19 @@ public class CreateFisheryMod {
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             BacktankInventorySupplier.register();
+
+            // 注册捕获网的动态结构移动行为
+            MovementBehaviour.REGISTRY.register(
+                    CreateFisheryBlocks.MESH_TRAP.get(),
+                    new MeshTrapMovementBehaviour()
+            );
+
+            // 手动注册 MountedStorageType 到方块
+            MountedItemStorageType<?> meshTrapStorageType = CreateFisheryMountedStorageTypes.MESH_TRAP.get();
+            MountedItemStorageType.REGISTRY.register(
+                    CreateFisheryBlocks.MESH_TRAP.get(),
+                    meshTrapStorageType
+            );
         });
     }
 

@@ -2,10 +2,11 @@ package com.adonis.createfisheryindustry.block.common;
 
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 /**
  * MovementBehaviour 的物品接收器实现
- * 使用 MovementContext 的存储系统来存储物品
+ * 直接使用装置的通用存储系统
  */
 public class MovementContextReceiver implements IItemReceiver {
     private final MovementContext context;
@@ -20,15 +21,14 @@ public class MovementContextReceiver implements IItemReceiver {
             return false;
         }
 
-        var itemHandler = context.contraption.getStorage().getAllItems();
-        if (itemHandler == null) {
+        // 获取装置的通用物品存储
+        var contraptionStorage = context.contraption.getStorage().getAllItems();
+        if (contraptionStorage == null) {
             return false;
         }
 
-        // 尝试插入到物品处理器
-        ItemStack remainder = net.neoforged.neoforge.items.ItemHandlerHelper.insertItem(
-                itemHandler, stack, false
-        );
+        // 尝试插入物品
+        ItemStack remainder = ItemHandlerHelper.insertItem(contraptionStorage, stack, false);
 
         return remainder.getCount() < stack.getCount();
     }
