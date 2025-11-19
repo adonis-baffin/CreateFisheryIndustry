@@ -1,5 +1,6 @@
 {
   "values": [
-    "createfisheryindustry:harpoon"
+    "createfisheryindustry:harpoon",
+    "createfisheryindustry:pneumatic_harpoon_gun"
   ]
 }
