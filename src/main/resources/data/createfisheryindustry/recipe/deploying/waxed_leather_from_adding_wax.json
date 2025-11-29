@@ -1,0 +1,17 @@
+{
+  "type": "create:deploying",
+  "ingredients": [
+    {
+      "item": "minecraft:leather"
+    },
+    {
+      "item": "minecraft:honeycomb_block"
+    }
+  ],
+  "keep_held_item": true,
+  "results": [
+    {
+      "id": "createfisheryindustry:waxed_leather"
+    }
+  ]
+}

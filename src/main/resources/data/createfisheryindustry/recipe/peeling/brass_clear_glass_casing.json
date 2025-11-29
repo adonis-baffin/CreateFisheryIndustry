@@ -1,0 +1,14 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "prism:brass_glass_casing"
+    }
+  ],
+  "results": [
+    {
+      "id": "prism:brass_clear_glass_casing",
+      "count": 1
+    }
+  ]
+}

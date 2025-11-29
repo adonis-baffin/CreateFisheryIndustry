@@ -1,0 +1,14 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "createfisheryindustry:worn_harpoon"
+    }
+  ],
+  "results": [
+    {
+      "id": "createfisheryindustry:harpoon",
+      "count": 1
+    }
+  ]
+}

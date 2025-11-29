@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "tag": "c:nuggets/zinc"
+    },
+    "w": {
+      "tag": "c:ingots/zinc"
+    }
+  },
+  "pattern": [
+    " #w",
+    " w ",
+    "w  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "createfisheryindustry:harpoon"
+  }
+}

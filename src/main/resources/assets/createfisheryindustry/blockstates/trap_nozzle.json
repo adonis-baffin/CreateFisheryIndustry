@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "createfisheryindustry:block/trap_nozzle",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "createfisheryindustry:block/trap_nozzle",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "createfisheryindustry:block/trap_nozzle",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "createfisheryindustry:block/trap_nozzle",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "createfisheryindustry:block/trap_nozzle"
+    },
+    "facing=west": {
+      "model": "createfisheryindustry:block/trap_nozzle",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

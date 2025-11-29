@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "priority": 1000,
+  "package": "com.adonis.createfisheryindustry.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "createfisheryindustry.refmap.json",
+  "mixins": [
+    "AllArmInteractionPointTypesMixin",
+    "BlockMovementChecksMixin",
+    "accessor.DivingBootsAccessor",
+    "accessor.LivingEntityAccessor",
+    "SuperJumpMarkerMixin",
+    "DivingSystemMixin",
+    "UnderwaterSprintMixin",
+    "SprintProtectionMixin",
+    "SwimmingPreventionMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

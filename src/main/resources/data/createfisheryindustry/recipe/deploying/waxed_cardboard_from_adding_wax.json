@@ -1,0 +1,17 @@
+{
+  "type": "create:deploying",
+  "ingredients": [
+    {
+      "item": "create:cardboard"
+    },
+    {
+      "item": "minecraft:honeycomb_block"
+    }
+  ],
+  "keep_held_item": true,
+  "results": [
+    {
+      "id": "createfisheryindustry:waxed_cardboard"
+    }
+  ]
+}

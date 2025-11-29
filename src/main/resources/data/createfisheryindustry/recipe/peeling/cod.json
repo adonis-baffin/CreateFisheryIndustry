@@ -1,0 +1,18 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "minecraft:cod"
+    }
+  ],
+  "results": [
+    {
+      "id": "createfisheryindustry:cod_steak",
+      "count": 1
+    },
+    {
+      "id": "createfisheryindustry:fish_skin",
+      "chance": 0.75
+    }
+  ]
+}

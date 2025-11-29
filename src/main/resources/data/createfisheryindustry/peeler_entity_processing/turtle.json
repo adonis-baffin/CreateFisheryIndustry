@@ -1,0 +1,5 @@
+{
+  "entity": "minecraft:turtle",
+  "loot_table": "createfisheryindustry:entities/peeler/turtle",
+  "cooldown": 1200
+}

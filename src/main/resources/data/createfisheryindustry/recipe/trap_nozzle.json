@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "tag": "c:plates/zinc"
+    },
+    "w": {
+      "item": "create:nozzle"
+    }
+  },
+  "pattern": [
+    " # ",
+    " w ",
+    " # "
+  ],
+  "result": {
+    "count": 1,
+    "id": "createfisheryindustry:trap_nozzle"
+  }
+}

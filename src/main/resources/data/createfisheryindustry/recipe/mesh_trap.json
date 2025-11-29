@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "tag": "c:plates/zinc"
+    },
+    "w": {
+      "tag": "minecraft:wool"
+    }
+  },
+  "pattern": [
+    " # ",
+    " w ",
+    " # "
+  ],
+  "result": {
+    "count": 1,
+    "id": "createfisheryindustry:mesh_trap"
+  }
+}

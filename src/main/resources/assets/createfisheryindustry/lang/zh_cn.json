@@ -1,0 +1,194 @@
+{
+  "block.createfisheryindustry.frame_trap": "捕鱼框",
+  "block.createfisheryindustry.mesh_trap": "捕获网",
+  "block.createfisheryindustry.trap_nozzle": "气捕网",
+  "block.createfisheryindustry.smart_mesh": "智能滤网",
+  "block.createfisheryindustry.trap_bearing": "捕鱼轴承",
+  "item.createfisheryindustry.zinc_sheet": "锌板",
+  "item.createfisheryindustry.pneumatic_mechanism": "气动构件",
+  "item.createfisheryindustry.incomplete_pneumatic_mechanism": "未完成的气动构件",
+  "item.createfisheryindustry.waxed_cardboard": "防水纸板",
+  "item.createfisheryindustry.waxed_leather": "防水皮革",
+  "item.createfisheryindustry.worn_harpoon": "破损的鱼叉",
+  "item.createfisheryindustry.harpoon_pouch": "鱼叉袋",
+  "item.createfisheryindustry.pneumatic_harpoon_gun": "气动鱼叉枪",
+
+  "item.createfisheryindustry.waxed_cardboard.tooltip.summary": "测试物品，目前无用途。将来会在新模组《机械动力：世界工厂》中发布，敬请期待。",
+  "item.createfisheryindustry.worn_harpoon.tooltip.summary": "折戟沉沙铁未销，自将磨洗认前朝",
+  "item.createfisheryindustry.copper_diving_leggings": "铜潜水护腿",
+  "item.createfisheryindustry.netherite_diving_leggings": "下界合金潜水护腿",
+  "item.createfisheryindustry.harpoon": "鱼叉",
+  "entity.createfisheryindustry.harpoon": "鱼叉",
+  "entity.createfisheryindustry.tethered_harpoon": "带锁链的鱼叉",
+  "itemGroup.createfisheryindustry.base": "机械动力：渔业",
+  "itemGroup.createfisheryindustry.fishery_industry_tab": "机械动力：渔业",
+  "itemGroup.createfisheryindustry.fishery_equipment_tab": "机械动力：渔业装备",
+
+  "create.gui.goggles.mesh_trap_contents": "捕获网内含：",
+  "create.gui.goggles.inventory.empty": "空",
+  "create.gui.goggles.trap_nozzle_contents": "气捕网内含：",
+  "create.gui.goggles.smart_mesh_contents": "智能滤网内含：",
+
+  "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+
+  "tooltip.keyShift": "Shift",
+  "tooltip.holdForDescription": "按住 [$] 查看描述",
+
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "铜潜水护腿与潜水靴配合使用，在海底体验月球漫步的感觉。",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "穿在腿上时：",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "穿戴者能够在水中或岩浆中获得疾跑与超级跳跃的能力，最多可以跨越四格的高度，并且超级跳跃在落地后也不会受到摔落伤害。",
+
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "下界合金潜水护腿与潜水靴配合使用，在海底或熔岩海底体验月球漫步的感觉。",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "穿在腿上时：",
+  "item.createfisheryindustry.netherite_diving_leggings.tooltip.behaviour1": "穿戴者能够在水中或岩浆中获得疾跑与超级跳跃的能力，最多可以跨越四格的高度，并且超级跳跃在落地后也不会受到摔落伤害。",
+
+  "item.createfisheryindustry.harpoon_pouch.tooltip.summary": "可以容纳4支鱼叉。在玩家投掷鱼叉后会自动补充鱼叉至主手，在玩家捡起鱼叉时会优先进入鱼叉袋",
+
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.summary": "由压缩空气驱动，可以发射一支鱼叉，命中实体后将实体拉至身边，命中方块后将自身拉向方块。可以远程拾取物品。",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.condition1": "右键使用时：",
+  "item.createfisheryindustry.pneumatic_harpoon_gun.tooltip.behaviour1": "发射鱼叉，再次右键收回",
+
+  "block.createfisheryindustry.frame_trap.tooltip.summary": "用于动态结构上捕鱼的元件。",
+  "block.createfisheryindustry.frame_trap.tooltip.condition1": "随动态结构移动时：",
+  "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "可以捕获触碰到的鱼类，或其他种类的小型生物，并收集路径上的物品。此外，还会随时间获得当前生物群系的钓鱼战利品。每当钓鱼触发或捕获生物时，获得经验颗粒。",
+
+  "block.createfisheryindustry.mesh_trap.tooltip.summary": "自动收集周边的物品，捕获鱼类或其他小型生物，并存储。注意捕获网并没有获取钓鱼战利品的能力。",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "对实体使用时",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "捕获可以被捕捉的实体，获得其掉落物和经验",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition2": "右键点击时：",
+  "block.createfisheryindustry.mesh_trap.tooltip.behaviour2": "取出其中的物品，一次最多一组。",
+
+  "block.createfisheryindustry.trap_nozzle.tooltip.summary": "附着在鼓风机出风口，将效果分散到各个方向。",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition1": "附着在鼓风机上时：",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour1": "自动收集周边的物品，捕获鱼类或其他小型生物，并存储",
+  "block.createfisheryindustry.trap_nozzle.tooltip.condition2": "右键点击时：",
+  "block.createfisheryindustry.trap_nozzle.tooltip.behaviour2": "取出其中的物品，一次最多一组。",
+
+  "block.createfisheryindustry.smart_mesh.tooltip.summary": "智能滤网自动收集并存储周边物品。",
+  "block.createfisheryindustry.smart_mesh.tooltip.condition1": "空手右键点击时：",
+  "block.createfisheryindustry.smart_mesh.tooltip.behaviour1": "取出其中的物品，一次最多一组。",
+
+  "create.trap_bearing.status": "捕鱼轴承状态：%1$s",
+  "create.trap_bearing.idle": "空闲",
+  "create.trap_bearing.lvl": "等级 %1$s",
+  "create.trap_bearing.max_lvl": "最高等级",
+  "create.trap_bearing.frame_traps": "捕鱼框",
+  "create.trap_bearing.frame_traps_dots": "...... ",
+  "create.trap_bearing.working_state": "工作状态：",
+  "create.trap_bearing.state.insufficient": "未满足工作条件",
+  "create.trap_bearing.state.idle": "空转",
+  "create.trap_bearing.state.water_fishing": "水中捕鱼",
+  "create.trap_bearing.state.water_fishing_treasure": "水中捕鱼，可获取宝藏",
+  "create.trap_bearing.state.lava_fishing": "熔岩捕鱼",
+  "create.trap_bearing.state.unknown": "未知状态",
+
+  "create.trap_bearing.storage.empty": "存储为空",
+  "create.trap_bearing.storage.header": "存储内容:",
+  "create.trap_bearing.storage.slots": "槽位: %1$s / %2$s",
+  "create.trap_bearing.storage.items": "物品总数: %1$s",
+
+  "item.createfisheryindustry.fish_skin": "鱼皮",
+  "item.createfisheryindustry.roasted_fish_skin": "烤鱼皮",
+  "item.createfisheryindustry.cod_steak": "鳕鱼排",
+  "item.createfisheryindustry.salmon_steak": "鲑鱼排",
+  "item.createfisheryindustry.cooked_cod_steak": "熟鳕鱼排",
+  "item.createfisheryindustry.cooked_salmon_steak": "熟鲑鱼排",
+
+  "recipe.createfisheryindustry.peeling": "切削",
+
+  "gui.goggles.kinetic_stats": "Kinetic Stats",
+  "create.gui.goggles.speed": "Speed: %s RPM",
+  "create.gui.goggles.peeler_input": "Input:",
+  "create.gui.goggles.peeler_outputs": "动力切削机内含:",
+  "create.gui.goggles.peeler_stored_outputs": "动力切削机内含:",
+  "block.createfisheryindustry.mechanical_peeler": "动力切削机",
+  "create.gui.goggles.mechanical_peeler_contents": "动力切削机副产品",
+
+  "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "用于处理去皮配方的机械元件，也可与部分生物交互",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "接入应力时",
+  "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "在物品处理方面，可以处理去皮配方，类似动力锯。在对实体处理方面，可以给羊去羊毛，或采集乌龟和犰狳的鳞甲。在对方块处理方面，可以给整棵树去树皮，给方块除锈除蜡，还可以采收成熟的紫水晶簇。",
+
+  "block.createfisheryindustry.smart_nozzle": "智能气滤网",
+
+  "create.gui.goggles.smart_nozzle_contents": "智能气滤网内容物",
+
+  "create_fishery.smart_mesh.extracted": "提取了 %s 个 %s",
+  "create_fishery.smart_mesh.extraction_failed": "提取失败，请重试",
+  "create_fishery.smart_mesh.empty": "智能滤网为空",
+
+  "create_fishery.mesh_trap.extracted": "提取了 %s 个 %s",
+  "create_fishery.mesh_trap.extraction_failed": "提取失败，请重试",
+  "create_fishery.mesh_trap.empty": "捕获网为空",
+
+  "create_fishery.trap_nozzle.extracted": "提取了 %s 个 %s",
+  "create_fishery.trap_nozzle.extraction_failed": "提取失败，请重试",
+  "create_fishery.trap_nozzle.empty": "气滤网为空",
+
+  "create_fishery.smart_nozzle.extracted": "提取了 %s 个 %s",
+  "create_fishery.smart_nozzle.extraction_failed": "提取失败，请重试",
+  "create_fishery.smart_nozzle.empty": "智能气滤网为空",
+
+  "block.createfisheryindustry.smart_nozzle.tooltip.summary": "具有过滤功能的智能气滤网，可以自动收集符合过滤条件的附近物品。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "当连接到鼓风机时：",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour1": "自动收集符合过滤条件的附近物品并存储。气流只影响过滤的物品。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition2": "右键点击时：",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour2": "提取物品，一次最多一组。",
+  "block.createfisheryindustry.smart_nozzle.tooltip.condition3": "过滤槽：",
+  "block.createfisheryindustry.smart_nozzle.tooltip.behaviour3": "在过滤槽中放置物品以仅收集该类型的物品。气流将完全忽略不匹配的物品。",
+
+  "create_fishery.pneumatic_harpoon_gun.insufficient_air": "气压不足，无法发射",
+  "create_fishery.pneumatic_harpoon_gun.must_aim_entity": "潜行时必须瞄准实体",
+  "create_fishery.pneumatic_harpoon_gun.no_valid_target": "没有有效目标",
+  "create_fishery.pneumatic_harpoon_gun.target_too_far": "目标太远",
+  "create_fishery.pneumatic_harpoon_gun.reloading": "鱼叉枪正在装填",
+  "create_fishery.pneumatic_harpoon_gun.pulled_item": "拉取了 %s 个物品",
+  "create_fishery.pneumatic_harpoon_gun.hooked_entity": "钩住了 %s",
+  "create_fishery.pneumatic_harpoon_gun.anchored_block": "锚定在方块上",
+  "create_fishery.pneumatic_harpoon_gun.released": "鱼叉已收回",
+
+  "create_fishery.harpoon.tooltip": "可配合气动鱼叉枪使用",
+  "create_fishery.harpoon.tooltip.controls": "操作方式：",
+  "create_fishery.harpoon.tooltip.shoot": "右键：发射鱼叉",
+  "create_fishery.harpoon.tooltip.retract": "右键（已钩住）：收回鱼叉",
+  "create_fishery.harpoon.tooltip.sneak": "潜行+右键：仅瞄准实体发射",
+
+  "create_fishery.harpoon.damage": "伤害：%s",
+  "create_fishery.harpoon.range": "射程：%s 格",
+  "create_fishery.harpoon.air_consumption": "气压消耗：每次 %s",
+  "create_fishery.harpoon.pull_strength": "牵引力：%s",
+
+  "death.attack.harpoon": "%1$s 被 %2$s 用鱼叉击杀",
+  "death.attack.harpoon.item": "%1$s 被 %2$s 使用 %3$s 的鱼叉击杀",
+
+  "createfisheryindustry.ponder.frame_trap.header": "使用捕鱼框",
+  "createfisheryindustry.ponder.frame_trap.text_1": "像风帆一样，捕鱼框会自行依附在动态结构上",
+  "createfisheryindustry.ponder.frame_trap.text_2": "当捕鱼框作为动态结构的一部分移动时……",
+  "createfisheryindustry.ponder.frame_trap.text_3": "它会收集触碰到的掉落物，并捕捉路径上的小型生物。每次捕获生物还会获得经验颗粒",
+  "createfisheryindustry.ponder.frame_trap.text_4": "并自动存储到该结构相接的容器中",
+  "createfisheryindustry.ponder.frame_trap_underwater.header": "在水下使用捕鱼框",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_1": "当捕鱼框在水下随着动态结构移动时……",
+  "createfisheryindustry.ponder.frame_trap_underwater.text_2": "有概率随时间获得钓鱼战利品，同时获得经验颗粒",
+
+  "createfisheryindustry.ponder.mesh_trap.header": "使用捕获网",
+  "createfisheryindustry.ponder.mesh_trap.text_1": "手持捕获网右击小型生物来捕获它们，捕获成功后会获得其战利品和经验颗粒",
+  "createfisheryindustry.ponder.mesh_trap.text_2": "捕获网会自动吸取附近的掉落物，捕获附近的生物。右键捕获网可以提取其中存储的物品",
+  "createfisheryindustry.ponder.mesh_trap.text_3": "如果有相邻的容器，捕获网会自动将物品输出到容器中",
+
+  "createfisheryindustry.ponder.mechanical_peeler.header": "使用动力切削机处理物品",
+  "createfisheryindustry.ponder.mechanical_peeler.text_1": "面朝上的动力切削机可以处理各种物品",
+  "createfisheryindustry.ponder.mechanical_peeler.text_2": "处理过后的物品的弹出方向始终与物品的输入方向相反",
+  "createfisheryindustry.ponder.mechanical_peeler.text_3": "动力切削机的副产物会被储存在其中，可以通过其他物流元件提取",
+
+  "createfisheryindustry.ponder.mechanical_peeler_tree.header": "使用动力切削机处理方块与实体",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_1": "向其通入旋转力后，动力切削机可以对前方的树木去皮",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_2": "也可以给羊剪羊毛，或获取乌龟和犰狳的鳞甲",
+  "createfisheryindustry.ponder.mechanical_peeler_tree.text_3": "还能收获紫水晶簇，以及给铜除锈",
+
+  "createfisheryindustry.ponder.mechanical_peeler_copper.header": "在动态结构中使用动力切削机",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "当动力切削机作为动态结构的一部分移动时……",
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "……它会处理前方的方块或实体",
+
+  "create_fishery.harpoon_pouch.remaining": "剩余鱼叉：%s",
+  "create_fishery.harpoon_pouch.empty": "鱼叉袋已空"
+
+}

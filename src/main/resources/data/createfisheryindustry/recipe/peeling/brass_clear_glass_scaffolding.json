@@ -1,0 +1,14 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "prism:brass_glass_scaffolding"
+    }
+  ],
+  "results": [
+    {
+      "id": "prism:brass_clear_glass_scaffolding",
+      "count": 1
+    }
+  ]
+}

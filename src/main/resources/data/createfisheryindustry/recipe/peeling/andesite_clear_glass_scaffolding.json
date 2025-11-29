@@ -1,0 +1,14 @@
+{
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "prism:andesite_glass_scaffolding"
+    }
+  ],
+  "results": [
+    {
+      "id": "prism:andesite_clear_glass_scaffolding",
+      "count": 1
+    }
+  ]
+}
