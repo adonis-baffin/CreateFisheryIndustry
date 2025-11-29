@@ -2,6 +2,7 @@ package com.adonis.createfisheryindustry.block.common;
 
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 /**
@@ -13,6 +14,27 @@ public class MovementContextReceiver implements IItemReceiver {
 
     public MovementContextReceiver(MovementContext context) {
         this.context = context;
+    }
+
+    @Override
+    public boolean canReceive() {
+        // 检查装置存储是否可用且有空间
+        if (context.contraption == null) {
+            return false;
+        }
+
+        var storage = context.contraption.getStorage();
+        if (storage == null) {
+            return false;
+        }
+
+        var contraptionItems = storage.getAllItems();
+        if (contraptionItems == null || contraptionItems.getSlots() <= 0) {
+            return false;
+        }
+
+        // 检查是否至少有一个槽位可以接收物品
+        return hasAvailableSpace(contraptionItems);
     }
 
     @Override
@@ -31,5 +53,21 @@ public class MovementContextReceiver implements IItemReceiver {
         ItemStack remainder = ItemHandlerHelper.insertItem(contraptionStorage, stack, false);
 
         return remainder.getCount() < stack.getCount();
+    }
+
+    /**
+     * 检查物品处理器是否有可用空间
+     */
+    private boolean hasAvailableSpace(IItemHandler handler) {
+        for (int i = 0; i < handler.getSlots(); i++) {
+            ItemStack stackInSlot = handler.getStackInSlot(i);
+            if (stackInSlot.isEmpty()) {
+                return true; // 有空槽位
+            }
+            if (stackInSlot.getCount() < stackInSlot.getMaxStackSize()) {
+                return true; // 有未满的槽位
+            }
+        }
+        return false;
     }
 }

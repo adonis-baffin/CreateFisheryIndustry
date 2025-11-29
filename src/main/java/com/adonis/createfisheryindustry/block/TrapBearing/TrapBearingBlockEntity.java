@@ -4,7 +4,6 @@ import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapBlock;
 import com.simibubi.create.content.contraptions.bearing.MechanicalBearingBlockEntity;
-import com.simibubi.create.content.contraptions.bearing.BearingBlock;
 import com.simibubi.create.content.contraptions.Contraption;
 import com.simibubi.create.content.kinetics.base.IRotate.StressImpact;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -13,7 +12,6 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,6 +26,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Containers;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -55,6 +54,7 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     private static final int OPEN_WATER_LEVEL_THRESHOLD = 4;
     private static final int UPDATE_INTERVAL = 20;
     private static final int EFFECTIVE_FRAME_CAP = 64;
+    private static final int EXTRACT_INTERVAL = 10;
 
     // 物品存储 - 27格存储空间
     public static final int INVENTORY_SIZE = 27;
@@ -91,13 +91,11 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
 
     // 定时器
     private int updateTimer = 0;
+    private int extractTimer = 0;
 
     // 统计数据
     private int totalCaught = 0;
     private int successfulAttempts = 0;
-
-    private static final int EXTRACT_INTERVAL = 10; // 每10tick抽取一次
-    private int extractTimer = 0;
 
     // 虚拟钓鱼工具
     private FishingHook virtualHook;
@@ -154,10 +152,78 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
         }
     }
 
-
     @Override
     public void lazyTick() {
         super.lazyTick();
+    }
+
+    /**
+     * 从装置存储中抽取物品到自身存储
+     * 这个方法是安全的：如果装置存储不可用，直接跳过，等下次再试
+     */
+    private void extractItemsFromContraption() {
+        // 安全检查：装置是否就绪
+        if (movedContraption == null) {
+            return;
+        }
+
+        var contraption = movedContraption.getContraption();
+        if (contraption == null || contraption.disassembled) {
+            return;
+        }
+
+        var storage = contraption.getStorage();
+        if (storage == null) {
+            return;
+        }
+
+        var contraptionItems = storage.getAllItems();
+        if (contraptionItems == null || contraptionItems.getSlots() <= 0) {
+            return;
+        }
+
+        // 遍历装置存储中的物品
+        for (int i = 0; i < contraptionItems.getSlots(); i++) {
+            ItemStack stackInSlot = contraptionItems.getStackInSlot(i);
+            if (stackInSlot.isEmpty()) {
+                continue;
+            }
+
+            // 尝试插入到自身存储
+            ItemStack toInsert = stackInSlot.copy();
+            ItemStack remainder = ItemHandlerHelper.insertItem(inventory, toInsert, true); // 先模拟
+
+            if (remainder.getCount() < toInsert.getCount()) {
+                // 可以插入至少一部分
+                int insertCount = toInsert.getCount() - remainder.getCount();
+
+                // 从装置存储中提取
+                ItemStack extracted = contraptionItems.extractItem(i, insertCount, false);
+
+                // 插入到自身存储
+                if (!extracted.isEmpty()) {
+                    ItemHandlerHelper.insertItem(inventory, extracted, false);
+                }
+            }
+
+            // 检查自身存储是否已满
+            if (isInventoryFull()) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * 检查自身存储是否已满
+     */
+    private boolean isInventoryFull() {
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            ItemStack stack = inventory.getStackInSlot(i);
+            if (stack.isEmpty() || stack.getCount() < stack.getMaxStackSize()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -336,6 +402,11 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             return;
         }
 
+        // 存储满了不钓鱼
+        if (isInventoryFull()) {
+            return;
+        }
+
         // 确保钓鱼已启动
         if (!isFishing) {
             isFishing = true;
@@ -365,6 +436,11 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
      * 执行钓鱼
      */
     private void performFishing() {
+        // 再次检查存储空间（防止在倒计时期间变满）
+        if (isInventoryFull()) {
+            return;
+        }
+
         successfulAttempts++;
 
         // 战利品生成
@@ -384,8 +460,8 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             ItemStack remainder = ItemHandlerHelper.insertItem(inventory, loot, false);
 
             if (!remainder.isEmpty()) {
-                // 存储已满，掉落到随机捕鱼框位置
-                spawnAtRandomFrameTrap(remainder);
+                // 存储已满，掉落到随机捕鱼框位置或轴承位置
+                spawnItemAtBestLocation(remainder);
             }
 
             // 生成经验颗粒
@@ -494,17 +570,25 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     }
 
     /**
-     * 掉落物品到随机捕鱼框位置
+     * 在最佳位置生成掉落物品
+     * 优先掉落到随机捕鱼框位置，如果没有则掉落在轴承位置
      */
-    private void spawnAtRandomFrameTrap(ItemStack stack) {
-        if (activeFramePositions.isEmpty() || stack.isEmpty()) {
+    private void spawnItemAtBestLocation(ItemStack stack) {
+        if (stack.isEmpty()) {
             return;
         }
 
-        BlockPos pos = activeFramePositions.get(level.getRandom().nextInt(activeFramePositions.size()));
+        BlockPos dropPos;
+        if (!activeFramePositions.isEmpty()) {
+            // 有活跃的捕鱼框，掉落到随机位置
+            dropPos = activeFramePositions.get(level.getRandom().nextInt(activeFramePositions.size()));
+        } else {
+            // 没有捕鱼框，掉落在轴承位置
+            dropPos = worldPosition;
+        }
 
         net.minecraft.world.entity.item.ItemEntity entity = new net.minecraft.world.entity.item.ItemEntity(level,
-                pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
+                dropPos.getX() + 0.5, dropPos.getY() + 0.5, dropPos.getZ() + 0.5, stack);
         entity.setDefaultPickUpDelay();
         entity.setDeltaMovement(0, 0.2, 0);
         level.addFreshEntity(entity);
@@ -533,90 +617,23 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             // 直接插入到自身的存储中
             ItemStack remainder = ItemHandlerHelper.insertItem(inventory, expNugget, false);
 
-            // 如果插入失败，掉落到随机捕鱼框位置
+            // 如果插入失败，掉落到最佳位置
             if (!remainder.isEmpty()) {
-                spawnAtRandomFrameTrap(remainder);
+                spawnItemAtBestLocation(remainder);
             }
         } else {
             // 如果找不到经验颗粒物品，生成经验球（回退方案）
+            BlockPos dropPos;
             if (!activeFramePositions.isEmpty()) {
-                BlockPos pos = activeFramePositions.get(
-                        level.getRandom().nextInt(activeFramePositions.size()));
-
-                int expAmount = isOpenWater ? 2 + level.getRandom().nextInt(3) : 1;
-                level.addFreshEntity(new net.minecraft.world.entity.ExperienceOrb(level,
-                        pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, expAmount));
-            }
-        }
-    }
-
-    /**
-     * 从装置存储中抽取物品到自身存储
-     * 这个方法是安全的：如果装置存储不可用，直接跳过，等下次再试
-     */
-    private void extractItemsFromContraption() {
-        // 安全检查：装置是否就绪
-        if (movedContraption == null) {
-            return;
-        }
-
-        var contraption = movedContraption.getContraption();
-        if (contraption == null || contraption.disassembled) {
-            return;
-        }
-
-        var storage = contraption.getStorage();
-        if (storage == null) {
-            return;
-        }
-
-        var contraptionItems = storage.getAllItems();
-        if (contraptionItems == null || contraptionItems.getSlots() <= 0) {
-            return;
-        }
-
-        // 遍历装置存储中的物品
-        for (int i = 0; i < contraptionItems.getSlots(); i++) {
-            ItemStack stackInSlot = contraptionItems.getStackInSlot(i);
-            if (stackInSlot.isEmpty()) {
-                continue;
+                dropPos = activeFramePositions.get(level.getRandom().nextInt(activeFramePositions.size()));
+            } else {
+                dropPos = worldPosition;
             }
 
-            // 尝试插入到自身存储
-            ItemStack toInsert = stackInSlot.copy();
-            ItemStack remainder = ItemHandlerHelper.insertItem(inventory, toInsert, true); // 先模拟
-
-            if (remainder.getCount() < toInsert.getCount()) {
-                // 可以插入至少一部分
-                int insertCount = toInsert.getCount() - remainder.getCount();
-
-                // 从装置存储中提取
-                ItemStack extracted = contraptionItems.extractItem(i, insertCount, false);
-
-                // 插入到自身存储
-                if (!extracted.isEmpty()) {
-                    ItemHandlerHelper.insertItem(inventory, extracted, false);
-                }
-            }
-
-            // 检查自身存储是否已满
-            if (isInventoryFull()) {
-                break;
-            }
+            int expAmount = isOpenWater ? 2 + level.getRandom().nextInt(3) : 1;
+            level.addFreshEntity(new net.minecraft.world.entity.ExperienceOrb(level,
+                    dropPos.getX() + 0.5, dropPos.getY() + 0.5, dropPos.getZ() + 0.5, expAmount));
         }
-    }
-
-    /**
-     * 检查自身存储是否已满
-     */
-    private boolean isInventoryFull() {
-        for (int i = 0; i < inventory.getSlots(); i++) {
-            ItemStack stack = inventory.getStackInSlot(i);
-            if (stack.isEmpty() || stack.getCount() < stack.getMaxStackSize()) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -842,16 +859,16 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             CreateLang.translate("tooltip.trap_bearing.working_state", getWorkingStateComponent())
                     .style(ChatFormatting.GRAY)
                     .forGoggles(tooltip);
+        }
 
-            // 第二部分：存储内容
-            int usedSlots = getUsedSlotCount();
-            int totalItems = getTotalItemCount();
+        // 第二部分：存储内容（无论是否运行都显示）
+        int usedSlots = getUsedSlotCount();
+        int totalItems = getTotalItemCount();
 
-            if (totalItems > 0) {
-                CreateLang.translate("tooltip.trap_bearing.storage", totalItems, usedSlots, INVENTORY_SIZE)
-                        .style(ChatFormatting.GREEN)
-                        .forGoggles(tooltip);
-            }
+        if (totalItems > 0) {
+            CreateLang.translate("tooltip.trap_bearing.storage", totalItems, usedSlots, INVENTORY_SIZE)
+                    .style(ChatFormatting.GREEN)
+                    .forGoggles(tooltip);
         }
 
         // 第三部分：动力状态（仿照机械手）
@@ -938,6 +955,24 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     @Override
     public void invalidate() {
         super.invalidate();
+    }
+
+    /**
+     * 掉落存储中的所有物品
+     * 当方块被破坏时调用
+     */
+    public void dropInventoryContents() {
+        if (level == null || level.isClientSide) {
+            return;
+        }
+
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            ItemStack stack = inventory.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), stack);
+                inventory.setStackInSlot(i, ItemStack.EMPTY);
+            }
+        }
     }
 
     private enum FluidType {

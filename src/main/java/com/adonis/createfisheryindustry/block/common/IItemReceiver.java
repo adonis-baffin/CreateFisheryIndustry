@@ -8,8 +8,15 @@ import net.minecraft.world.item.ItemStack;
  */
 public interface IItemReceiver {
     /**
+     * 检查是否能接收物品（至少有一个空位或可堆叠的位置）
+     *
+     * @return 是否能接收物品
+     */
+    boolean canReceive();
+
+    /**
      * 接收物品
-     * 
+     *
      * @param stack 要接收的物品
      * @return 是否成功接收（全部或部分）
      */

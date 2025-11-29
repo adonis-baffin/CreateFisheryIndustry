@@ -188,7 +188,35 @@ public class MeshTrapMovementBehaviour implements MovementBehaviour {
         private final MovementContext context;
 
         public MeshTrapItemReceiver(MovementContext context) {
+
             this.context = context;
+        }
+
+        @Override
+        public boolean canReceive() {
+            // 先检查 MeshTrap 自身的存储
+            IItemHandler meshTrapHandler = getMeshTrapHandlerFromContext(context);
+            if (meshTrapHandler != null) {
+                for (int i = 0; i < meshTrapHandler.getSlots(); i++) {
+                    ItemStack stackInSlot = meshTrapHandler.getStackInSlot(i);
+                    if (stackInSlot.isEmpty() || stackInSlot.getCount() < stackInSlot.getMaxStackSize()) {
+                        return true;
+                    }
+                }
+            }
+
+            // 再检查装置的通用存储
+            var contraptionStorage = context.contraption.getStorage().getAllItems();
+            if (contraptionStorage != null && contraptionStorage.getSlots() > 0) {
+                for (int i = 0; i < contraptionStorage.getSlots(); i++) {
+                    ItemStack stackInSlot = contraptionStorage.getStackInSlot(i);
+                    if (stackInSlot.isEmpty() || stackInSlot.getCount() < stackInSlot.getMaxStackSize()) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         @Override

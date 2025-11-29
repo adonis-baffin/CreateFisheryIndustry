@@ -15,7 +15,7 @@ public class PlayerInventoryReceiver implements IItemReceiver {
     private final double dropX;
     private final double dropY;
     private final double dropZ;
-    
+
     public PlayerInventoryReceiver(Player player, ServerLevel level, double dropX, double dropY, double dropZ) {
         this.player = player;
         this.level = level;
@@ -23,28 +23,36 @@ public class PlayerInventoryReceiver implements IItemReceiver {
         this.dropY = dropY;
         this.dropZ = dropZ;
     }
-    
+
+    @Override
+    public boolean canReceive() {
+        // 玩家背包总是可以"接收"物品
+        // 因为即使背包满了，也会掉落到世界，不会丢失物品
+        // 所以这里始终返回 true
+        return true;
+    }
+
     @Override
     public boolean receiveItem(ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
         }
-        
+
         // 尝试添加到玩家背包
         ItemStack remainder = stack.copy();
         boolean added = player.getInventory().add(remainder);
-        
+
         if (added && remainder.isEmpty()) {
             // 完全添加成功
             return true;
         }
-        
+
         // 如果有剩余（背包满了），掉落到世界
         if (!remainder.isEmpty()) {
             ItemEntity itemEntity = new ItemEntity(level, dropX, dropY, dropZ, remainder);
             level.addFreshEntity(itemEntity);
         }
-        
+
         // 只要有部分成功就返回 true
         return stack.getCount() != remainder.getCount() || added;
     }

@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -91,6 +92,20 @@ public class TrapBearingBlock extends BearingBlock implements IBE<TrapBearingBlo
         }
 
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        // 如果方块被替换为不同类型的方块（而不是状态变化）
+        if (!state.is(newState.getBlock())) {
+            // 获取方块实体并掉落物品
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof TrapBearingBlockEntity trapBearing) {
+                trapBearing.dropInventoryContents();
+            }
+        }
+
+        super.onRemove(state, level, pos, newState, isMoving);
     }
 
     public boolean isValidCapLocation(BlockState state, BlockPos pos, Direction direction) {
