@@ -96,6 +96,9 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     private int totalCaught = 0;
     private int successfulAttempts = 0;
 
+    private static final int EXTRACT_INTERVAL = 10; // 每10tick抽取一次
+    private int extractTimer = 0;
+
     // 虚拟钓鱼工具
     private FishingHook virtualHook;
     private TrapBearingFakePlayer fakePlayer;
@@ -135,15 +138,22 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             // 确保虚拟工具已初始化
             ensureVirtualToolsInitialized();
 
-            // 每 20 ticks 轮询一次
+            // 每 20 ticks 轮询一次捕鱼框状态
             if (++updateTimer >= UPDATE_INTERVAL) {
                 updateTimer = 0;
                 updateFrameTrapStates();
             }
 
+            // 每 10 ticks 尝试从装置存储抽取物品
+            if (++extractTimer >= EXTRACT_INTERVAL) {
+                extractTimer = 0;
+                extractItemsFromContraption();
+            }
+
             updateFishingLogic();
         }
     }
+
 
     @Override
     public void lazyTick() {
@@ -541,6 +551,75 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     }
 
     /**
+     * 从装置存储中抽取物品到自身存储
+     * 这个方法是安全的：如果装置存储不可用，直接跳过，等下次再试
+     */
+    private void extractItemsFromContraption() {
+        // 安全检查：装置是否就绪
+        if (movedContraption == null) {
+            return;
+        }
+
+        var contraption = movedContraption.getContraption();
+        if (contraption == null || contraption.disassembled) {
+            return;
+        }
+
+        var storage = contraption.getStorage();
+        if (storage == null) {
+            return;
+        }
+
+        var contraptionItems = storage.getAllItems();
+        if (contraptionItems == null || contraptionItems.getSlots() <= 0) {
+            return;
+        }
+
+        // 遍历装置存储中的物品
+        for (int i = 0; i < contraptionItems.getSlots(); i++) {
+            ItemStack stackInSlot = contraptionItems.getStackInSlot(i);
+            if (stackInSlot.isEmpty()) {
+                continue;
+            }
+
+            // 尝试插入到自身存储
+            ItemStack toInsert = stackInSlot.copy();
+            ItemStack remainder = ItemHandlerHelper.insertItem(inventory, toInsert, true); // 先模拟
+
+            if (remainder.getCount() < toInsert.getCount()) {
+                // 可以插入至少一部分
+                int insertCount = toInsert.getCount() - remainder.getCount();
+
+                // 从装置存储中提取
+                ItemStack extracted = contraptionItems.extractItem(i, insertCount, false);
+
+                // 插入到自身存储
+                if (!extracted.isEmpty()) {
+                    ItemHandlerHelper.insertItem(inventory, extracted, false);
+                }
+            }
+
+            // 检查自身存储是否已满
+            if (isInventoryFull()) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * 检查自身存储是否已满
+     */
+    private boolean isInventoryFull() {
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            ItemStack stack = inventory.getStackInSlot(i);
+            if (stack.isEmpty() || stack.getCount() < stack.getMaxStackSize()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * 播放钓鱼成功的音效和粒子效果
      */
     private void playFishingEffects() {
@@ -682,32 +761,25 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
      * 获取工作状态组件
      */
     private MutableComponent getWorkingStateComponent() {
-        // 状态 1：未满足工作条件（有效捕鱼框 < 8）
         if (currentFishingLevel == 0) {
-            // 进一步判断：如果总捕鱼框数量为 0，说明装置上根本没有捕鱼框
             if (totalFrameTraps == 0) {
                 return CreateLang.translateDirect("trap_bearing.state.idle");
             }
-            // 否则是有捕鱼框但不在流体中或数量不足
             return CreateLang.translateDirect("trap_bearing.state.insufficient");
         }
 
-        // 状态 2：熔岩捕鱼
         if (dominantFluid == FluidType.LAVA) {
             return CreateLang.translateDirect("trap_bearing.state.lava_fishing");
         }
 
-        // 状态 3：水中捕鱼，可获取宝藏（开放水域，等级 >= 4）
         if (dominantFluid == FluidType.WATER && isOpenWater) {
             return CreateLang.translateDirect("trap_bearing.state.water_fishing_treasure");
         }
 
-        // 状态 4：水中捕鱼
         if (dominantFluid == FluidType.WATER) {
             return CreateLang.translateDirect("trap_bearing.state.water_fishing");
         }
 
-        // 默认：理论上不应该到达（容错）
         return CreateLang.translateDirect("trap_bearing.state.unknown");
     }
 
@@ -744,60 +816,45 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     }
 
     @Override
-    public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        // 调用父类方法但不使用其返回值
-        super.addToTooltip(tooltip, isPlayerSneaking);
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        // 第一部分：捕鱼轴承标题
+        CreateLang.translate("tooltip.trap_bearing.header")
+                .forGoggles(tooltip);
 
         if (!running) {
-            return true;
-        }
-
-        // === 第一部分：捕鱼轴承状态 ===
-        CreateLang.translate("trap_bearing.status", getLevelTextComponent().withStyle(ChatFormatting.GREEN))
-                .forGoggles(tooltip);
-
-        // 捕鱼框条形图 - 缩进
-        CreateLang.builder()
-                .add(CreateLang.translateDirect("trap_bearing.frame_traps")
-                        .withStyle(ChatFormatting.GRAY))
-                .add(CreateLang.translateDirect("trap_bearing.frame_traps_dots")
-                        .withStyle(ChatFormatting.DARK_GRAY))
-                .add(getFrameTrapsComponent())
-                .forGoggles(tooltip, 1);
-
-        // 工作状态 - 不缩进
-        CreateLang.builder()
-                .add(CreateLang.translateDirect("trap_bearing.working_state"))
-                .add(getWorkingStateComponent()
-                        .withStyle(ChatFormatting.GRAY))
-                .forGoggles(tooltip);
-
-        // === 第二部分：存储内容 ===
-        tooltip.add(CommonComponents.EMPTY);
-
-        int usedSlots = getUsedSlotCount();
-        int totalItems = getTotalItemCount();
-
-        if (usedSlots == 0) {
-            // 存储为空
-            CreateLang.translate("trap_bearing.storage.empty")
+            CreateLang.translate("tooltip.trap_bearing.not_running")
                     .style(ChatFormatting.DARK_GRAY)
                     .forGoggles(tooltip);
         } else {
-            // 显示存储概况
-            CreateLang.translate("trap_bearing.storage.header")
+            // 显示当前状态
+            CreateLang.translate("tooltip.trap_bearing.status", getLevelTextComponent())
+                    .style(ChatFormatting.YELLOW)
                     .forGoggles(tooltip);
 
-            CreateLang.translate("trap_bearing.storage.slots", usedSlots, INVENTORY_SIZE)
-                    .style(ChatFormatting.GRAY)
-                    .forGoggles(tooltip, 1);
+            // 捕鱼框条形图
+            CreateLang.builder()
+                    .add(CreateLang.translateDirect("tooltip.trap_bearing.frame_traps")
+                            .withStyle(ChatFormatting.GRAY))
+                    .add(getFrameTrapsComponent())
+                    .forGoggles(tooltip);
 
-            CreateLang.translate("trap_bearing.storage.items", totalItems)
+            // 工作状态
+            CreateLang.translate("tooltip.trap_bearing.working_state", getWorkingStateComponent())
                     .style(ChatFormatting.GRAY)
-                    .forGoggles(tooltip, 1);
+                    .forGoggles(tooltip);
+
+            // 第二部分：存储内容
+            int usedSlots = getUsedSlotCount();
+            int totalItems = getTotalItemCount();
+
+            if (totalItems > 0) {
+                CreateLang.translate("tooltip.trap_bearing.storage", totalItems, usedSlots, INVENTORY_SIZE)
+                        .style(ChatFormatting.GREEN)
+                        .forGoggles(tooltip);
+            }
         }
 
-        // === 第三部分：动力状态（仿照机械手的 stress 显示）===
+        // 第三部分：动力状态（仿照机械手）
         float stressAtBase = calculateStressApplied();
         if (StressImpact.isEnabled() && !Mth.equal(stressAtBase, 0)) {
             tooltip.add(CommonComponents.EMPTY);

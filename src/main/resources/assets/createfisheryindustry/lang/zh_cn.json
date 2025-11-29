@@ -82,10 +82,12 @@
   "create.trap_bearing.state.lava_fishing": "熔岩捕鱼",
   "create.trap_bearing.state.unknown": "未知状态",
 
-  "create.trap_bearing.storage.empty": "存储为空",
-  "create.trap_bearing.storage.header": "存储内容:",
-  "create.trap_bearing.storage.slots": "槽位: %1$s / %2$s",
-  "create.trap_bearing.storage.items": "物品总数: %1$s",
+  "create.tooltip.trap_bearing.header": "捕鱼轴承信息",
+  "create.tooltip.trap_bearing.not_running": "未组装",
+  "create.tooltip.trap_bearing.status": "等级：%1$s",
+  "create.tooltip.trap_bearing.frame_traps": "捕鱼框：",
+  "create.tooltip.trap_bearing.working_state": "状态：%1$s",
+  "create.tooltip.trap_bearing.storage": "存储：%1$s 物品（%2$s/%3$s 槽位）",
 
   "item.createfisheryindustry.fish_skin": "鱼皮",
   "item.createfisheryindustry.roasted_fish_skin": "烤鱼皮",

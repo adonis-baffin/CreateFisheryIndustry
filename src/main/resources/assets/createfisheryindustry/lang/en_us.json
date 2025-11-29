@@ -86,10 +86,12 @@
   "create.trap_bearing.state.lava_fishing": "Lava Fishing",
   "create.trap_bearing.state.unknown": "Unknown State",
 
-  "create.trap_bearing.storage.empty": "Storage Empty",
-  "create.trap_bearing.storage.header": "Storage Contents:",
-  "create.trap_bearing.storage.slots": "Slots: %1$s / %2$s",
-  "create.trap_bearing.storage.items": "Total Items: %1$s",
+  "create.tooltip.trap_bearing.header": "Trap Bearing Information",
+  "create.tooltip.trap_bearing.not_running": "Not Assembled",
+  "create.tooltip.trap_bearing.status": "Level: %1$s",
+  "create.tooltip.trap_bearing.frame_traps": "Traps: ",
+  "create.tooltip.trap_bearing.working_state": "State: %1$s",
+  "create.tooltip.trap_bearing.storage": "Storage: %1$s items (%2$s/%3$s slots)",
 
   "block.createfisheryindustry.smart_beehive": "Smart Beehive",
   "block.createfisheryindustry.smart_beehive.tooltip.summary": "Test block, the functions are still under development. This block is not part of the content of this mod 'Create: Fishery Industry'. It will be released in the upcoming new mod 'Create: Dinner' in the future. Stay tuned.",
