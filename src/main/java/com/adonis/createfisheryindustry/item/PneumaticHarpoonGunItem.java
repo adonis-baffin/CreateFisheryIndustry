@@ -3,6 +3,7 @@ package com.adonis.createfisheryindustry.item;
 import com.adonis.createfisheryindustry.client.renderer.PneumaticHarpoonGunItemRenderer;
 import com.adonis.createfisheryindustry.entity.TetheredHarpoonEntity;
 import com.adonis.createfisheryindustry.procedures.PneumaticHarpoonGunItemInHandTickProcedure;
+import com.adonis.createfisheryindustry.registry.CreateFisheryEnchantments;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.foundation.item.CustomArmPoseItem;
 import com.simibubi.create.foundation.item.render.SimpleCustomRenderer;
@@ -282,14 +283,28 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
 
     @Override
     public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
-        // Support Mending, Unbreaking, and Impaling
+        // 原版附魔
         if (enchantment.is(Enchantments.MENDING))
             return true;
         if (enchantment.is(Enchantments.UNBREAKING))
             return true;
-        if (enchantment.is(Enchantments.IMPALING))
+        if (enchantment.is(Enchantments.VANISHING_CURSE))
             return true;
-        return super.supportsEnchantment(stack, enchantment);
+        if (enchantment.is(Enchantments.LOOTING))
+            return true;
+
+        // 自定义附魔
+        if (enchantment.is(CreateFisheryEnchantments.EXECUTION))
+            return true;
+        if (enchantment.is(CreateFisheryEnchantments.BARBED))
+            return true;
+
+        return false;
+    }
+
+    @Override
+    public int getEnchantmentValue() {
+        return 15; // 类似于铁质武器的附魔能力，数值越高越容易获得高级附魔
     }
 
     @Override

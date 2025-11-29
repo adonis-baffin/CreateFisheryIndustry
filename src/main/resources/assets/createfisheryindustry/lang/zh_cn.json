@@ -89,6 +89,13 @@
   "create.tooltip.trap_bearing.working_state": "状态：%1$s",
   "create.tooltip.trap_bearing.storage": "存储：%1$s 物品（%2$s/%3$s 槽位）",
 
+  "enchantment.create_fishery.execution": "处决",
+  "enchantment.create_fishery.execution.desc": "当被勾住的实体生命值低于 %s 时直接斩杀",
+  "enchantment.create_fishery.barbed": "倒刺",
+  "enchantment.create_fishery.barbed.desc": "对被勾住的实体持续造成伤害",
+  "enchantment.createfisheryindustry.execution": "处决",
+  "enchantment.createfisheryindustry.barbed": "倒刺",
+
   "item.createfisheryindustry.fish_skin": "鱼皮",
   "item.createfisheryindustry.roasted_fish_skin": "烤鱼皮",
   "item.createfisheryindustry.cod_steak": "鳕鱼排",

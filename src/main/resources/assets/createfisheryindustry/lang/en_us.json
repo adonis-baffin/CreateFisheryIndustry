@@ -93,6 +93,14 @@
   "create.tooltip.trap_bearing.working_state": "State: %1$s",
   "create.tooltip.trap_bearing.storage": "Storage: %1$s items (%2$s/%3$s slots)",
 
+  "enchantment.create_fishery.execution": "Execution",
+  "enchantment.create_fishery.execution.desc": "Instantly kills hooked entities below %s health",
+  "enchantment.create_fishery.barbed": "Barbed",
+  "enchantment.create_fishery.barbed.desc": "Deals damage over time to hooked entities",
+
+  "enchantment.createfisheryindustry.execution": "Execution",
+  "enchantment.createfisheryindustry.barbed": "Barbed",
+
   "block.createfisheryindustry.smart_beehive": "Smart Beehive",
   "block.createfisheryindustry.smart_beehive.tooltip.summary": "Test block, the functions are still under development. This block is not part of the content of this mod 'Create: Fishery Industry'. It will be released in the upcoming new mod 'Create: Dinner' in the future. Stay tuned.",
   "createfisheryindustry.smart_beehive.mode": "Beehive Mode",

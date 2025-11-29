@@ -1,15 +1,22 @@
 package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class CreateFisheryTabs {
     private static final DeferredRegister<CreativeModeTab> REGISTER = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CreateFisheryMod.ID);
@@ -66,6 +73,32 @@ public class CreateFisheryTabs {
             output.accept(CreateFisheryItems.NETHERITE_DIVING_LEGGINGS.get());
             output.accept(CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get());
             output.accept(CreateFisheryItems.HARPOON_POUCH.get());
+
+            // 添加自定义附魔书
+            addEnchantedBooks(parameters, output);
+        }
+
+        private void addEnchantedBooks(CreativeModeTab.ItemDisplayParameters parameters, CreativeModeTab.Output output) {
+            // 获取附魔注册表
+            var enchantmentRegistry = parameters.holders().lookupOrThrow(Registries.ENCHANTMENT);
+
+            // 添加处决附魔书（所有等级）
+            Optional<Holder.Reference<Enchantment>> executionHolder = enchantmentRegistry.get(CreateFisheryEnchantments.EXECUTION);
+            executionHolder.ifPresent(holder -> {
+                for (int level = 1; level <= holder.value().getMaxLevel(); level++) {
+                    ItemStack book = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(holder, level));
+                    output.accept(book);
+                }
+            });
+
+            // 添加倒刺附魔书（所有等级）
+            Optional<Holder.Reference<Enchantment>> barbedHolder = enchantmentRegistry.get(CreateFisheryEnchantments.BARBED);
+            barbedHolder.ifPresent(holder -> {
+                for (int level = 1; level <= holder.value().getMaxLevel(); level++) {
+                    ItemStack book = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(holder, level));
+                    output.accept(book);
+                }
+            });
         }
     }
 

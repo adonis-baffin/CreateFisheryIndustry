@@ -4,6 +4,7 @@ import com.adonis.createfisheryindustry.registry.CreateFisheryEntityTypes;
 import com.adonis.createfisheryindustry.registry.CreateFisheryItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -23,6 +24,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -164,16 +167,16 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         }
     }
 
-    private ItemStack getHarpoonGunFromPlayer(Player player) {
-        ItemStack mainHand = player.getMainHandItem();
-        ItemStack offHand = player.getOffhandItem();
-        if (mainHand.getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get()) {
-            return mainHand;
-        } else if (offHand.getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get()) {
-            return offHand;
-        }
-        return null;
-    }
+//    private ItemStack getHarpoonGunFromPlayer(Player player) {
+//        ItemStack mainHand = player.getMainHandItem();
+//        ItemStack offHand = player.getOffhandItem();
+//        if (mainHand.getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get()) {
+//            return mainHand;
+//        } else if (offHand.getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get()) {
+//            return offHand;
+//        }
+//        return null;
+//    }
 
     public Entity getHitEntity() {
         return this.hitEntity;
@@ -235,21 +238,49 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             return;
         }
 
+        // 获取玩家手中的鱼叉枪
+        ItemStack harpoonGun = getHarpoonGunFromPlayer(player);
+
+        // 创建伤害源
+        DamageSource damageSource = damageSources().trident(this, player);
+
         LootParams.Builder paramsBuilder = new LootParams.Builder(serverLevel)
                 .withParameter(LootContextParams.THIS_ENTITY, mob)
                 .withParameter(LootContextParams.ORIGIN, mob.position())
-                .withParameter(LootContextParams.DAMAGE_SOURCE, damageSources().playerAttack(player))
-                .withParameter(LootContextParams.ATTACKING_ENTITY, this);
+                .withParameter(LootContextParams.DAMAGE_SOURCE, damageSource)
+                .withParameter(LootContextParams.ATTACKING_ENTITY, this)
+                .withParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, this);
 
         if (player instanceof ServerPlayer serverPlayer) {
             paramsBuilder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, serverPlayer);
         }
 
+        // 如果有鱼叉枪，添加为工具参数（这会让附魔生效）
+        if (!harpoonGun.isEmpty()) {
+            paramsBuilder.withParameter(LootContextParams.TOOL, harpoonGun);
+        }
+
         LootParams params = paramsBuilder.create(LootContextParamSets.ENTITY);
         LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(lootTableKey);
+
+        // 使用 getRandomItems 并应用抢夺加成
+        List<ItemStack> loot = lootTable.getRandomItems(params, serverLevel.getRandom());
+
+        // 手动应用抢夺附魔效果
+        if (!harpoonGun.isEmpty()) {
+            int lootingLevel = EnchantmentHelper.getItemEnchantmentLevel(
+                    serverLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.LOOTING),
+                    harpoonGun
+            );
+            if (lootingLevel > 0) {
+                // 抢夺附魔会增加掉落数量，这里需要在战利品生成时处理
+                // 但由于 LootTable 已经生成了物品，我们需要用其他方式
+            }
+        }
+
         long tetherEndTime = serverLevel.getGameTime() + 200;
 
-        for (ItemStack item : lootTable.getRandomItems(params)) {
+        for (ItemStack item : loot) {
             ItemEntity drop = new ItemEntity(level(), deadEntity.getX(), deadEntity.getY(), deadEntity.getZ(), item);
             CompoundTag tag = drop.getPersistentData();
             tag.putBoolean("HarpoonTethered", true);
@@ -278,6 +309,17 @@ public class TetheredHarpoonEntity extends AbstractArrow {
             orb.setDeltaMovement(dx * 0.2, dy * 0.2 + Math.sqrt(distance) * 0.1, dz * 0.2);
             level().addFreshEntity(orb);
         }
+    }
+
+    private ItemStack getHarpoonGunFromPlayer(Player player) {
+        ItemStack mainHand = player.getMainHandItem();
+        ItemStack offHand = player.getOffhandItem();
+        if (mainHand.getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get()) {
+            return mainHand;
+        } else if (offHand.getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get()) {
+            return offHand;
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override

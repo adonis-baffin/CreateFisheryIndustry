@@ -16,6 +16,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.DataMapHooks;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
@@ -1261,8 +1262,15 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     private void spawnBlockProcessingParticles(BlockState state) {
         if (targetBlockPos == null || level == null || !level.isClientSide) return;
 
+        // 添加这个检查
+        VoxelShape shape = state.getShape(level, targetBlockPos);
+        if (shape.isEmpty()) return;
+
         RandomSource random = level.random;
         Vec3 center = Vec3.atCenterOf(targetBlockPos);
+
+        // 获取边界尺寸，使用已验证的 shape
+        AABB bounds = shape.bounds();
 
         if (state.getBlock() == Blocks.AMETHYST_CLUSTER) {
             for (int i = 0; i < 2; i++) {
@@ -1282,9 +1290,9 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             }
 
             for (int i = 0; i < 1; i++) {
-                double offsetX = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getXsize();
-                double offsetY = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getYsize();
-                double offsetZ = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getZsize();
+                double offsetX = (random.nextDouble() - 0.5) * bounds.getXsize();
+                double offsetY = (random.nextDouble() - 0.5) * bounds.getYsize();
+                double offsetZ = (random.nextDouble() - 0.5) * bounds.getZsize();
 
                 level.addParticle(
                         new BlockParticleOption(ParticleTypes.BLOCK, state),
@@ -1298,9 +1306,9 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
             }
         } else {
             for (int i = 0; i < 3; i++) {
-                double offsetX = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getXsize();
-                double offsetY = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getYsize();
-                double offsetZ = (random.nextDouble() - 0.5) * state.getShape(level, targetBlockPos).bounds().getZsize();
+                double offsetX = (random.nextDouble() - 0.5) * bounds.getXsize();
+                double offsetY = (random.nextDouble() - 0.5) * bounds.getYsize();
+                double offsetZ = (random.nextDouble() - 0.5) * bounds.getZsize();
 
                 level.addParticle(
                         new BlockParticleOption(ParticleTypes.BLOCK, state),

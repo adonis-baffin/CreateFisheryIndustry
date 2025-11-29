@@ -15,6 +15,8 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 处理被鱼叉牵引的实体
@@ -22,122 +24,102 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
  */
 @EventBusSubscriber(modid = CreateFisheryMod.ID)
 public class TetheredEntityHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TetheredEntityHandler.class);
 
-    private static final double PULL_STRENGTH = 0.3; // 牵引力强度
-    private static final double MAX_PULL_DISTANCE = 50.0; // 最大牵引距离
-    private static final double PICKUP_DISTANCE = 1.5; // 拾取距离
+    private static final double PULL_STRENGTH = 0.4;
+    private static final double MAX_PULL_DISTANCE = 50.0;
+    private static final double PICKUP_DISTANCE = 1.5;
 
-    /**
-     * 每tick更新被牵引的实体
-     */
     @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Post event) {
         Entity entity = event.getEntity();
 
-        // 只在服务端处理
         if (entity.level().isClientSide) {
             return;
         }
 
-        // 只处理物品和经验球
         if (!(entity instanceof ItemEntity) && !(entity instanceof ExperienceOrb)) {
             return;
         }
 
-        // 检查是否被牵引
         CompoundTag tag = entity.getPersistentData();
         if (!tag.getBoolean("HarpoonTethered")) {
             return;
         }
 
-        // 检查牵引是否过期
         long currentTime = entity.level().getGameTime();
         long tetherEndTime = tag.getLong("TetherEndTime");
         if (currentTime > tetherEndTime) {
-            // 清除牵引状态并重置鱼叉枪
             cleanupTether(entity, tag);
             return;
         }
 
-        // 找到牵引的玩家
         int playerId = tag.getInt("TetherPlayerId");
         Level world = entity.level();
         Entity playerEntity = world.getEntity(playerId);
 
         if (!(playerEntity instanceof Player player)) {
-            // 玩家不存在，清除牵引
             cleanupTether(entity, tag);
             return;
         }
 
-        // 计算到玩家的距离
         Vec3 entityPos = entity.position();
         Vec3 playerPos = player.position().add(0, player.getBbHeight() * 0.5, 0);
         double distance = entityPos.distanceTo(playerPos);
 
-        // 如果超出最大距离，停止牵引
         if (distance > MAX_PULL_DISTANCE) {
             cleanupTether(entity, tag, player);
             return;
         }
 
-        // 如果非常接近玩家，准备拾取
         if (distance < PICKUP_DISTANCE) {
             if (entity instanceof ItemEntity itemEntity) {
-                // 设置无拾取延迟
                 itemEntity.setPickUpDelay(0);
-                // 直接移动到玩家位置以确保拾取
-                entity.setPos(playerPos);
-
-                // 检查是否可以被拾取
-                if (player.getInventory().add(itemEntity.getItem())) {
-                    // 物品被成功添加到背包
-                    itemEntity.discard();
-                    // 重置鱼叉枪状态
-                    resetHarpoonGun(player);
-                    return;
-                }
-            } else if (entity instanceof ExperienceOrb orb) {
-                // 经验球会自动被吸引，只需要确保距离足够近
-                entity.setPos(playerPos);
+                entity.setPos(playerPos.x, playerPos.y, playerPos.z);
+                cleanupTether(entity, tag, player);
+                return;
+            } else if (entity instanceof ExperienceOrb) {
+                entity.setPos(playerPos.x, playerPos.y, playerPos.z);
+                cleanupTether(entity, tag, player);
+                return;
             }
         }
 
-        // 应用牵引力
-        Vec3 pullDirection = playerPos.subtract(entityPos).normalize();
+        Vec3 direction = playerPos.subtract(entityPos);
+        Vec3 pullDirection = direction.normalize();
+
+        double pullSpeed = PULL_STRENGTH * Math.min(1.0 + distance * 0.03, 1.5);
+
         Vec3 currentVelocity = entity.getDeltaMovement();
+        Vec3 pullVelocity = pullDirection.scale(pullSpeed);
 
-        // 计算牵引速度（距离越远，速度越快）
-        double pullSpeed = PULL_STRENGTH * (1.0 + distance * 0.05);
-        pullSpeed = Math.min(pullSpeed, 1.0); // 限制最大速度
+        Vec3 newVelocity = currentVelocity.scale(0.5).add(pullVelocity);
 
-        // 混合当前速度和牵引速度
-        Vec3 newVelocity = currentVelocity.scale(0.8).add(pullDirection.scale(pullSpeed));
+        if (entity.onGround()) {
+            newVelocity = new Vec3(newVelocity.x, Math.max(newVelocity.y, 0.3), newVelocity.z);
+        }
 
-        // 限制最大速度
-        if (newVelocity.length() > 1.5) {
-            newVelocity = newVelocity.normalize().scale(1.5);
+        double maxSpeed = 1.5;
+        if (newVelocity.length() > maxSpeed) {
+            newVelocity = newVelocity.normalize().scale(maxSpeed);
         }
 
         entity.setDeltaMovement(newVelocity);
         entity.hasImpulse = true;
+        entity.setOnGround(false);
 
-        // 防止物品卡在地面
-        if (entity.onGround() && newVelocity.y < 0.1) {
-            entity.setDeltaMovement(newVelocity.x, 0.2, newVelocity.z);
+        // 保持物品有拾取延迟，防止被其他人捡起
+        if (entity instanceof ItemEntity itemEntity) {
+            if (!itemEntity.hasPickUpDelay()) {
+                itemEntity.setPickUpDelay(5);
+            }
         }
     }
 
-    /**
-     * 清理牵引状态
-     */
     private static void cleanupTether(Entity entity, CompoundTag tag) {
         cleanupTether(entity, tag, null);
     }
 
-    /**
-     * 清理牵引状态并重置鱼叉枪
-     */
     private static void cleanupTether(Entity entity, CompoundTag tag, Player player) {
         tag.remove("HarpoonTethered");
         tag.remove("TetherPlayerId");
@@ -148,26 +130,20 @@ public class TetheredEntityHandler {
         }
     }
 
-    /**
-     * 重置鱼叉枪状态
-     */
     private static void resetHarpoonGun(Player player) {
         ItemStack mainHand = player.getMainHandItem();
         ItemStack offHand = player.getOffhandItem();
 
         if (mainHand.getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get()) {
-            resetGunState(mainHand, player);
+            resetGunState(mainHand);
         }
 
         if (offHand.getItem() == CreateFisheryItems.PNEUMATIC_HARPOON_GUN.get()) {
-            resetGunState(offHand, player);
+            resetGunState(offHand);
         }
     }
 
-    /**
-     * 重置单个鱼叉枪的状态
-     */
-    private static void resetGunState(ItemStack itemstack, Player player) {
+    private static void resetGunState(ItemStack itemstack) {
         CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
 
         if (customData.copyTag().getBoolean("tagPullingItem")) {
