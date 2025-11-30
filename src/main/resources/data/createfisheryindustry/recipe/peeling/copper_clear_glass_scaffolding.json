@@ -1,13 +1,19 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "createprism"
+    }
+  ],
   "type": "createfisheryindustry:peeling",
   "ingredients": [
     {
-      "item": "prism:copper_glass_scaffolding"
+      "item": "createprism:copper_glass_scaffolding"
     }
   ],
   "results": [
     {
-      "id": "prism:copper_clear_glass_scaffolding",
+      "id": "createprism:copper_clear_glass_scaffolding",
       "count": 1
     }
   ]

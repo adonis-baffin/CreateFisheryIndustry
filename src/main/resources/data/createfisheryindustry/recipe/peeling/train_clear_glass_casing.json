@@ -1,13 +1,19 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "createprism"
+    }
+  ],
   "type": "createfisheryindustry:peeling",
   "ingredients": [
     {
-      "item": "prism:train_glass_casing"
+      "item": "createprism:train_glass_casing"
     }
   ],
   "results": [
     {
-      "id": "prism:train_clear_glass_casing",
+      "id": "createprism:train_clear_glass_casing",
       "count": 1
     }
   ]

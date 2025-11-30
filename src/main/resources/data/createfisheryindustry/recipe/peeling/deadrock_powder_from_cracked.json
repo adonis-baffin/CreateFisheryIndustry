@@ -1,0 +1,29 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create_shimmer"
+    }
+  ],
+  "type": "createfisheryindustry:peeling",
+  "ingredients": [
+    {
+      "item": "twilightforest:deadrock"
+    }
+  ],
+  "results": [
+    {
+      "id": "create_shimmer:thorn_flour",
+      "count": 1
+    },
+    {
+      "id": "create_shimmer:thorn_flour",
+      "count": 1,
+      "chance": 0.5
+    },
+    {
+      "id": "twilightforest:cracked_deadrock",
+      "count": 1
+    }
+  ]
+}
