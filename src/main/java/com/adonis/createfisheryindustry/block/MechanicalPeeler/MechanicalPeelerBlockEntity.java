@@ -733,6 +733,15 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
         if (inputStackForRecipe.isEmpty() || level == null) return;
 
         PeelingRecipe recipe = recipeHolder.value();  // 直接使用 value() 获取配方（因为这里 recipeHolder 是 RecipeHolder，不是 Optional）
+
+        // 调试日志 - 检查 chance 值
+        for (ProcessingOutput output : recipe.getRollableResults()) {
+            CreateFisheryMod.LOGGER.info("Output: {} x{}, chance: {}",
+                    output.getStack().getItem(),
+                    output.getStack().getCount(),
+                    output.getChance());
+        }
+
         int itemsToProcess = inputStackForRecipe.getCount();
         inputInventory.setStackInSlot(INPUT_SLOT, ItemStack.EMPTY);
 

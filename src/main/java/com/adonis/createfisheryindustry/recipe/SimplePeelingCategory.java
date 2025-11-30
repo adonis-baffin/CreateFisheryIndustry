@@ -2,11 +2,12 @@ package com.adonis.createfisheryindustry.recipe;
 
 import com.adonis.createfisheryindustry.CreateFisheryJeiPlugin;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.AnimatedMechanicalPeeler;
-import com.adonis.createfisheryindustry.recipe.PeelingRecipe;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
+import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -17,7 +18,6 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -77,29 +77,33 @@ public class SimplePeelingCategory implements IRecipeCategory<PeelingRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, PeelingRecipe recipe, IFocusGroup focuses) {
-        // Input slot (left-top, adjusted to (27, 5))
+        // Input slot
         builder.addSlot(RecipeIngredientRole.INPUT, 27, 5)
                 .setBackground(BASIC_SLOT, -1, -1)
                 .addIngredients(recipe.getIngredients().get(0));
 
-        // Primary Output slot (right-bottom, at (132, 38))
-        ItemStack primaryOutputStack = recipe.getPrimaryOutput();
-        if (!primaryOutputStack.isEmpty()) {
-            builder.addSlot(RecipeIngredientRole.OUTPUT, 132, 38)
-                    .setBackground(BASIC_SLOT, -1, -1)
-                    .addItemStack(primaryOutputStack);
-        }
+        List<ProcessingOutput> results = recipe.getRollableResults();
 
-        // Secondary Outputs (right-top, starting at (132, 5), 2x2 grid)
-        List<ProcessingOutput> secondaryOutputs = recipe.getSecondaryOutputs();
-        int maxDisplaySecondary = 4; // Show up to 2x2 grid
-        for (int i = 0; i < Math.min(secondaryOutputs.size(), maxDisplaySecondary); i++) {
-            ProcessingOutput output = secondaryOutputs.get(i);
-            int xOffset = (i % 2) * 19;
-            int yOffset = (i / 2) * 19;
-            builder.addSlot(RecipeIngredientRole.OUTPUT, 132 + xOffset, 5 + yOffset)
+        // 所有输出都用统一的方式处理
+        int[] xPositions = {132, 132, 151, 151};  // 2x2 网格的 x 坐标
+        int[] yPositions = {38, 5, 5, 24};        // 调整 y 坐标，第一个是主输出位置
+
+        for (int i = 0; i < Math.min(results.size(), 4); i++) {
+            ProcessingOutput output = results.get(i);
+
+            IRecipeSlotBuilder slotBuilder = builder.addSlot(RecipeIngredientRole.OUTPUT, xPositions[i], yPositions[i])
                     .setBackground(BASIC_SLOT, -1, -1)
                     .addItemStack(output.getStack());
+
+            // 如果概率不是 100%，添加概率提示
+            if (output.getChance() < 1.0f) {
+                slotBuilder.addRichTooltipCallback((recipeSlotView, tooltip) -> {
+                    float chance = output.getChance();
+                    tooltip.add(Component.translatable("create.recipe.processing.chance",
+                                    String.format("%.0f", chance * 100))
+                            .withStyle(style -> style.withColor(0xFFAA00)));
+                });
+            }
         }
     }
 
@@ -107,8 +111,6 @@ public class SimplePeelingCategory implements IRecipeCategory<PeelingRecipe> {
     public void draw(PeelingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics gui, double mouseX, double mouseY) {
         AllGuiTextures.JEI_DOWN_ARROW.render(gui, 65, 10);
         AllGuiTextures.JEI_SHADOW.render(gui, 72 - 17, 42 + 13);
-
-        // 绘制动画机械切削机
         peeler.draw(gui, 72, 42);
     }
 }
