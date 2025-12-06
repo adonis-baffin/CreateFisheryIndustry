@@ -128,6 +128,12 @@
   "item.createfisheryindustry.salmon_steak": "Salmon Steak",
   "item.createfisheryindustry.cooked_cod_steak": "Cooked Cod Steak",
   "item.createfisheryindustry.cooked_salmon_steak": "Cooked Salmon Steak",
+  "item.createfisheryindustry.raw_blue_mussel": "Raw Blue Mussel",
+  "item.createfisheryindustry.cooked_blue_mussel": "Cooked Blue Mussel",
+  "item.createfisheryindustry.raw_mediterranean_mussel": "Raw Mediterranean Mussel",
+  "item.createfisheryindustry.cooked_mediterranean_mussel": "Cooked Mediterranean Mussel",
+  "item.createfisheryindustry.raw_lobster": "Raw Lobster",
+  "item.createfisheryindustry.cooked_lobster": "Cooked Lobster",
 
 
   "recipe.createfisheryindustry.peeling": "Peeling",

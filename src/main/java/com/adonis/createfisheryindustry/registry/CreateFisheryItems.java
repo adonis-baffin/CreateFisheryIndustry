@@ -53,6 +53,25 @@ public class CreateFisheryItems {
     public static final FoodProperties COOKED_SALMON_STEAK_FOOD = new FoodProperties.Builder()
             .nutrition(6).saturationModifier(0.96f).build();
 
+    // ============ 新增海鲜食物属性（全部先设为 nutrition=1, saturation=1.0） ============
+    public static final FoodProperties RAW_BLUE_MUSSEL_FOOD = new FoodProperties.Builder()
+            .nutrition(1).saturationModifier(1f).build();
+
+    public static final FoodProperties COOKED_BLUE_MUSSEL_FOOD = new FoodProperties.Builder()
+            .nutrition(1).saturationModifier(1f).build();
+
+    public static final FoodProperties RAW_MEDITERRANEAN_MUSSEL_FOOD = new FoodProperties.Builder()
+            .nutrition(1).saturationModifier(1f).build();
+
+    public static final FoodProperties COOKED_MEDITERRANEAN_MUSSEL_FOOD = new FoodProperties.Builder()
+            .nutrition(1).saturationModifier(1f).build();
+
+    public static final FoodProperties RAW_LOBSTER_FOOD = new FoodProperties.Builder()
+            .nutrition(1).saturationModifier(1f).build();
+
+    public static final FoodProperties COOKED_LOBSTER_FOOD = new FoodProperties.Builder()
+            .nutrition(1).saturationModifier(1f).build();
+
     // Existing items
     public static final ItemEntry<Item> ZINC_SHEET = REGISTRATE.item("zinc_sheet",
                     p -> new Item(basicItem()))
@@ -183,6 +202,55 @@ public class CreateFisheryItems {
             .onRegister(item -> {
                 ItemDescription.useKey(item, "item.createfisheryindustry.cooked_salmon_steak");
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("cooked_salmon_steak", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    //新增食物
+    public static final ItemEntry<Item> RAW_BLUE_MUSSEL = REGISTRATE.item("raw_blue_mussel",
+                    p -> new Item(basicItem().food(RAW_BLUE_MUSSEL_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.raw_blue_mussel");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("raw_blue_mussel", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<Item> COOKED_BLUE_MUSSEL = REGISTRATE.item("cooked_blue_mussel",
+                    p -> new Item(basicItem().food(COOKED_BLUE_MUSSEL_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.cooked_blue_mussel");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("cooked_blue_mussel", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<Item> RAW_MEDITERRANEAN_MUSSEL = REGISTRATE.item("raw_mediterranean_mussel",
+                    p -> new Item(basicItem().food(RAW_MEDITERRANEAN_MUSSEL_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.raw_mediterranean_mussel");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("raw_mediterranean_mussel", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<Item> COOKED_MEDITERRANEAN_MUSSEL = REGISTRATE.item("cooked_mediterranean_mussel",
+                    p -> new Item(basicItem().food(COOKED_MEDITERRANEAN_MUSSEL_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.cooked_mediterranean_mussel");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("cooked_mediterranean_mussel", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<Item> RAW_LOBSTER = REGISTRATE.item("raw_lobster",
+                    p -> new Item(basicItem().food(RAW_LOBSTER_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.raw_lobster");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("raw_lobster", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<Item> COOKED_LOBSTER = REGISTRATE.item("cooked_lobster",
+                    p -> new Item(basicItem().food(COOKED_LOBSTER_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.cooked_lobster");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("cooked_lobster", net.minecraft.core.registries.Registries.ITEM));
             })
             .register();
 

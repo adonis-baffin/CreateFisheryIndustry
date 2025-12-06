@@ -58,6 +58,13 @@ public class CreateFisheryTabs {
             output.accept(CreateFisheryItems.COOKED_COD_STEAK.get());
             output.accept(CreateFisheryItems.SALMON_STEAK.get());
             output.accept(CreateFisheryItems.COOKED_SALMON_STEAK.get());
+
+            output.accept(CreateFisheryItems.RAW_BLUE_MUSSEL.get());
+            output.accept(CreateFisheryItems.RAW_MEDITERRANEAN_MUSSEL.get());
+            output.accept(CreateFisheryItems.COOKED_BLUE_MUSSEL.get());
+            output.accept(CreateFisheryItems.COOKED_MEDITERRANEAN_MUSSEL.get());
+            output.accept(CreateFisheryItems.RAW_LOBSTER.get());
+            output.accept(CreateFisheryItems.COOKED_LOBSTER.get());
         }
     }
 
