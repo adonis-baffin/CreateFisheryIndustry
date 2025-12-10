@@ -1,3 +1,4 @@
+// settings.gradle
 pluginManagement {
     repositories {
         mavenLocal()
@@ -7,5 +8,28 @@ pluginManagement {
 }
 
 plugins {
+    id 'net.neoforged.moddev.repositories' version '2.0.119'
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
+rootProject.name = 'Createfishery21'
+
+// 重点：加这一整段（解决 neoform-runtime 找不到）
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        // 必须放在最前面！让所有 NeoForge/NeoForm 依赖都优先从官方仓库下
+        maven { url 'https://maven.neoforged.net/releases' }
+        maven { url 'https://maven.neoforged.net/snapshots' }  // 防止以后用 snapshot
+        mavenCentral()
+
+        // 你原来的这些仓库保留就行
+        maven { url "https://maven.createmod.net" }
+        maven { url "https://mvn.devos.one/snapshots" }
+        maven { url "https://maven.blamejared.com" }
+        maven { url "https://maven.theillusivec4.top/" }
+        maven { url "https://www.cursemaven.com" }
+        maven { url "https://api.modrinth.com/maven" }
+        maven { url "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" }
+    }
 }

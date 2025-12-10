@@ -1,7 +1,8 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '1.0.21'
+    // 这行改成下面这样（删掉 version）
+    id 'net.neoforged.moddev'   // ← 删掉 version '2.0.123' 这段
     id "com.diffplug.spotless" version "7.0.2"
 }
 
@@ -76,22 +77,6 @@ configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
-repositories {
-    mavenCentral() // Maven Central (for OkHttp, Gson, etc.)
-    
-    flatDir {
-        dirs 'libs'
-    }
-
-    maven { url "https://maven.createmod.net" } // Ponder, Flywheel
-    maven { url "https://mvn.devos.one/snapshots" } // Registrate
-    maven { url "https://maven.blamejared.com" } // JEI
-    maven { url "https://maven.theillusivec4.top/" } // Curios API
-    maven { url "https://www.cursemaven.com" }
-    maven { url "https://api.modrinth.com/maven" }
-    maven { url "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // NeoForge config api port, needed by ponder
-}
-
 dependencies {
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${flywheel_minecraft_version}:${flywheel_version}")
     runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_version}")
@@ -109,7 +94,7 @@ dependencies {
 //    localImplementation("maven.modrinth:nether-depths-upgrade:${nether_depths_upgrade_version}")
 //    localImplementation("maven.modrinth:geckolib:${geckolib_version}")
 
-    // Claude API 相关依赖
+    // Claude API 鐩稿叧渚濊禆
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
 }
@@ -154,11 +139,4 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-}
-
-idea {
-    module {
-        downloadSources = true
-        downloadJavadoc = true
-    }
 }
