@@ -20,8 +20,7 @@ import java.util.function.Function;
 public class PeelingRecipeParams extends ProcessingRecipeParams {
 
     public PeelingRecipeParams() {
-        super(); // 调用无参构造器
-        // 在这里设置默认值
+        super();
         this.ingredients = NonNullList.create();
         this.results = NonNullList.create();
         this.processingDuration = 0;
@@ -30,7 +29,6 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
         this.fluidResults = NonNullList.create();
     }
 
-    // 用于设置参数的便捷构造器
     public PeelingRecipeParams(
             NonNullList<Ingredient> ingredients,
             NonNullList<ProcessingOutput> results,
@@ -71,7 +69,6 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
     private static void encodeToBuffer(RegistryFriendlyByteBuf buffer, PeelingRecipeParams params) {
         CatnipStreamCodecBuilders.nonNullList(Ingredient.CONTENTS_STREAM_CODEC).encode(buffer, params.ingredients);
         CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC).encode(buffer, params.results);
-        // 不编码 processingDuration
         HeatCondition.STREAM_CODEC.encode(buffer, params.requiredHeat);
         CatnipStreamCodecBuilders.nonNullList(SizedFluidIngredient.STREAM_CODEC).encode(buffer, params.fluidIngredients);
         CatnipStreamCodecBuilders.nonNullList(FluidStack.STREAM_CODEC).encode(buffer, params.fluidResults);
@@ -80,7 +77,6 @@ public class PeelingRecipeParams extends ProcessingRecipeParams {
     private static PeelingRecipeParams decodeFromBuffer(RegistryFriendlyByteBuf buffer) {
         NonNullList<Ingredient> ingredients = CatnipStreamCodecBuilders.nonNullList(Ingredient.CONTENTS_STREAM_CODEC).decode(buffer);
         NonNullList<ProcessingOutput> results = CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC).decode(buffer);
-        // 不解码 processingDuration
         HeatCondition heat = HeatCondition.STREAM_CODEC.decode(buffer);
         NonNullList<SizedFluidIngredient> fluidIngredients = CatnipStreamCodecBuilders.nonNullList(SizedFluidIngredient.STREAM_CODEC).decode(buffer);
         NonNullList<FluidStack> fluidResults = CatnipStreamCodecBuilders.nonNullList(FluidStack.STREAM_CODEC).decode(buffer);

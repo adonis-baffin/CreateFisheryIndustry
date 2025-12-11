@@ -4,6 +4,7 @@ import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour.TransportedResult;
 import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
@@ -38,23 +39,17 @@ import java.util.Map;
 public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation {
     protected static final int PROCESSING_TIME = 10;
     private static final int AUTO_EXPORT_COOLDOWN = 20; // 每20tick尝试一次输出
-    private static final int BELT_EXTRACTION_COOLDOWN = 5; // 每5tick尝试一次从传送带提取
+    private static final int BELT_EXPORT_COOLDOWN = 5; // 每5tick尝试一次向传送带输出
     protected static final double COLLECTION_RANGE = 1.5; // 收集范围
 
-    // 处理相关变量
     private int processingTicks = 0;
     private int autoExportTicks = 0;
-    private int beltExtractionTicks = 0;
+    private int beltExportTicks = 0;
 
-    // 传送带提取相关
-    private final Map<Direction, TransportedItemStackHandlerBehaviour> beltHandlers = new HashMap<>();
-
-    // 库存处理
     protected ItemStackHandler inventory;
     private final IItemHandler insertionHandler;
     private final IItemHandler extractionHandler;
 
-    // 过滤行为
     protected FilteringBehaviour filtering;
 
     public SmartMeshBlockEntity(BlockPos pos, BlockState state) {
@@ -110,10 +105,10 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
             be.tryExportItems(serverLevel);
         }
 
-        be.beltExtractionTicks++;
-        if (be.beltExtractionTicks >= BELT_EXTRACTION_COOLDOWN) {
-            be.beltExtractionTicks = 0;
-            be.extractItemsFromBelts(serverLevel);
+        be.beltExportTicks++;
+        if (be.beltExportTicks >= BELT_EXPORT_COOLDOWN) {
+            be.beltExportTicks = 0;
+            be.tryExportToBelts(serverLevel);
         }
     }
 
@@ -151,109 +146,68 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
         return stack.getCount() != remainder.getCount();
     }
 
-    protected void extractItemsFromBelts(ServerLevel level) {
+    /**
+     * Try to export items to adjacent belts using DirectBeltInputBehaviour
+     */
+    protected void tryExportToBelts(ServerLevel level) {
         if (level == null || level.isClientSide()) {
             return;
         }
 
-        updateBeltHandlers(level);
+        boolean anyItemMoved = false;
 
         for (Direction direction : Direction.values()) {
-            if (direction == Direction.UP || direction == Direction.DOWN) {
-                continue;
-            }
-
-            TransportedItemStackHandlerBehaviour handler = beltHandlers.get(direction);
-            if (handler != null) {
-                extractFromBelt(handler);
-            }
-        }
-    }
-
-    private void updateBeltHandlers(ServerLevel level) {
-        beltHandlers.clear();
-
-        for (Direction direction : Direction.values()) {
-            if (direction == Direction.UP || direction == Direction.DOWN) {
-                continue;
-            }
-
             BlockPos neighborPos = getBlockPos().relative(direction);
-            if (level.getBlockEntity(neighborPos) instanceof SmartBlockEntity smartBE) {
-                TransportedItemStackHandlerBehaviour behaviour = BlockEntityBehaviour.get(level, neighborPos,
-                        TransportedItemStackHandlerBehaviour.TYPE);
-                if (behaviour != null) {
-                    beltHandlers.put(direction, behaviour);
+
+            // Try to find DirectBeltInputBehaviour on the neighbor
+            DirectBeltInputBehaviour beltInput = BlockEntityBehaviour.get(level, neighborPos, DirectBeltInputBehaviour.TYPE);
+
+            if (beltInput == null) {
+                continue;
+            }
+
+            // Skip if belt cannot accept items from this direction
+            if (!beltInput.canInsertFromSide(direction.getOpposite())) {
+                continue;
+            }
+
+            // Try to export items from our inventory to the belt
+            for (int sourceSlot = 0; sourceSlot < inventory.getSlots(); sourceSlot++) {
+                ItemStack stackInSlot = inventory.getStackInSlot(sourceSlot);
+
+                if (stackInSlot.isEmpty()) {
+                    continue;
+                }
+
+                // Calculate extraction amount based on filter settings
+                int extractionAmount = getExtractionAmount();
+                int toExtract = Math.min(1, Math.min(stackInSlot.getCount(), extractionAmount));
+
+                // Try to insert one item at a time to the belt
+                ItemStack toInsert = stackInSlot.copy();
+                toInsert.setCount(toExtract);
+
+                ItemStack remaining = beltInput.handleInsertion(toInsert, Direction.DOWN, false);
+
+                int inserted = toExtract - remaining.getCount();
+                if (inserted > 0) {
+                    // Successfully inserted, remove from our inventory
+                    inventory.extractItem(sourceSlot, inserted, false);
+                    anyItemMoved = true;
+                    break;
                 }
             }
-        }
-    }
 
-    private void extractFromBelt(TransportedItemStackHandlerBehaviour beltHandler) {
-        boolean hasSpace = false;
-        for (int slot = 0; slot < inventory.getSlots(); slot++) {
-            if (inventory.getStackInSlot(slot).isEmpty()) {
-                hasSpace = true;
+            if (anyItemMoved) {
                 break;
             }
         }
 
-        if (!hasSpace) {
-            return;
+        if (anyItemMoved) {
+            setChanged();
+            sendData();
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
         }
-
-        beltHandler.handleCenteredProcessingOnAllItems(.5f, transportedItem -> {
-            ItemStack stack = transportedItem.stack;
-            if (stack.isEmpty()) {
-                return TransportedResult.doNothing();
-            }
-
-            if (!canAcceptItem(stack)) {
-                return TransportedResult.doNothing();
-            }
-
-            ItemStack remaining = stack.copy();
-            boolean anyInserted = false;
-
-            for (int slot = 0; slot < inventory.getSlots(); slot++) {
-                ItemStack slotStack = inventory.getStackInSlot(slot);
-
-                if (slotStack.isEmpty() || (ItemStack.isSameItem(slotStack, remaining) &&
-                        slotStack.getCount() < slotStack.getMaxStackSize())) {
-
-                    ItemStack toInsert = remaining.copy();
-                    remaining = inventory.insertItem(slot, toInsert, false);
-
-                    if (remaining.getCount() < toInsert.getCount()) {
-                        anyInserted = true;
-                        if (remaining.isEmpty()) {
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (anyInserted) {
-                setChanged();
-                sendData();
-                if (level instanceof ServerLevel serverLevel) {
-                    serverLevel.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
-                }
-
-                if (remaining.isEmpty()) {
-                    return TransportedResult.removeItem();
-                } else {
-                    TransportedItemStack newTransportedItem = new TransportedItemStack(remaining);
-                    newTransportedItem.prevBeltPosition = transportedItem.prevBeltPosition;
-                    newTransportedItem.beltPosition = transportedItem.beltPosition;
-                    newTransportedItem.insertedFrom = transportedItem.insertedFrom;
-                    newTransportedItem.insertedAt = transportedItem.insertedAt;
-                    return TransportedResult.convertTo(newTransportedItem);
-                }
-            }
-
-            return TransportedResult.doNothing();
-        });
     }
 
     protected void tryExportItems(ServerLevel level) {
@@ -266,14 +220,13 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
         for (Direction direction : Direction.values()) {
             BlockPos neighborPos = getBlockPos().relative(direction);
 
-            // 检查是否是传送带，如果是则跳过
-            TransportedItemStackHandlerBehaviour beltBehaviour = BlockEntityBehaviour.get(level, neighborPos,
-                    TransportedItemStackHandlerBehaviour.TYPE);
+            // Skip belts - they are handled by tryExportToBelts
+            DirectBeltInputBehaviour beltBehaviour = BlockEntityBehaviour.get(level, neighborPos, DirectBeltInputBehaviour.TYPE);
             if (beltBehaviour != null) {
                 continue;
             }
 
-            // 检查目标方块实体类型，如果是 MeshTrap 或 SmartMesh 则跳过
+            // Skip other mesh blocks
             if (level.getBlockEntity(neighborPos) instanceof MeshTrapBlockEntity ||
                     level.getBlockEntity(neighborPos) instanceof SmartMeshBlockEntity) {
                 continue;
@@ -403,7 +356,7 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 CreateFisheryBlockEntities.SMART_MESH.get(),
-                (be, side) -> be.inventory // 所有方向都返回完整库存，允许输入和输出
+                (be, side) -> be.inventory
         );
     }
 

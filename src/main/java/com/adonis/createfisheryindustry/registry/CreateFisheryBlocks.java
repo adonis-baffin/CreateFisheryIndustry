@@ -2,6 +2,7 @@ package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingBlock;
+import com.adonis.createfisheryindustry.block.BaitTrap.BaitTrapBlock;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapBlock;
 import com.adonis.createfisheryindustry.block.FrameTrap.FrameTrapMovementBehaviour;
 import com.adonis.createfisheryindustry.block.MechanicalPeeler.MechanicalPeelerGenerator;
@@ -68,6 +69,22 @@ public class CreateFisheryBlocks {
             .simpleItem()
             .register();
 
+    public static final BlockEntry<BaitTrapBlock> BAIT_TRAP = REGISTRATE
+            .block("bait_trap", BaitTrapBlock::new)
+            .initialProperties(SharedProperties::wooden)
+            .properties(prop -> prop
+                    .mapColor(DyeColor.ORANGE)
+                    .sound(SoundType.BAMBOO)
+                    .noOcclusion())
+            .transform(axeOrPickaxe())
+            .blockstate((ctx, prov) -> prov.getVariantBuilder(ctx.get())
+                    .partialState().with(BaitTrapBlock.BAITED, false)
+                    .modelForState().modelFile(prov.models().cubeAll(ctx.getName(), prov.modLoc("block/bait_trap"))).addModel()
+                    .partialState().with(BaitTrapBlock.BAITED, true)
+                    .modelForState().modelFile(prov.models().cubeAll(ctx.getName() + "_baited", prov.modLoc("block/bait_trap_baited"))).addModel())
+            .simpleItem()
+            .register();
+
     public static final BlockEntry<TrapNozzleBlock> TRAP_NOZZLE = CreateFisheryMod.REGISTRATE
             .block("trap_nozzle", TrapNozzleBlock::new)
             .initialProperties(SharedProperties::wooden)
@@ -117,7 +134,6 @@ public class CreateFisheryBlocks {
             .transform(axeOrPickaxe())
             .transform(CreateFisheryMod.STRESS_CONFIG.setImpact(4.0))
             .blockstate((ctx, prov) -> {
-                // 使用 directionalBlock 并忽略 waterlogged 属性
                 prov.getVariantBuilder(ctx.get())
                         .forAllStatesExcept(state -> {
                             Direction facing = state.getValue(BlockStateProperties.FACING);

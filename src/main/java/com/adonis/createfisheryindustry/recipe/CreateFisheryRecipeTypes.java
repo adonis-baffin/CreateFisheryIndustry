@@ -3,6 +3,8 @@ package com.adonis.createfisheryindustry.recipe;
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -12,28 +14,19 @@ import java.util.Locale;
 import java.util.function.Supplier;
 
 public enum CreateFisheryRecipeTypes implements IRecipeTypeInfo {
-    PEELING; // No longer passing PeelingRecipe::new directly to enum constructor
+    PEELING(PeelingRecipeSerializer::new),
+    BAIT_TRAP(BaitTrapRecipeSerializer::new);
 
     private final ResourceLocation id;
-    private DeferredHolder<RecipeSerializer<?>, RecipeSerializer<PeelingRecipe>> serializerObject;
-    private DeferredHolder<RecipeType<?>, RecipeType<PeelingRecipe>> typeObject;
+    private DeferredHolder<RecipeSerializer<?>, ? extends RecipeSerializer<?>> serializerObject;
+    private DeferredHolder<RecipeType<?>, ? extends RecipeType<?>> typeObject;
 
-    private final Supplier<RecipeSerializer<PeelingRecipe>> serializerSupplier;
-    private final Supplier<RecipeType<PeelingRecipe>> typeSupplier;
+    private final Supplier<? extends RecipeSerializer<?>> serializerSupplier;
 
-    CreateFisheryRecipeTypes() {
-        String name = name().toLowerCase(Locale.ROOT);  // 一劳永逸
+    <T extends Recipe<?>> CreateFisheryRecipeTypes(Supplier<RecipeSerializer<T>> serializerSupplier) {
+        String name = name().toLowerCase(Locale.ROOT);
         this.id = CreateFisheryMod.asResource(name);
-
-        // Provide a supplier for your new PeelingRecipeSerializer
-        this.serializerSupplier = PeelingRecipeSerializer::new; // Assumes PeelingRecipeSerializer has a no-arg constructor
-
-        this.typeSupplier = () -> new RecipeType<PeelingRecipe>() {
-            @Override
-            public String toString() {
-                return id.toString();
-            }
-        };
+        this.serializerSupplier = serializerSupplier;
     }
 
     @Override
@@ -48,23 +41,25 @@ public enum CreateFisheryRecipeTypes implements IRecipeTypeInfo {
         return (S) serializerObject.get();
     }
 
-    // Optional: specific getter if needed elsewhere, but generic should work
-    public RecipeSerializer<PeelingRecipe> getActualSerializer() {
-        if (serializerObject == null) throw new IllegalStateException("Recipe Serializer for " + id + " not registered yet!");
-        return serializerObject.get();
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
-    public RecipeType<PeelingRecipe> getType() {
+    public <I extends RecipeInput, R extends Recipe<I>> RecipeType<R> getType() {
         if (typeObject == null) throw new IllegalStateException("Recipe Type for " + id + " not registered yet!");
-        return typeObject.get();
+        return (RecipeType<R>) typeObject.get();
     }
 
     public static void register(DeferredRegister<RecipeSerializer<?>> serializersRegistry,
                                 DeferredRegister<RecipeType<?>> typesRegistry) {
         for (CreateFisheryRecipeTypes type : values()) {
             type.serializerObject = serializersRegistry.register(type.id.getPath(), type.serializerSupplier);
-            type.typeObject = typesRegistry.register(type.id.getPath(), type.typeSupplier);
+
+            final ResourceLocation typeId = type.id;
+            type.typeObject = typesRegistry.register(type.id.getPath(), () -> new RecipeType<>() {
+                @Override
+                public String toString() {
+                    return typeId.toString();
+                }
+            });
         }
     }
 }

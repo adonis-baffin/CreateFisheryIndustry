@@ -137,9 +137,7 @@ public class CreateFisheryRecipeManager {
             ResourceLocation blockId = entry.getKey().location();
             String path = blockId.getPath();
 
-            // 检查是否是原木（包含"log"但不包含"stripped"）
             if (path.contains("log") && !path.contains("stripped")) {
-                // 寻找对应的去皮原木
                 String strippedPath = "stripped_" + path;
                 ResourceLocation strippedId = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), strippedPath);
 

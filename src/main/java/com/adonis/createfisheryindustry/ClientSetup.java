@@ -1,5 +1,6 @@
 package com.adonis.createfisheryindustry;
 
+import com.adonis.createfisheryindustry.block.BaitTrap.BaitTrapRenderer;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshRenderer;
 import com.adonis.createfisheryindustry.block.SmartNozzle.SmartNozzleRenderer;
 import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
@@ -46,26 +47,24 @@ public class ClientSetup {
         CreateFisheryPartialModels.init();
 
         event.enqueueWork(() -> {
-            // 渲染层设置
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.FRAME_TRAP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.MESH_TRAP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.TRAP_NOZZLE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_NOZZLE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.SMART_MESH.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.BAIT_TRAP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.MECHANICAL_PEELER.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(CreateFisheryBlocks.TRAP_BEARING.get(), RenderType.cutoutMipped());
 
-            // 方块实体渲染器注册
             BlockEntityRenderers.register(CreateFisheryBlockEntities.SMART_NOZZLE.get(), SmartNozzleRenderer::new);
             BlockEntityRenderers.register(CreateFisheryBlockEntities.SMART_MESH.get(), SmartMeshRenderer::new);
+            BlockEntityRenderers.register(CreateFisheryBlockEntities.BAIT_TRAP.get(), BaitTrapRenderer::new);
             BlockEntityRenderers.register(CreateFisheryBlockEntities.MECHANICAL_PEELER.get(), MechanicalPeelerRenderer::new);
             BlockEntityRenderers.register(CreateFisheryBlockEntities.TRAP_BEARING.get(), TrapBearingRenderer::new);
 
-            // 实体渲染器注册
             EntityRenderers.register(CreateFisheryEntityTypes.HARPOON.get(), HarpoonRenderer::new);
             EntityRenderers.register(CreateFisheryEntityTypes.TETHERED_HARPOON.get(), TetheredHarpoonRenderer::new);
 
-            // 物品属性注册
             HarpoonItem.registerItemProperties(CreateFisheryItems.HARPOON);
 
             ItemProperties.register(
@@ -74,11 +73,9 @@ public class ClientSetup {
                     (stack, level, entity, seed) -> HarpoonPouchItem.getFullnessDisplay(stack)
             );
 
-            // 其他初始化
             PneumaticHarpoonGunChainsLineProcedure.register();
             PneumaticHarpoonTargetHandler.init();
 
-            // 注册思索插件
             PonderIndex.addPlugin(new CreateFisheryPonderPlugin());
         });
     }

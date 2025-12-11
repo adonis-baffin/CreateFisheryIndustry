@@ -11,16 +11,13 @@ import java.util.stream.Collectors;
 public class CreateFisheryCommonConfig {
     public static final ModConfigSpec CONFIG_SPEC;
 
-    // Frame Trap 实体捕获配置
     public static final ModConfigSpec.ConfigValue<List<? extends String>> WHITELIST;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
 
-    // Trap Bearing 钓鱼配置
     public static final ModConfigSpec.BooleanValue ENABLE_FISHING;
     public static final ModConfigSpec.BooleanValue ENABLE_LAVA_FISHING;
     public static final ModConfigSpec.BooleanValue USE_NDU_LOOT_TABLES;
 
-    // 潜水装备配置
     public static final ModConfigSpec.DoubleValue DIVING_BASE_JUMP_POWER;
     public static final ModConfigSpec.DoubleValue DIVING_SPRINT_JUMP_POWER;
     public static final ModConfigSpec.IntValue DIVING_JUMP_COOLDOWN;
@@ -42,7 +39,6 @@ public class CreateFisheryCommonConfig {
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
-        // Frame Trap 实体捕获配置
         builder.comment("Frame Trap entity capture settings")
                 .push("frameTrap");
 
@@ -71,7 +67,6 @@ public class CreateFisheryCommonConfig {
 
         builder.pop();
 
-        // Trap Bearing 钓鱼配置
         builder.comment("Trap Bearing fishing settings")
                 .push("trapBearingFishing");
 
@@ -90,7 +85,6 @@ public class CreateFisheryCommonConfig {
 
         builder.pop();
 
-        // 潜水装备配置部分
         builder.comment("Diving Equipment settings")
                 .push("divingEquipment");
 
@@ -168,7 +162,6 @@ public class CreateFisheryCommonConfig {
         CONFIG_SPEC = builder.build();
     }
 
-    // 白名单/黑名单缓存方法
     public static List<ResourceLocation> getWhitelist() {
         if (!isConfigLoaded) {
             return cachedWhitelist;
@@ -183,7 +176,6 @@ public class CreateFisheryCommonConfig {
                         .collect(Collectors.toList());
                 lastWhitelistUpdate = currentTime;
             } catch (IllegalStateException e) {
-                // 配置尚未加载，使用缓存值
             }
         }
         return cachedWhitelist;
@@ -203,7 +195,6 @@ public class CreateFisheryCommonConfig {
                         .collect(Collectors.toList());
                 lastBlacklistUpdate = currentTime;
             } catch (IllegalStateException e) {
-                // 配置尚未加载，使用缓存值
             }
         }
         return cachedBlacklist;
@@ -229,7 +220,6 @@ public class CreateFisheryCommonConfig {
         refreshCache();
     }
 
-    // 实体列表相关方法
     public static boolean isEntityWhitelisted(ResourceLocation entityId) {
         return getWhitelist().contains(entityId);
     }
@@ -238,7 +228,6 @@ public class CreateFisheryCommonConfig {
         return getBlacklist().contains(entityId);
     }
 
-    // 钓鱼功能开关
     public static boolean isFishingEnabled() {
         if (!isConfigLoaded) {
             return true;
@@ -272,7 +261,6 @@ public class CreateFisheryCommonConfig {
         }
     }
 
-    // 潜水装备相关方法
     public static double getDivingBaseJumpPower() {
         if (!isConfigLoaded) {
             return 1.0;

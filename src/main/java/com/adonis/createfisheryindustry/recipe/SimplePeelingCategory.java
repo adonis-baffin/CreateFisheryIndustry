@@ -77,16 +77,14 @@ public class SimplePeelingCategory implements IRecipeCategory<PeelingRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, PeelingRecipe recipe, IFocusGroup focuses) {
-        // Input slot
         builder.addSlot(RecipeIngredientRole.INPUT, 27, 5)
                 .setBackground(BASIC_SLOT, -1, -1)
                 .addIngredients(recipe.getIngredients().get(0));
 
         List<ProcessingOutput> results = recipe.getRollableResults();
 
-        // 所有输出都用统一的方式处理
-        int[] xPositions = {132, 132, 151, 151};  // 2x2 网格的 x 坐标
-        int[] yPositions = {38, 5, 5, 24};        // 调整 y 坐标，第一个是主输出位置
+        int[] xPositions = {132, 132, 151, 151};
+        int[] yPositions = {38, 5, 5, 24};
 
         for (int i = 0; i < Math.min(results.size(), 4); i++) {
             ProcessingOutput output = results.get(i);
@@ -94,8 +92,6 @@ public class SimplePeelingCategory implements IRecipeCategory<PeelingRecipe> {
             IRecipeSlotBuilder slotBuilder = builder.addSlot(RecipeIngredientRole.OUTPUT, xPositions[i], yPositions[i])
                     .setBackground(BASIC_SLOT, -1, -1)
                     .addItemStack(output.getStack());
-
-            // 如果概率不是 100%，添加概率提示
             if (output.getChance() < 1.0f) {
                 slotBuilder.addRichTooltipCallback((recipeSlotView, tooltip) -> {
                     float chance = output.getChance();

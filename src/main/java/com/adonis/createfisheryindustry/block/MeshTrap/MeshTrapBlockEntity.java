@@ -8,6 +8,7 @@ import com.adonis.createfisheryindustry.block.common.InventoryReceiver;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour.TransportedResult;
 import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
@@ -50,14 +51,11 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
     protected static final double ENTITY_KILL_RANGE = 1.0;
     protected static final int PROCESSING_TIME = 10;
 
-    // 添加自动输出相关常量
     private static final int AUTO_EXPORT_COOLDOWN = 20; // 每20tick尝试一次输出
     private int autoExportTicks = 0;
 
-    // 添加传送带提取相关常量
-    private static final int BELT_EXTRACTION_COOLDOWN = 5; // 每5tick尝试一次从传送带提取
-    private int beltExtractionTicks = 0;
-    private final Map<Direction, TransportedItemStackHandlerBehaviour> beltHandlers = new HashMap<>();
+    private static final int BELT_EXPORT_COOLDOWN = 5; // 每5tick尝试一次向传送带输出
+    private int beltExportTicks = 0;
 
     protected final ItemStackHandler inventory;
     protected int processingTicks = 0;
@@ -153,18 +151,16 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
             serverLevel.sendBlockUpdated(pos, state, state, 3);
         }
 
-        // 添加自动输出逻辑
         be.autoExportTicks++;
         if (be.autoExportTicks >= AUTO_EXPORT_COOLDOWN) {
             be.autoExportTicks = 0;
             be.tryExportItems(serverLevel);
         }
 
-        // 添加传送带提取逻辑
-        be.beltExtractionTicks++;
-        if (be.beltExtractionTicks >= BELT_EXTRACTION_COOLDOWN) {
-            be.beltExtractionTicks = 0;
-            be.extractItemsFromBelts(serverLevel);
+        be.beltExportTicks++;
+        if (be.beltExportTicks >= BELT_EXPORT_COOLDOWN) {
+            be.beltExportTicks = 0;
+            be.tryExportToBelts(serverLevel);
         }
 
         be.tickInternal();
@@ -192,185 +188,58 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
     }
 
-    // 添加新方法：从周围的传送带提取物品
-    protected void extractItemsFromBelts(ServerLevel level) {
-        if (level == null || level.isClientSide()) {
-            return;
-        }
-
-        // 检查并更新相邻方向的传送带处理器
-        updateBeltHandlers(level);
-
-        // 从所有侧面的传送带提取物品
-        for (Direction direction : Direction.values()) {
-            // 只从水平方向的传送带提取（侧面）
-            if (direction == Direction.UP || direction == Direction.DOWN) {
-                continue;
-            }
-
-            TransportedItemStackHandlerBehaviour handler = beltHandlers.get(direction);
-            if (handler != null) {
-                extractFromBelt(handler);
-            }
-        }
-    }
-
-    // 更新周围的传送带处理器缓存
-    private void updateBeltHandlers(ServerLevel level) {
-        beltHandlers.clear();
-
-        for (Direction direction : Direction.values()) {
-            // 排除上下方向，只检查侧面
-            if (direction == Direction.UP || direction == Direction.DOWN) {
-                continue;
-            }
-
-            BlockPos neighborPos = getBlockPos().relative(direction);
-            if (level.getBlockEntity(neighborPos) instanceof SmartBlockEntity smartBE) {
-                TransportedItemStackHandlerBehaviour behaviour = BlockEntityBehaviour.get(level, neighborPos,
-                        TransportedItemStackHandlerBehaviour.TYPE);
-                if (behaviour != null) {
-                    beltHandlers.put(direction, behaviour);
-                }
-            }
-        }
-    }
-
-    // 从单个传送带提取物品
-    private void extractFromBelt(TransportedItemStackHandlerBehaviour beltHandler) {
-        // 检查我们的库存是否有空间
-        boolean hasSpace = false;
-        for (int slot = 0; slot < inventory.getSlots(); slot++) {
-            if (inventory.getStackInSlot(slot).isEmpty()) {
-                hasSpace = true;
-                break;
-            }
-        }
-
-        if (!hasSpace) {
-            return; // 如果没有空间就不提取
-        }
-
-        // 尝试从传送带上提取物品
-        beltHandler.handleCenteredProcessingOnAllItems(.5f, transportedItem -> {
-            ItemStack stack = transportedItem.stack;
-            if (stack.isEmpty()) {
-                return TransportedResult.doNothing();
-            }
-
-            // 尝试将物品放入我们的库存
-            ItemStack remaining = stack.copy();
-            boolean anyInserted = false;
-
-            for (int slot = 0; slot < inventory.getSlots(); slot++) {
-                ItemStack slotStack = inventory.getStackInSlot(slot);
-
-                // 检查是否可以合并或是空槽位
-                if (slotStack.isEmpty() || (ItemStack.isSameItem(slotStack, remaining) &&
-                        slotStack.getCount() < slotStack.getMaxStackSize())) {
-
-                    ItemStack toInsert = remaining.copy();
-                    remaining = inventory.insertItem(slot, toInsert, false);
-
-                    if (remaining.getCount() < toInsert.getCount()) {
-                        anyInserted = true;
-                        if (remaining.isEmpty()) {
-                            break; // 全部插入成功，跳出循环
-                        }
-                    }
-                }
-            }
-
-            if (anyInserted) {
-                setChanged();
-                sendData();
-                if (level instanceof ServerLevel serverLevel) {
-                    serverLevel.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
-                }
-
-                // 如果全部被提取走了，就移除传送带上的物品
-                if (remaining.isEmpty()) {
-                    return TransportedResult.removeItem();
-                } else {
-                    // 否则更新传送带上物品的数量
-                    TransportedItemStack newTransportedItem = new TransportedItemStack(remaining);
-                    newTransportedItem.prevBeltPosition = transportedItem.prevBeltPosition;
-                    newTransportedItem.beltPosition = transportedItem.beltPosition;
-                    newTransportedItem.insertedFrom = transportedItem.insertedFrom;
-                    newTransportedItem.insertedAt = transportedItem.insertedAt;
-                    return TransportedResult.convertTo(newTransportedItem);
-                }
-            }
-
-            return TransportedResult.doNothing();
-        });
-    }
-
-    // 添加新方法：尝试将物品输出到相邻容器
-    protected void tryExportItems(ServerLevel level) {
+    /**
+     * Try to export items to adjacent belts using DirectBeltInputBehaviour
+     */
+    protected void tryExportToBelts(ServerLevel level) {
         if (level == null || level.isClientSide()) {
             return;
         }
 
         boolean anyItemMoved = false;
 
-        // 检查每个方向的相邻方块
         for (Direction direction : Direction.values()) {
             BlockPos neighborPos = getBlockPos().relative(direction);
 
-            // 检查是否是传送带，如果是则跳过
-            TransportedItemStackHandlerBehaviour beltBehaviour = BlockEntityBehaviour.get(level, neighborPos,
-                    TransportedItemStackHandlerBehaviour.TYPE);
-            if (beltBehaviour != null) {
-                continue; // 跳过传送带
-            }
+            // Try to find DirectBeltInputBehaviour on the neighbor
+            DirectBeltInputBehaviour beltInput = BlockEntityBehaviour.get(level, neighborPos, DirectBeltInputBehaviour.TYPE);
 
-            // 检查目标方块实体类型，如果是 MeshTrap 或 SmartMesh 则跳过
-            if (level.getBlockEntity(neighborPos) instanceof MeshTrapBlockEntity ||
-                    level.getBlockEntity(neighborPos) instanceof SmartMeshBlockEntity) {
+            if (beltInput == null) {
                 continue;
             }
 
-            // 使用NeoForge能力系统获取相邻方块的物品处理器
-            IItemHandler targetInventory = level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, direction.getOpposite());
+            // Skip if belt cannot accept items from this direction
+            if (!beltInput.canInsertFromSide(direction.getOpposite())) {
+                continue;
+            }
 
-            if (targetInventory != null) {
-                // 从我们的库存中提取物品并插入到目标容器
-                for (int sourceSlot = 0; sourceSlot < inventory.getSlots(); sourceSlot++) {
-                    ItemStack stackInSlot = inventory.getStackInSlot(sourceSlot);
+            // Try to export items from our inventory to the belt
+            for (int sourceSlot = 0; sourceSlot < inventory.getSlots(); sourceSlot++) {
+                ItemStack stackInSlot = inventory.getStackInSlot(sourceSlot);
 
-                    if (stackInSlot.isEmpty()) {
-                        continue;
-                    }
-
-                    // 尝试每次移动一整组物品
-                    ItemStack extractedItem = inventory.extractItem(sourceSlot, stackInSlot.getCount(), true);
-                    if (extractedItem.isEmpty()) {
-                        continue;
-                    }
-
-                    // 找到目标容器中可以接收物品的位置
-                    ItemStack remainingItem = insertItemIntoTarget(extractedItem, targetInventory);
-
-                    // 计算实际可以移动的数量
-                    int actualExtractAmount = extractedItem.getCount() - remainingItem.getCount();
-                    if (actualExtractAmount > 0) {
-                        // 实际从源提取
-                        inventory.extractItem(sourceSlot, actualExtractAmount, false);
-                        anyItemMoved = true;
-                        // 只输出一种物品后中断，避免一次性输出过多
-                        break;
-                    }
+                if (stackInSlot.isEmpty()) {
+                    continue;
                 }
 
-                // 如果已经移动了物品，暂时不检查其他方向
-                if (anyItemMoved) {
+                // Try to insert one item at a time to the belt
+                ItemStack toInsert = stackInSlot.copy();
+                toInsert.setCount(1);
+
+                ItemStack remaining = beltInput.handleInsertion(toInsert, Direction.DOWN, false);
+
+                if (remaining.isEmpty()) {
+                    // Successfully inserted, remove from our inventory
+                    inventory.extractItem(sourceSlot, 1, false);
+                    anyItemMoved = true;
                     break;
                 }
             }
+
+            if (anyItemMoved) {
+                break;
+            }
         }
 
-        // 如果有物品被移动，更新方块实体状态
         if (anyItemMoved) {
             setChanged();
             sendData();
@@ -378,11 +247,65 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
     }
 
-    // 辅助方法：尝试将物品插入目标容器
+    protected void tryExportItems(ServerLevel level) {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+
+        boolean anyItemMoved = false;
+
+        for (Direction direction : Direction.values()) {
+            BlockPos neighborPos = getBlockPos().relative(direction);
+
+            // Skip belts - they are handled by tryExportToBelts
+            DirectBeltInputBehaviour beltBehaviour = BlockEntityBehaviour.get(level, neighborPos, DirectBeltInputBehaviour.TYPE);
+            if (beltBehaviour != null) {
+                continue;
+            }
+
+            // Skip other mesh traps
+            if (level.getBlockEntity(neighborPos) instanceof MeshTrapBlockEntity ||
+                    level.getBlockEntity(neighborPos) instanceof SmartMeshBlockEntity) {
+                continue;
+            }
+
+            IItemHandler targetInventory = level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, direction.getOpposite());
+
+            if (targetInventory != null) {
+                for (int sourceSlot = 0; sourceSlot < inventory.getSlots(); sourceSlot++) {
+                    ItemStack stackInSlot = inventory.getStackInSlot(sourceSlot);
+
+                    if (stackInSlot.isEmpty()) {
+                        continue;
+                    }
+                    ItemStack extractedItem = inventory.extractItem(sourceSlot, stackInSlot.getCount(), true);
+                    if (extractedItem.isEmpty()) {
+                        continue;
+                    }
+                    ItemStack remainingItem = insertItemIntoTarget(extractedItem, targetInventory);
+
+                    int actualExtractAmount = extractedItem.getCount() - remainingItem.getCount();
+                    if (actualExtractAmount > 0) {
+                        inventory.extractItem(sourceSlot, actualExtractAmount, false);
+                        anyItemMoved = true;
+                        break;
+                    }
+                }
+                if (anyItemMoved) {
+                    break;
+                }
+            }
+        }
+        if (anyItemMoved) {
+            setChanged();
+            sendData();
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+        }
+    }
+
     private ItemStack insertItemIntoTarget(ItemStack stack, IItemHandler targetInventory) {
         ItemStack remaining = stack.copy();
 
-        // 遍历目标容器的所有槽位
         for (int slot = 0; slot < targetInventory.getSlots() && !remaining.isEmpty(); slot++) {
             remaining = targetInventory.insertItem(slot, remaining, false);
         }
@@ -400,8 +323,6 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
             if (!entity.isAlive()) {
                 continue;
             }
-
-            // 使用统一的实体筛选逻辑
             if (EntityCaptureHelper.shouldCaptureEntity(entity)) {
                 processEntityDrops(level, (Mob) entity);
             }
@@ -409,13 +330,8 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
     }
 
     private void processEntityDrops(ServerLevel level, Mob mob) {
-        // 创建物品接收器
         IItemReceiver receiver = new InventoryReceiver(this.inventory, level, mob.position());
-
-        // 使用统一的捕获逻辑
         EntityCaptureHelper.captureEntity(mob, level, getBlockPos(), receiver);
-
-        // 更新方块实体状态
         setChanged();
         sendData();
         level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
@@ -521,7 +437,7 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
     @Nullable
     public <T> T getCapability(BlockCapability<T, @Nullable Direction> capability, @Nullable Direction side) {
         if (capability == Capabilities.ItemHandler.BLOCK) {
-            return (T) inventory; // 所有方向都返回完整库存，允许输入和输出
+            return (T) inventory;
         }
         return null;
     }

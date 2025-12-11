@@ -29,6 +29,13 @@
   "create.gui.goggles.trap_nozzle_contents": "气捕网内含：",
   "create.gui.goggles.smart_mesh_contents": "智能滤网内含：",
 
+  "block.createfisheryindustry.bait_trap": "诱饵陷阱",
+  "gui.goggles.bait_trap_contents": "诱饵陷阱状态:",
+  "gui.goggles.bait_trap_inventory": "物品栏:",
+  "gui.createfisheryindustry.bait_trap.bait": "诱饵",
+  "gui.createfisheryindustry.bait_trap.time_remaining": "剩余时间:",
+  "gui.createfisheryindustry.bait_trap.no_bait": "未装载诱饵",
+
   "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
 
   "tooltip.keyShift": "Shift",

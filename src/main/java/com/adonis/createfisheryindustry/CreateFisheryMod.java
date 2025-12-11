@@ -67,7 +67,6 @@ public class CreateFisheryMod {
         CreateFisheryTabs.register(bus);
         CreateFisheryComponents.register(bus);
 
-        // 注册动态存储类型
         LOGGER.info("Registering mounted storage types...");
         CreateFisheryMountedStorageTypes.register(bus);
         LOGGER.info("Mounted storage types registered");
@@ -87,7 +86,6 @@ public class CreateFisheryMod {
         bus.addListener(this::onModConfigEvent);
         bus.register(CreateFisheryBlockEntities.class);
 
-        // 注册客户端事件（仅在客户端运行）
         if (FMLEnvironment.dist == Dist.CLIENT) {
             NeoForge.EVENT_BUS.register(UnderwaterSprintFOVHandler.class);
         }
@@ -102,13 +100,11 @@ public class CreateFisheryMod {
         event.enqueueWork(() -> {
             BacktankInventorySupplier.register();
 
-            // 注册捕获网的动态结构移动行为
             MovementBehaviour.REGISTRY.register(
                     CreateFisheryBlocks.MESH_TRAP.get(),
                     new MeshTrapMovementBehaviour()
             );
 
-            // 手动注册 MountedStorageType 到方块
             MountedItemStorageType<?> meshTrapStorageType = CreateFisheryMountedStorageTypes.MESH_TRAP.get();
             MountedItemStorageType.REGISTRY.register(
                     CreateFisheryBlocks.MESH_TRAP.get(),

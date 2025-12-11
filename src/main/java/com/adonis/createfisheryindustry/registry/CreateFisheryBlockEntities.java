@@ -2,6 +2,7 @@ package com.adonis.createfisheryindustry.registry;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingBlockEntity;
+import com.adonis.createfisheryindustry.block.BaitTrap.BaitTrapBlockEntity;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartNozzle.SmartNozzleBlockEntity;
@@ -39,6 +40,10 @@ public class CreateFisheryBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SmartMeshBlockEntity>> SMART_MESH =
             BLOCK_ENTITIES.register("smart_mesh", () ->
                     BlockEntityType.Builder.of(SmartMeshBlockEntity::new, CreateFisheryBlocks.SMART_MESH.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BaitTrapBlockEntity>> BAIT_TRAP =
+            BLOCK_ENTITIES.register("bait_trap", () ->
+                    BlockEntityType.Builder.of(BaitTrapBlockEntity::new, CreateFisheryBlocks.BAIT_TRAP.get()).build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TrapNozzleBlockEntity>> TRAP_NOZZLE =
             BLOCK_ENTITIES.register("trap_nozzle", () ->
@@ -81,6 +86,12 @@ public class CreateFisheryBlockEntities {
                 (be, side) -> be.getCapability(Capabilities.ItemHandler.BLOCK, side)
         );
 
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                BAIT_TRAP.get(),
+                (be, side) -> be.getCapability(Capabilities.ItemHandler.BLOCK, side)
+        );
+
         // Mechanical Peeler ItemHandler
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
@@ -93,7 +104,6 @@ public class CreateFisheryBlockEntities {
                 }
         );
 
-        // Trap Bearing ItemHandler - 允许从任何方向访问存储
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 TRAP_BEARING.get(),

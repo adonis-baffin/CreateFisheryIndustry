@@ -72,12 +72,10 @@ public class PeelingRecipe extends ProcessingRecipe<RecipeInput, PeelingRecipePa
     public boolean matches(RecipeInput input, Level level) {
         if (getIngredients().isEmpty()) return false;
 
-        // 检查输入是否为SingleRecipeInput类型
         if (input instanceof SingleRecipeInput singleInput) {
             return getIngredients().get(0).test(singleInput.item());
         }
 
-        // 对于其他类型的RecipeInput，检查第一个物品
         if (input.size() > 0) {
             return getIngredients().get(0).test(input.getItem(0));
         }

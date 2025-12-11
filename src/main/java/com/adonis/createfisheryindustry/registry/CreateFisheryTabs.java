@@ -47,6 +47,7 @@ public class CreateFisheryTabs {
             output.accept(CreateFisheryBlocks.FRAME_TRAP);
             output.accept(CreateFisheryBlocks.TRAP_BEARING);
             output.accept(CreateFisheryBlocks.MESH_TRAP);
+            output.accept(CreateFisheryBlocks.BAIT_TRAP);
             output.accept(CreateFisheryBlocks.TRAP_NOZZLE);
             output.accept(CreateFisheryBlocks.SMART_NOZZLE);
             output.accept(CreateFisheryBlocks.SMART_MESH);
