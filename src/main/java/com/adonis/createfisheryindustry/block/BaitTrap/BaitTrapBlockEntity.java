@@ -6,6 +6,7 @@ import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.recipe.BaitTrapRecipe;
 import com.adonis.createfisheryindustry.recipe.CreateFisheryRecipeTypes;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
+import com.adonis.createfisheryindustry.registry.CreateFisheryTags;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -52,7 +53,6 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
     private static final int AUTO_EXPORT_COOLDOWN = 20;
     private static final int BELT_EXPORT_COOLDOWN = 5;
-    private static final int PARTICLE_COOLDOWN = 40;
     private static final int SYNC_RATE = 8;
 
     protected final ItemStackHandler inventory;
@@ -68,7 +68,6 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
     protected int processingTicks = 0;
     protected int autoExportTicks = 0;
     protected int beltExportTicks = 0;
-    protected int particleTicks = 0;
     protected int syncCooldown = 0;
     protected boolean queuedSync = false;
 
@@ -255,7 +254,6 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
     public static void tick(Level level, BlockPos pos, BlockState state, BaitTrapBlockEntity be) {
         if (level.isClientSide()) {
-            be.clientTick();
             return;
         }
 
@@ -312,26 +310,6 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
 
         be.tickInternal();
-    }
-
-    private void clientTick() {
-        if (!isBaited()) return;
-
-        particleTicks++;
-        if (particleTicks >= PARTICLE_COOLDOWN) {
-            particleTicks = 0;
-            spawnBaitParticles();
-        }
-    }
-
-    private void spawnBaitParticles() {
-        if (level == null || !level.isClientSide()) return;
-
-        double x = worldPosition.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.5;
-        double y = worldPosition.getY() + 0.5 + (random.nextDouble() - 0.5) * 0.3;
-        double z = worldPosition.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.5;
-
-        level.addParticle(ParticleTypes.HAPPY_VILLAGER, x, y, z, 0, 0.02, 0);
     }
 
     private void generateLoot(ServerLevel level) {
@@ -434,17 +412,22 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         for (Direction direction : Direction.values()) {
             BlockPos neighborPos = getBlockPos().relative(direction);
 
-            // Skip belts - handled by tryExportToBelts
+            // Skip belts - they are handled by tryExportToBelts
             DirectBeltInputBehaviour beltBehaviour = BlockEntityBehaviour.get(level, neighborPos, DirectBeltInputBehaviour.TYPE);
             if (beltBehaviour != null) {
                 continue;
             }
 
-            // Skip other trap blocks
             BlockEntity neighborBE = level.getBlockEntity(neighborPos);
             if (neighborBE instanceof MeshTrapBlockEntity ||
                     neighborBE instanceof SmartMeshBlockEntity ||
                     neighborBE instanceof BaitTrapBlockEntity) {
+                continue;
+            }
+
+            // Skip blocks in the export blacklist tag (e.g., chutes)
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (neighborState.is(CreateFisheryTags.Blocks.TRAP_EXPORT_BLACKLIST)) {
                 continue;
             }
 
@@ -457,12 +440,10 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                     if (stackInSlot.isEmpty()) {
                         continue;
                     }
-
                     ItemStack extractedItem = inventory.extractItem(sourceSlot, stackInSlot.getCount(), true);
                     if (extractedItem.isEmpty()) {
                         continue;
                     }
-
                     ItemStack remainingItem = insertItemIntoTarget(extractedItem, targetInventory);
 
                     int actualExtractAmount = extractedItem.getCount() - remainingItem.getCount();
@@ -477,7 +458,6 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                 }
             }
         }
-
         if (anyItemMoved) {
             setChanged();
             sendData();
@@ -543,30 +523,9 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        // 显示库存内容
         CreateLang.translate("gui.goggles.bait_trap_contents").forGoggles(tooltip);
 
-        // Show bait status
-        if (isBaited()) {
-            CreateLang.text("")
-                    .add(Component.translatable("gui.createfisheryindustry.bait_trap.bait").withStyle(ChatFormatting.GRAY))
-                    .add(Component.literal(": ").withStyle(ChatFormatting.GRAY))
-                    .add(Component.translatable(currentBait.getDescriptionId()).withStyle(ChatFormatting.GRAY))
-                    .forGoggles(tooltip, 1);
-
-            if (cachedRecipe != null) {
-                CreateLang.text("")
-                        .add(Component.translatable("gui.createfisheryindustry.bait_trap.level").withStyle(ChatFormatting.GRAY))
-                        .add(Component.literal(": ").withStyle(ChatFormatting.GRAY))
-                        .add(CreateLang.text(String.valueOf(cachedRecipe.getBaitLevel())).style(ChatFormatting.GREEN))
-                        .forGoggles(tooltip, 1);
-            }
-        } else {
-            CreateLang.text("")
-                    .add(Component.translatable("gui.createfisheryindustry.bait_trap.no_bait").withStyle(ChatFormatting.DARK_GRAY))
-                    .forGoggles(tooltip, 1);
-        }
-
-        // Show inventory contents
         boolean isEmpty = true;
         for (int i = 0; i < inventory.getSlots(); i++) {
             ItemStack stack = inventory.getStackInSlot(i);
@@ -581,6 +540,38 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
         if (isEmpty) {
             CreateLang.translate("gui.goggles.inventory.empty").forGoggles(tooltip, 1);
+        }
+
+        // 添加空行
+        tooltip.add(Component.empty());
+
+        // 显示诱饵状态
+        CreateLang.translate("gui.goggles.bait_trap_status").forGoggles(tooltip);
+
+        if (isBaited()) {
+            CreateLang.text("")
+                    .add(Component.translatable("gui.createfisheryindustry.bait_trap.bait").withStyle(ChatFormatting.GRAY))
+                    .add(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                    .add(Component.translatable(currentBait.getDescriptionId()).withStyle(ChatFormatting.AQUA))
+                    .forGoggles(tooltip, 1);
+
+            // 如果 cachedRecipe 为空，尝试重新获取
+            if (cachedRecipe == null && level != null) {
+                cachedRecipe = findRecipe(currentBait);
+            }
+
+            if (cachedRecipe != null) {
+                CreateLang.text("")
+                        .add(Component.translatable("gui.createfisheryindustry.bait_trap.level").withStyle(ChatFormatting.GRAY))
+                        .add(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                        .add(CreateLang.text(String.valueOf(cachedRecipe.getBaitLevel())).style(ChatFormatting.GREEN))
+                        .add(Component.translatable("gui.createfisheryindustry.bait_trap.level_suffix").withStyle(ChatFormatting.GREEN))
+                        .forGoggles(tooltip, 1);
+            }
+        } else {
+            CreateLang.text("")
+                    .add(Component.translatable("gui.createfisheryindustry.bait_trap.no_bait").withStyle(ChatFormatting.DARK_GRAY))
+                    .forGoggles(tooltip, 1);
         }
 
         return true;

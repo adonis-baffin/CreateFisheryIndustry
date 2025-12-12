@@ -17,13 +17,6 @@ import java.util.Set;
 
 @ParametersAreNonnullByDefault
 public class BaitTrapRecipe extends ProcessingRecipe<RecipeInput, BaitTrapRecipeParams> {
-
-    // Fixed loot generation times in ticks for each bait level
-    // Level 5: 4 min = 4800 ticks
-    // Level 4: 8 min = 9600 ticks
-    // Level 3: 12 min = 14400 ticks
-    // Level 2: 16 min = 19200 ticks
-    // Level 1: 20 min = 24000 ticks
     private static final int[] LOOT_TIME_TICKS = {
             24000,  // Level 1: 20 minutes
             19200,  // Level 2: 16 minutes

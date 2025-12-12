@@ -1,12 +1,14 @@
 package com.adonis.createfisheryindustry.block.MeshTrap;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
+import com.adonis.createfisheryindustry.block.BaitTrap.BaitTrapBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.common.EntityCaptureHelper;
 import com.adonis.createfisheryindustry.block.common.IItemReceiver;
 import com.adonis.createfisheryindustry.block.common.InventoryReceiver;
 import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
+import com.adonis.createfisheryindustry.registry.CreateFisheryTags;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
@@ -263,9 +265,17 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                 continue;
             }
 
-            // Skip other mesh traps
-            if (level.getBlockEntity(neighborPos) instanceof MeshTrapBlockEntity ||
-                    level.getBlockEntity(neighborPos) instanceof SmartMeshBlockEntity) {
+            // Skip other trap blocks
+            BlockEntity neighborBE = level.getBlockEntity(neighborPos);
+            if (neighborBE instanceof MeshTrapBlockEntity ||
+                    neighborBE instanceof SmartMeshBlockEntity ||
+                    neighborBE instanceof BaitTrapBlockEntity) {
+                continue;
+            }
+
+            // Skip blocks in the export blacklist tag (e.g., chutes)
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (neighborState.is(CreateFisheryTags.Blocks.TRAP_EXPORT_BLACKLIST)) {
                 continue;
             }
 

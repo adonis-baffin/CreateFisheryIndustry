@@ -2,7 +2,8 @@ package com.adonis.createfisheryindustry.recipe;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
-import com.simibubi.create.compat.jei.category.animations.AnimatedKinetics;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -16,7 +17,12 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -29,10 +35,6 @@ public class BaitTrapCategory implements IRecipeCategory<BaitTrapRecipe> {
     public static final RecipeType<BaitTrapRecipe> BAIT_TRAP_TYPE =
             RecipeType.create(CreateFisheryMod.ID, "bait_trap", BaitTrapRecipe.class);
 
-    // 背景尺寸 - 使用Create标准尺寸
-    private static final int BACKGROUND_WIDTH = 177;
-    private static final int BACKGROUND_HEIGHT = 70;
-
     private final IDrawable background;
     private final IDrawable icon;
     private final IDrawable slotDrawable;
@@ -40,7 +42,7 @@ public class BaitTrapCategory implements IRecipeCategory<BaitTrapRecipe> {
 
     public BaitTrapCategory(IRecipeCategoryRegistration registration) {
         IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
-        this.background = guiHelper.createBlankDrawable(BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
+        this.background = guiHelper.createBlankDrawable(177, 80);
         this.icon = guiHelper.createDrawableItemStack(CreateFisheryBlocks.BAIT_TRAP.asStack());
         this.slotDrawable = createSlotDrawable();
         this.baitTrapState = CreateFisheryBlocks.BAIT_TRAP.getDefaultState();
@@ -87,40 +89,25 @@ public class BaitTrapCategory implements IRecipeCategory<BaitTrapRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, BaitTrapRecipe recipe, IFocusGroup focuses) {
-        // 布局计算
-        int centerX = BACKGROUND_WIDTH / 2;  // 88
-        int centerY = 28;
-
-        // 输入槽 - 左侧
-        int inputX = centerX - 50;  // 38
-        builder.addSlot(RecipeIngredientRole.INPUT, inputX, centerY)
+        // Input slot (bait) - left side
+        builder.addSlot(RecipeIngredientRole.INPUT, 27, 28)
                 .setBackground(slotDrawable, -1, -1)
                 .addIngredients(recipe.getIngredients().get(0));
 
-        // 输出槽 - 右侧，2x2布局
+        // Output slots - right side in 2x2 layout
         List<ProcessingOutput> results = recipe.getRollableResults();
-        int outputStartX = centerX + 32;  // 120
-        int outputStartY = centerY - 10;  // 18
 
-        // 2x2 输出槽位置
-        int[][] outputPositions = {
-                {outputStartX, outputStartY},           // 左上
-                {outputStartX + 19, outputStartY},      // 右上
-                {outputStartX, outputStartY + 19},      // 左下
-                {outputStartX + 19, outputStartY + 19}  // 右下
-        };
+        int[] xPositions = {132, 132, 151, 151};
+        int[] yPositions = {28, 5, 5, 28};
 
         for (int i = 0; i < Math.min(results.size(), 4); i++) {
             ProcessingOutput output = results.get(i);
 
-            IRecipeSlotBuilder slotBuilder = builder.addSlot(
-                            RecipeIngredientRole.OUTPUT,
-                            outputPositions[i][0],
-                            outputPositions[i][1])
+            IRecipeSlotBuilder slotBuilder = builder.addSlot(RecipeIngredientRole.OUTPUT, xPositions[i], yPositions[i])
                     .setBackground(slotDrawable, -1, -1)
                     .addItemStack(output.getStack());
 
-            // 添加概率提示
+            // Add chance tooltip if output has less than 100% chance
             if (output.getChance() < 1.0f) {
                 slotBuilder.addRichTooltipCallback((recipeSlotView, tooltip) -> {
                     float chance = output.getChance();
@@ -134,43 +121,55 @@ public class BaitTrapCategory implements IRecipeCategory<BaitTrapRecipe> {
 
     @Override
     public void draw(BaitTrapRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
+        // Draw arrow from input to output
+        AllGuiTextures.JEI_ARROW.render(graphics, 70, 30);
+
+        // Draw shadow under the block
+        AllGuiTextures.JEI_SHADOW.render(graphics, 72 - 17, 27 + 13);
+
+        // Draw the bait trap block in the center (static, no rotation animation)
+        PoseStack poseStack = graphics.pose();
+        poseStack.pushPose();
+
+        // Position the block in the center
+        poseStack.translate(82, 48, 100);
+        poseStack.mulPose(Axis.XP.rotationDegrees(-15.5f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(22.5f));
+        poseStack.scale(20, -20, 20);
+
+        // Render the block
         Minecraft mc = Minecraft.getInstance();
+        BlockRenderDispatcher blockRenderer = mc.getBlockRenderer();
+        MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
 
-        int centerX = BACKGROUND_WIDTH / 2;  // 88
-        int centerY = 28;
+        blockRenderer.renderSingleBlock(
+                baitTrapState,
+                poseStack,
+                buffer,
+                LightTexture.FULL_BRIGHT,
+                OverlayTexture.NO_OVERLAY
+        );
 
-        // 1. 绘制箭头 - 在输入槽和方块之间
-        AllGuiTextures.JEI_ARROW.render(graphics, centerX - 26, centerY + 1);
+        buffer.endBatch();
+        poseStack.popPose();
 
-        // 2. 绘制阴影
-        AllGuiTextures.JEI_SHADOW.render(graphics, centerX - 17, centerY + 13);
-
-        // 3. 绘制诱捕网方块（使用GuiGameElement静态渲染）
-        AnimatedKinetics.defaultBlockElement(baitTrapState)
-                .atLocal(0, 0, 0)
-                .scale(20)
-                .at(centerX - 7, centerY + 10)
-                .render(graphics);
-
-        // 4. 绘制第二个箭头 - 在方块和输出槽之间
-        AllGuiTextures.JEI_ARROW.render(graphics, centerX + 8, centerY + 1);
-
-        // 5. 绘制等待时间信息 - 底部居中
+        // Draw wait time info in bottom right
+        Font font = mc.font;
         int minutes = recipe.getLootTimeMinutes();
         String timeText = formatTime(minutes);
 
+        // "Wait Time" label
         Component waitTimeLabel = Component.translatable("createfisheryindustry.recipe.Trapping.wait_time");
-        String fullText = waitTimeLabel.getString() + ": " + timeText;
+        graphics.drawString(font, waitTimeLabel, 100, 58, 0x888888, false);
 
-        int textWidth = mc.font.width(fullText);
-        int textX = (BACKGROUND_WIDTH - textWidth) / 2;
-        int textY = BACKGROUND_HEIGHT - 12;
-
-        graphics.drawString(mc.font, fullText, textX, textY, 0x888888, false);
+        // Time value
+        graphics.drawString(font, timeText, 100, 68, 0x526878, false);
     }
 
     /**
-     * 格式化时间显示
+     * Format time for display.
+     * @param minutes time in minutes
+     * @return formatted string like "4 min"
      */
     private String formatTime(int minutes) {
         return minutes + " min";

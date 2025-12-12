@@ -77,6 +77,12 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
         return 0;
     }
 
+    // 添加这个方法来让诱饵状态发光
+    @Override
+    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+        return state.getValue(BAITED) ? 5 : 0;
+    }
+
     @Override
     public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
         if (entity.isSuppressingBounce()) {
@@ -111,6 +117,7 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
     @Override
     public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                            Player player, InteractionHand hand, BlockHitResult hitResult) {
+        // 扳手处理
         if (stack.getItem() instanceof WrenchItem) {
             UseOnContext wrenchContext = new UseOnContext(level, player, hand, stack, hitResult);
             InteractionResult result = player.isShiftKeyDown()
@@ -134,6 +141,42 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
             return ItemInteractionResult.FAIL;
         }
 
+        // 潜行 + 手持物品 = 尝试添加或替换诱饵
+        if (player.isShiftKeyDown() && !stack.isEmpty()) {
+            if (baitTrap.findRecipe(stack) != null) {
+                // 检查是否已有诱饵
+                if (baitTrap.isBaited()) {
+                    ItemStack currentBait = baitTrap.getCurrentBait();
+                    // 如果是相同诱饵，不做任何事
+                    if (ItemStack.isSameItem(currentBait, stack)) {
+                        player.displayClientMessage(
+                                Component.translatable("create_fishery.bait_trap.same_bait"),
+                                true
+                        );
+                        return ItemInteractionResult.CONSUME;
+                    }
+                    // 不同诱饵，先返还旧诱饵（非创造模式）
+                    ItemStack removedBait = baitTrap.removeBait();
+                    if (!removedBait.isEmpty() && !player.isCreative()) {
+                        if (!player.getInventory().add(removedBait)) {
+                            player.drop(removedBait, false);
+                        }
+                    }
+                }
+
+                // 添加新诱饵
+                if (baitTrap.tryAddBait(stack)) {
+                    if (!player.isCreative()) {
+                        stack.shrink(1);
+                    }
+                    return ItemInteractionResult.SUCCESS;
+                }
+                return ItemInteractionResult.CONSUME;
+            }
+            // 不是有效诱饵，继续执行提取逻辑
+        }
+
+        // 提取物品逻辑
         var inventory = baitTrap.getInventory();
         if (inventory == null) {
             return ItemInteractionResult.FAIL;

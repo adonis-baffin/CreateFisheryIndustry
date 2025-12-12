@@ -1,8 +1,10 @@
 package com.adonis.createfisheryindustry.block.SmartMesh;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
+import com.adonis.createfisheryindustry.block.BaitTrap.BaitTrapBlockEntity;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
+import com.adonis.createfisheryindustry.registry.CreateFisheryTags;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
@@ -23,6 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -226,9 +229,17 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
                 continue;
             }
 
-            // Skip other mesh blocks
-            if (level.getBlockEntity(neighborPos) instanceof MeshTrapBlockEntity ||
-                    level.getBlockEntity(neighborPos) instanceof SmartMeshBlockEntity) {
+            // Skip other trap blocks
+            BlockEntity neighborBE = level.getBlockEntity(neighborPos);
+            if (neighborBE instanceof MeshTrapBlockEntity ||
+                    neighborBE instanceof SmartMeshBlockEntity ||
+                    neighborBE instanceof BaitTrapBlockEntity) {
+                continue;
+            }
+
+            // Skip blocks in the export blacklist tag (e.g., chutes)
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (neighborState.is(CreateFisheryTags.Blocks.TRAP_EXPORT_BLACKLIST)) {
                 continue;
             }
 
@@ -241,16 +252,10 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
                     if (stackInSlot.isEmpty()) {
                         continue;
                     }
-
-                    int extractionAmount = getExtractionAmount();
-                    ExtractionCountMode extractionMode = getExtractionMode();
-
-                    ItemStack extractedItem = inventory.extractItem(sourceSlot,
-                            Math.min(stackInSlot.getCount(), extractionAmount), true);
+                    ItemStack extractedItem = inventory.extractItem(sourceSlot, stackInSlot.getCount(), true);
                     if (extractedItem.isEmpty()) {
                         continue;
                     }
-
                     ItemStack remainingItem = insertItemIntoTarget(extractedItem, targetInventory);
 
                     int actualExtractAmount = extractedItem.getCount() - remainingItem.getCount();
@@ -260,13 +265,11 @@ public class SmartMeshBlockEntity extends SmartBlockEntity implements IHaveGoggl
                         break;
                     }
                 }
-
                 if (anyItemMoved) {
                     break;
                 }
             }
         }
-
         if (anyItemMoved) {
             setChanged();
             sendData();
