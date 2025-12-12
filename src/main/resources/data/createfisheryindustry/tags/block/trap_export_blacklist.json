@@ -2,6 +2,11 @@
   "replace": false,
   "values": [
     "create:chute",
-    "create:smart_chute"
+    "create:smart_chute",
+    "createfisheryindustry:bait_trap",
+    "createfisheryindustry:mesh_trap",
+    "createfisheryindustry:smart_mesh",
+    "createfisheryindustry:smart_nozzle",
+    "createfisheryindustry:trap_nozzle"
   ]
 }

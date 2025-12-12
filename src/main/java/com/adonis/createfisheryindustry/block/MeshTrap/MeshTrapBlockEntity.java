@@ -203,6 +203,12 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         for (Direction direction : Direction.values()) {
             BlockPos neighborPos = getBlockPos().relative(direction);
 
+            // 检查黑名单标签（包括溜槽和其他trap方块）
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (neighborState.is(CreateFisheryTags.Blocks.TRAP_EXPORT_BLACKLIST)) {
+                continue;
+            }
+
             // Try to find DirectBeltInputBehaviour on the neighbor
             DirectBeltInputBehaviour beltInput = BlockEntityBehaviour.get(level, neighborPos, DirectBeltInputBehaviour.TYPE);
 
@@ -265,15 +271,7 @@ public class MeshTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                 continue;
             }
 
-            // Skip other trap blocks
-            BlockEntity neighborBE = level.getBlockEntity(neighborPos);
-            if (neighborBE instanceof MeshTrapBlockEntity ||
-                    neighborBE instanceof SmartMeshBlockEntity ||
-                    neighborBE instanceof BaitTrapBlockEntity) {
-                continue;
-            }
-
-            // Skip blocks in the export blacklist tag (e.g., chutes)
+            // Skip blocks in the export blacklist tag (包括溜槽和其他trap方块)
             BlockState neighborState = level.getBlockState(neighborPos);
             if (neighborState.is(CreateFisheryTags.Blocks.TRAP_EXPORT_BLACKLIST)) {
                 continue;

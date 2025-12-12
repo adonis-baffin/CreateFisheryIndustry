@@ -365,12 +365,25 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         for (Direction direction : Direction.values()) {
             BlockPos neighborPos = getBlockPos().relative(direction);
 
+            // 检查黑名单标签（包括溜槽和其他trap方块）
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (neighborState.is(CreateFisheryTags.Blocks.TRAP_EXPORT_BLACKLIST)) {
+                continue;
+            }
+
+            // Try to find DirectBeltInputBehaviour on the neighbor
             DirectBeltInputBehaviour beltInput = BlockEntityBehaviour.get(level, neighborPos, DirectBeltInputBehaviour.TYPE);
 
             if (beltInput == null) {
                 continue;
             }
 
+            // Skip if belt cannot accept items from this direction
+            if (!beltInput.canInsertFromSide(direction.getOpposite())) {
+                continue;
+            }
+
+            // Try to export items from our inventory to the belt
             for (int sourceSlot = 0; sourceSlot < inventory.getSlots(); sourceSlot++) {
                 ItemStack stackInSlot = inventory.getStackInSlot(sourceSlot);
 
@@ -378,12 +391,14 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                     continue;
                 }
 
+                // Try to insert one item at a time to the belt
                 ItemStack toInsert = stackInSlot.copy();
                 toInsert.setCount(1);
 
                 ItemStack remaining = beltInput.handleInsertion(toInsert, Direction.DOWN, false);
 
                 if (remaining.isEmpty()) {
+                    // Successfully inserted, remove from our inventory
                     inventory.extractItem(sourceSlot, 1, false);
                     anyItemMoved = true;
                     break;
@@ -418,14 +433,7 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                 continue;
             }
 
-            BlockEntity neighborBE = level.getBlockEntity(neighborPos);
-            if (neighborBE instanceof MeshTrapBlockEntity ||
-                    neighborBE instanceof SmartMeshBlockEntity ||
-                    neighborBE instanceof BaitTrapBlockEntity) {
-                continue;
-            }
-
-            // Skip blocks in the export blacklist tag (e.g., chutes)
+            // Skip blocks in the export blacklist tag (包括溜槽和其他trap方块)
             BlockState neighborState = level.getBlockState(neighborPos);
             if (neighborState.is(CreateFisheryTags.Blocks.TRAP_EXPORT_BLACKLIST)) {
                 continue;

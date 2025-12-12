@@ -36,7 +36,8 @@
   "gui.createfisheryindustry.bait_trap.level_suffix": "",
   "gui.createfisheryindustry.bait_trap.no_bait": "No Bait",
   "gui.createfisheryindustry.bait_trap.bait": "Bait",
-  "createfisheryindustry.recipe.Trapping": "Trapping",
+  "createfisheryindustry.recipe.bait_trap": "Trapping",
+  "createfisheryindustry.recipe.bait_trap.bait_level": "Bait Level",
   "createfisheryindustry.recipe.Trapping.wait_time": "Wait Time",
   "create_fishery.bait_trap.extracted": "Extracted %s x %s",
   "create_fishery.bait_trap.extraction_failed": "Extraction failed, please try again",
@@ -134,7 +135,7 @@
   "item.createfisheryindustry.cooked_lobster": "Cooked Lobster",
 
 
-  "recipe.createfisheryindustry.peeling": "Peeling",
+  "createfisheryindustry.recipe.peeling": "Peeling",
 
   "gui.goggles.kinetic_stats": "Kinetic Stats",
   "create.gui.goggles.speed": "Speed: %s RPM",
