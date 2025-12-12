@@ -1,5 +1,6 @@
 package com.adonis.createfisheryindustry.block.BaitTrap;
 
+import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
@@ -110,10 +111,6 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
     @Override
     public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                            Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (level.isClientSide()) {
-            return ItemInteractionResult.SUCCESS;
-        }
-
         if (stack.getItem() instanceof WrenchItem) {
             UseOnContext wrenchContext = new UseOnContext(level, player, hand, stack, hitResult);
             InteractionResult result = player.isShiftKeyDown()
@@ -128,24 +125,15 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
+        if (level.isClientSide()) {
+            return ItemInteractionResult.SUCCESS;
+        }
+
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof BaitTrapBlockEntity baitTrap)) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return ItemInteractionResult.FAIL;
         }
 
-        // Sneak + right-click to add bait
-        if (player.isShiftKeyDown() && !stack.isEmpty()) {
-            if (baitTrap.tryAddBait(stack)) {
-                if (!player.isCreative()) {
-                    stack.shrink(1);
-                }
-                level.setBlock(pos, state.setValue(BAITED, true), 3); // Switch to baited mode
-                return ItemInteractionResult.SUCCESS;
-            }
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-
-        // Non-sneak right-click to extract items
         var inventory = baitTrap.getInventory();
         if (inventory == null) {
             return ItemInteractionResult.FAIL;

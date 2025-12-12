@@ -14,7 +14,6 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.RecipeHolder;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,19 +45,19 @@ public class CreateFisheryJeiPlugin implements IModPlugin {
 
         var recipeManager = Minecraft.getInstance().level.getRecipeManager();
 
-// Peeling recipes
+        // Peeling recipes
         List<PeelingRecipe> peelingRecipes = recipeManager
                 .getAllRecipesFor(CreateFisheryRecipeTypes.PEELING.getType())
                 .stream()
-                .map(holder -> (PeelingRecipe) holder.value())  // 用 lambda 替换方法引用，并添加 (PeelingRecipe) 强制转换
+                .map(holder -> (PeelingRecipe) holder.value())
                 .collect(Collectors.toList());
         registration.addRecipes(PEELING_TYPE_JEI, peelingRecipes);
 
-// Bait Trap recipes
+        // Bait Trap recipes
         List<BaitTrapRecipe> baitTrapRecipes = recipeManager
                 .getAllRecipesFor(CreateFisheryRecipeTypes.BAIT_TRAP.getType())
                 .stream()
-                .map(holder -> (BaitTrapRecipe) holder.value())  // 同理
+                .map(holder -> (BaitTrapRecipe) holder.value())
                 .collect(Collectors.toList());
         registration.addRecipes(BAIT_TRAP_TYPE_JEI, baitTrapRecipes);
     }

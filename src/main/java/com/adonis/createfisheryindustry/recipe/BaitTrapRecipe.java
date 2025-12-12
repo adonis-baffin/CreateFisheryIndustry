@@ -18,14 +18,28 @@ import java.util.Set;
 @ParametersAreNonnullByDefault
 public class BaitTrapRecipe extends ProcessingRecipe<RecipeInput, BaitTrapRecipeParams> {
 
+    // Fixed loot generation times in ticks for each bait level
+    // Level 5: 4 min = 4800 ticks
+    // Level 4: 8 min = 9600 ticks
+    // Level 3: 12 min = 14400 ticks
+    // Level 2: 16 min = 19200 ticks
+    // Level 1: 20 min = 24000 ticks
+    private static final int[] LOOT_TIME_TICKS = {
+            24000,  // Level 1: 20 minutes
+            19200,  // Level 2: 16 minutes
+            14400,  // Level 3: 12 minutes
+            9600,   // Level 4: 8 minutes
+            4800    // Level 5: 4 minutes
+    };
+
     public BaitTrapRecipe(BaitTrapRecipeParams params) {
         super(CreateFisheryRecipeTypes.BAIT_TRAP, params);
     }
 
     /**
      * Get the bait level (1-5).
-     * Level 5 = slowest (60-300 seconds)
-     * Each level down halves the time.
+     * Higher level = faster loot generation.
+     * Level 5: 4 min, Level 4: 8 min, Level 3: 12 min, Level 2: 16 min, Level 1: 20 min
      */
     public int getBaitLevel() {
         return getParams().getBaitLevel();
@@ -72,11 +86,11 @@ public class BaitTrapRecipe extends ProcessingRecipe<RecipeInput, BaitTrapRecipe
     @Override
     public boolean matches(RecipeInput input, Level level) {
         if (getIngredients().isEmpty()) return false;
-        
+
         if (input instanceof SingleRecipeInput singleInput) {
             return getIngredients().get(0).test(singleInput.item());
         }
-        
+
         if (input.size() > 0) {
             return getIngredients().get(0).test(input.getItem(0));
         }
@@ -85,26 +99,41 @@ public class BaitTrapRecipe extends ProcessingRecipe<RecipeInput, BaitTrapRecipe
     }
 
     /**
-     * Calculate the minimum time in ticks to produce loot based on bait level.
-     * Level 5: 1200 ticks (60 seconds)
-     * Each level down halves the time.
+     * Get the fixed loot generation time in ticks based on bait level.
+     * Level 5: 4 min (4800 ticks)
+     * Level 4: 8 min (9600 ticks)
+     * Level 3: 12 min (14400 ticks)
+     * Level 2: 16 min (19200 ticks)
+     * Level 1: 20 min (24000 ticks)
      */
-    public int getMinLootTimeTicks() {
-        int baseMinTicks = 1200; // 60 seconds at level 5
-        double multiplier = Math.pow(0.5, 5 - getBaitLevel());
-        return Math.max(20, (int) (baseMinTicks * multiplier));
+    public int getLootTimeTicks() {
+        int level = getBaitLevel();
+        // Clamp level to valid range (1-5) and convert to array index (0-4)
+        int index = Math.max(0, Math.min(4, level - 1));
+        return LOOT_TIME_TICKS[index];
     }
 
     /**
-     * Calculate the maximum time in ticks to produce loot based on bait level.
-     * Level 5: 6000 ticks (300 seconds)
-     * Each level down halves the time.
+     * Get the loot generation time in minutes for display purposes.
      */
+    public int getLootTimeMinutes() {
+        return getLootTimeTicks() / 20 / 60;
+    }
+
+    /**
+     * @deprecated Use {@link #getLootTimeTicks()} instead. Kept for compatibility.
+     */
+    @Deprecated
+    public int getMinLootTimeTicks() {
+        return getLootTimeTicks();
+    }
+
+    /**
+     * @deprecated Use {@link #getLootTimeTicks()} instead. Kept for compatibility.
+     */
+    @Deprecated
     public int getMaxLootTimeTicks() {
-        int baseMaxTicks = 6000; // 300 seconds at level 5
-        double multiplier = Math.pow(0.5, 5 - getBaitLevel());
-        int minTicks = getMinLootTimeTicks();
-        return Math.max(minTicks + 20, (int) (baseMaxTicks * multiplier));
+        return getLootTimeTicks();
     }
 
     public void addRequiredMachines(Set<ItemLike> list) {

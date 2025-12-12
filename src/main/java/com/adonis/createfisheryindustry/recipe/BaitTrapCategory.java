@@ -2,6 +2,7 @@ package com.adonis.createfisheryindustry.recipe;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
+import com.simibubi.create.compat.jei.category.animations.AnimatedKinetics;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -15,10 +16,9 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -26,17 +26,24 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 public class BaitTrapCategory implements IRecipeCategory<BaitTrapRecipe> {
 
-    public static final RecipeType<BaitTrapRecipe> BAIT_TRAP_TYPE = 
+    public static final RecipeType<BaitTrapRecipe> BAIT_TRAP_TYPE =
             RecipeType.create(CreateFisheryMod.ID, "bait_trap", BaitTrapRecipe.class);
+
+    // 背景尺寸 - 使用Create标准尺寸
+    private static final int BACKGROUND_WIDTH = 177;
+    private static final int BACKGROUND_HEIGHT = 70;
 
     private final IDrawable background;
     private final IDrawable icon;
-    private static final IDrawable BASIC_SLOT = createSlotDrawable();
+    private final IDrawable slotDrawable;
+    private final BlockState baitTrapState;
 
     public BaitTrapCategory(IRecipeCategoryRegistration registration) {
         IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
-        this.background = guiHelper.createBlankDrawable(177, 80);
+        this.background = guiHelper.createBlankDrawable(BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
         this.icon = guiHelper.createDrawableItemStack(CreateFisheryBlocks.BAIT_TRAP.asStack());
+        this.slotDrawable = createSlotDrawable();
+        this.baitTrapState = CreateFisheryBlocks.BAIT_TRAP.getDefaultState();
     }
 
     private static IDrawable createSlotDrawable() {
@@ -65,7 +72,7 @@ public class BaitTrapCategory implements IRecipeCategory<BaitTrapRecipe> {
 
     @Override
     public Component getTitle() {
-        return Component.translatable("recipe.createfisheryindustry.bait_trap");
+        return Component.translatable("createfisheryindustry.recipe.Trapping");
     }
 
     @Override
@@ -80,24 +87,40 @@ public class BaitTrapCategory implements IRecipeCategory<BaitTrapRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, BaitTrapRecipe recipe, IFocusGroup focuses) {
-        // Input slot (bait)
-        builder.addSlot(RecipeIngredientRole.INPUT, 27, 28)
-                .setBackground(BASIC_SLOT, -1, -1)
+        // 布局计算
+        int centerX = BACKGROUND_WIDTH / 2;  // 88
+        int centerY = 28;
+
+        // 输入槽 - 左侧
+        int inputX = centerX - 50;  // 38
+        builder.addSlot(RecipeIngredientRole.INPUT, inputX, centerY)
+                .setBackground(slotDrawable, -1, -1)
                 .addIngredients(recipe.getIngredients().get(0));
 
-        // Output slots
+        // 输出槽 - 右侧，2x2布局
         List<ProcessingOutput> results = recipe.getRollableResults();
-        
-        int[] xPositions = {132, 132, 151, 151};
-        int[] yPositions = {28, 5, 5, 28};
+        int outputStartX = centerX + 32;  // 120
+        int outputStartY = centerY - 10;  // 18
+
+        // 2x2 输出槽位置
+        int[][] outputPositions = {
+                {outputStartX, outputStartY},           // 左上
+                {outputStartX + 19, outputStartY},      // 右上
+                {outputStartX, outputStartY + 19},      // 左下
+                {outputStartX + 19, outputStartY + 19}  // 右下
+        };
 
         for (int i = 0; i < Math.min(results.size(), 4); i++) {
             ProcessingOutput output = results.get(i);
 
-            IRecipeSlotBuilder slotBuilder = builder.addSlot(RecipeIngredientRole.OUTPUT, xPositions[i], yPositions[i])
-                    .setBackground(BASIC_SLOT, -1, -1)
+            IRecipeSlotBuilder slotBuilder = builder.addSlot(
+                            RecipeIngredientRole.OUTPUT,
+                            outputPositions[i][0],
+                            outputPositions[i][1])
+                    .setBackground(slotDrawable, -1, -1)
                     .addItemStack(output.getStack());
 
+            // 添加概率提示
             if (output.getChance() < 1.0f) {
                 slotBuilder.addRichTooltipCallback((recipeSlotView, tooltip) -> {
                     float chance = output.getChance();
@@ -110,42 +133,46 @@ public class BaitTrapCategory implements IRecipeCategory<BaitTrapRecipe> {
     }
 
     @Override
-    public void draw(BaitTrapRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics gui, double mouseX, double mouseY) {
-        // Draw arrow
-        AllGuiTextures.JEI_ARROW.render(gui, 70, 30);
-        
-        // Draw bait trap icon in center
-        AllGuiTextures.JEI_SHADOW.render(gui, 72 - 17, 27 + 13);
-        
-        // Draw level and time info
-        Font font = Minecraft.getInstance().font;
-        
-        int level = recipe.getBaitLevel();
-        int minSeconds = recipe.getMinLootTimeTicks() / 20;
-        int maxSeconds = recipe.getMaxLootTimeTicks() / 20;
-        
-        // Level text
-        Component levelText = Component.translatable("gui.createfisheryindustry.bait_trap.level", level);
-        gui.drawString(font, levelText, 5, 5, 0x444444, false);
-        
-        // Time range text
-        String timeRange;
-        if (minSeconds >= 60 || maxSeconds >= 60) {
-            int minMinutes = minSeconds / 60;
-            int minSecs = minSeconds % 60;
-            int maxMinutes = maxSeconds / 60;
-            int maxSecs = maxSeconds % 60;
-            
-            if (minMinutes > 0 && maxMinutes > 0) {
-                timeRange = String.format("%d:%02d - %d:%02d", minMinutes, minSecs, maxMinutes, maxSecs);
-            } else {
-                timeRange = String.format("%ds - %d:%02d", minSeconds, maxMinutes, maxSecs);
-            }
-        } else {
-            timeRange = String.format("%d - %ds", minSeconds, maxSeconds);
-        }
-        
-        Component timeText = Component.translatable("gui.createfisheryindustry.bait_trap.time", timeRange);
-        gui.drawString(font, timeText, 5, 65, 0x666666, false);
+    public void draw(BaitTrapRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
+        Minecraft mc = Minecraft.getInstance();
+
+        int centerX = BACKGROUND_WIDTH / 2;  // 88
+        int centerY = 28;
+
+        // 1. 绘制箭头 - 在输入槽和方块之间
+        AllGuiTextures.JEI_ARROW.render(graphics, centerX - 26, centerY + 1);
+
+        // 2. 绘制阴影
+        AllGuiTextures.JEI_SHADOW.render(graphics, centerX - 17, centerY + 13);
+
+        // 3. 绘制诱捕网方块（使用GuiGameElement静态渲染）
+        AnimatedKinetics.defaultBlockElement(baitTrapState)
+                .atLocal(0, 0, 0)
+                .scale(20)
+                .at(centerX - 7, centerY + 10)
+                .render(graphics);
+
+        // 4. 绘制第二个箭头 - 在方块和输出槽之间
+        AllGuiTextures.JEI_ARROW.render(graphics, centerX + 8, centerY + 1);
+
+        // 5. 绘制等待时间信息 - 底部居中
+        int minutes = recipe.getLootTimeMinutes();
+        String timeText = formatTime(minutes);
+
+        Component waitTimeLabel = Component.translatable("createfisheryindustry.recipe.Trapping.wait_time");
+        String fullText = waitTimeLabel.getString() + ": " + timeText;
+
+        int textWidth = mc.font.width(fullText);
+        int textX = (BACKGROUND_WIDTH - textWidth) / 2;
+        int textY = BACKGROUND_HEIGHT - 12;
+
+        graphics.drawString(mc.font, fullText, textX, textY, 0x888888, false);
+    }
+
+    /**
+     * 格式化时间显示
+     */
+    private String formatTime(int minutes) {
+        return minutes + " min";
     }
 }

@@ -1,5 +1,6 @@
 package com.adonis.createfisheryindustry.block.BaitTrap;
 
+import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapBlockEntity;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.recipe.BaitTrapRecipe;
@@ -58,7 +59,7 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
     protected ItemStack currentBait = ItemStack.EMPTY;
     protected int baitTimeRemaining = 0;
     protected int lootGenerationTicks = 0;
-    protected int currentLootInterval = 0;
+    protected int lootInterval = 0; // Fixed interval from recipe
 
     // Cache the current recipe
     @Nullable
@@ -119,30 +120,54 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
     /**
      * Find a matching recipe for the given bait item using the RecipeManager.
+     * Made public so it can be accessed by the event handler.
      */
     @Nullable
-    protected BaitTrapRecipe findRecipe(ItemStack bait) {
-        if (level == null || bait.isEmpty()) return null;
+    public BaitTrapRecipe findRecipe(ItemStack bait) {
+        CreateFisheryMod.LOGGER.info("[BaitTrap] findRecipe called for: {}", bait.getItem());
+
+        if (level == null || bait.isEmpty()) {
+            CreateFisheryMod.LOGGER.info("[BaitTrap] findRecipe early return: level null = {}, bait empty = {}",
+                    level == null, bait.isEmpty());
+            return null;
+        }
+
+        CreateFisheryMod.LOGGER.info("[BaitTrap] Looking up recipe type: {}", CreateFisheryRecipeTypes.BAIT_TRAP.getId());
 
         SingleRecipeInput input = new SingleRecipeInput(bait);
         Optional<RecipeHolder<BaitTrapRecipe>> recipeHolder = level.getRecipeManager()
                 .getRecipeFor(CreateFisheryRecipeTypes.BAIT_TRAP.getType(), input, level);
 
+        CreateFisheryMod.LOGGER.info("[BaitTrap] Recipe lookup result: {}", recipeHolder.isPresent() ? "found" : "not found");
+
+        if (recipeHolder.isPresent()) {
+            BaitTrapRecipe recipe = recipeHolder.get().value();
+            CreateFisheryMod.LOGGER.info("[BaitTrap] Found recipe with baitLevel: {}", recipe.getBaitLevel());
+        }
+
         return recipeHolder.map(RecipeHolder::value).orElse(null);
     }
 
     public boolean tryAddBait(ItemStack stack) {
+        CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait called with: {}", stack.getItem());
+
         if (stack.isEmpty() || level == null) {
+            CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: stack empty = {}, level null = {}",
+                    stack.isEmpty(), level == null);
             return false;
         }
 
         BaitTrapRecipe recipe = findRecipe(stack);
+        CreateFisheryMod.LOGGER.info("[BaitTrap] findRecipe result: {}", recipe != null ? "found" : "null");
+
         if (recipe == null) {
+            CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: no matching recipe");
             return false;
         }
 
         // If already baited, don't allow adding new bait
         if (isBaited()) {
+            CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: already baited");
             return false;
         }
 
@@ -150,7 +175,11 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         cachedRecipe = recipe;
         baitTimeRemaining = BAIT_DURATION_TICKS;
         lootGenerationTicks = 0;
-        currentLootInterval = calculateLootInterval(recipe);
+        // Use fixed loot interval from recipe
+        lootInterval = recipe.getLootTimeTicks();
+
+        CreateFisheryMod.LOGGER.info("[BaitTrap] Bait set successfully: bait={}, level={}, interval={}",
+                currentBait.getItem(), recipe.getBaitLevel(), lootInterval);
 
         updateBlockState();
         setChanged();
@@ -169,20 +198,13 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         cachedRecipe = null;
         baitTimeRemaining = 0;
         lootGenerationTicks = 0;
-        currentLootInterval = 0;
+        lootInterval = 0;
 
         updateBlockState();
         setChanged();
         sendData();
 
         return removed;
-    }
-
-    private int calculateLootInterval(BaitTrapRecipe recipe) {
-        int minTicks = recipe.getMinLootTimeTicks();
-        int maxTicks = recipe.getMaxLootTimeTicks();
-
-        return minTicks + random.nextInt(maxTicks - minTicks + 1);
     }
 
     private void updateBlockState() {
@@ -250,21 +272,17 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                 be.cachedRecipe = null;
                 be.baitTimeRemaining = 0;
                 be.lootGenerationTicks = 0;
-                be.currentLootInterval = 0;
+                be.lootInterval = 0;
                 be.updateBlockState();
                 be.setChanged();
                 be.sendData();
             } else {
-                // Try to generate loot
+                // Try to generate loot at fixed intervals
                 be.lootGenerationTicks++;
-                if (be.lootGenerationTicks >= be.currentLootInterval && be.hasInventorySpace()) {
+                if (be.lootInterval > 0 && be.lootGenerationTicks >= be.lootInterval && be.hasInventorySpace()) {
                     be.generateLoot(serverLevel);
                     be.lootGenerationTicks = 0;
-
-                    // Recalculate interval for next loot
-                    if (be.cachedRecipe != null) {
-                        be.currentLootInterval = be.calculateLootInterval(be.cachedRecipe);
-                    }
+                    // Interval stays the same (fixed)
                 }
             }
         }
@@ -321,6 +339,9 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
             // Try to find recipe again (in case it wasn't cached)
             cachedRecipe = findRecipe(currentBait);
             if (cachedRecipe == null) return;
+
+            // Also update the loot interval if recipe was re-cached
+            lootInterval = cachedRecipe.getLootTimeTicks();
         }
 
         // Roll for results using the recipe's roll system
@@ -526,25 +547,17 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
         // Show bait status
         if (isBaited()) {
-            int secondsRemaining = baitTimeRemaining / 20;
-            int minutes = secondsRemaining / 60;
-            int seconds = secondsRemaining % 60;
-
             CreateLang.text("")
-                    .add(Component.translatable("gui.createfisheryindustry.bait_trap.bait").withStyle(ChatFormatting.GOLD))
+                    .add(Component.translatable("gui.createfisheryindustry.bait_trap.bait").withStyle(ChatFormatting.GRAY))
                     .add(Component.literal(": ").withStyle(ChatFormatting.GRAY))
-                    .add(Component.translatable(currentBait.getDescriptionId()).withStyle(ChatFormatting.YELLOW))
+                    .add(Component.translatable(currentBait.getDescriptionId()).withStyle(ChatFormatting.GRAY))
                     .forGoggles(tooltip, 1);
 
-            CreateLang.text("")
-                    .add(Component.translatable("gui.createfisheryindustry.bait_trap.time_remaining").withStyle(ChatFormatting.GRAY))
-                    .add(Component.literal(String.format(" %d:%02d", minutes, seconds)).withStyle(ChatFormatting.GREEN))
-                    .forGoggles(tooltip, 1);
-
-            // Show bait level if recipe is cached
             if (cachedRecipe != null) {
                 CreateLang.text("")
-                        .add(Component.translatable("gui.createfisheryindustry.bait_trap.level", cachedRecipe.getBaitLevel()).withStyle(ChatFormatting.AQUA))
+                        .add(Component.translatable("gui.createfisheryindustry.bait_trap.level").withStyle(ChatFormatting.GRAY))
+                        .add(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                        .add(CreateLang.text(String.valueOf(cachedRecipe.getBaitLevel())).style(ChatFormatting.GREEN))
                         .forGoggles(tooltip, 1);
             }
         } else {
@@ -554,8 +567,6 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
 
         // Show inventory contents
-        CreateLang.translate("gui.goggles.bait_trap_inventory").forGoggles(tooltip);
-
         boolean isEmpty = true;
         for (int i = 0; i < inventory.getSlots(); i++) {
             ItemStack stack = inventory.getStackInSlot(i);
@@ -586,7 +597,7 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
         tag.putInt("BaitTimeRemaining", baitTimeRemaining);
         tag.putInt("LootGenerationTicks", lootGenerationTicks);
-        tag.putInt("CurrentLootInterval", currentLootInterval);
+        tag.putInt("LootInterval", lootInterval);
     }
 
     @Override
@@ -607,7 +618,7 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
         baitTimeRemaining = tag.getInt("BaitTimeRemaining");
         lootGenerationTicks = tag.getInt("LootGenerationTicks");
-        currentLootInterval = tag.getInt("CurrentLootInterval");
+        lootInterval = tag.getInt("LootInterval");
     }
 
     @Override
