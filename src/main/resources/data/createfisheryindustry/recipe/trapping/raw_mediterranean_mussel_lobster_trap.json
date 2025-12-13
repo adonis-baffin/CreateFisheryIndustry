@@ -1,0 +1,7 @@
+{
+  "type": "createfisheryindustry:bait_trap",
+  "ingredients": [{ "item": "createfisheryindustry:raw_mediterranean_mussel" }],
+  "results": [{ "id": "createfisheryindustry:raw_lobster", "count": 1, "chance": 1.0 }],
+  "baitLevel": 4,
+  "requires_water": true
+}

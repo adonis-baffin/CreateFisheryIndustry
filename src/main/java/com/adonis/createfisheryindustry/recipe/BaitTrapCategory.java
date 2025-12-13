@@ -26,7 +26,7 @@ public class BaitTrapCategory extends CFIRecipeCategory<BaitTrapRecipe> {
 
     @Override
     protected void setRecipe(IRecipeLayoutBuilder builder, BaitTrapRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.INPUT, 55, 3)
+        builder.addSlot(RecipeIngredientRole.INPUT, 63, 3)
                 .setBackground(getRenderedSlot(), -1, -1)
                 .addIngredients(recipe.getIngredients().get(0));
 
@@ -49,38 +49,39 @@ public class BaitTrapCategory extends CFIRecipeCategory<BaitTrapRecipe> {
     protected void draw(BaitTrapRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         Font font = Minecraft.getInstance().font;
 
-        AllGuiTextures.JEI_SHADOW.render(graphics, 76, 43);
-        baitTrap.draw(graphics, 87, 10);
-        AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 88, 8);
+        AllGuiTextures.JEI_SHADOW.render(graphics, 79, 43);
+        baitTrap.draw(graphics, 90, 10);
+        AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 91, 8);
 
         // 等级
         int baitLevel = recipe.getBaitLevel();
         graphics.drawString(font,
                 Component.translatable("createfisheryindustry.recipe.bait_trap.bait_level")
                         .append(": " + baitLevel),
-                10, 35, 0x526878, false);
+                9, 35, 0x526878, false);
 
-        // 生成间隔
+        // 生成间隔时间
         graphics.drawString(font,
                 recipe.getLootTimeMinutes() + " min",
                 10, 55, 0x526878, false);
 
-        // ==================== 环境需求（位置不变，样式完全同步 Basin 加热条）===================
+// ==================== 环境需求文字（完美对齐原版加热条）===================
         boolean needsWater = recipe.requiresWater();
+        AllGuiTextures.JEI_NO_HEAT_BAR.render(graphics, 4, 49);
 
-        // 1. 画底条（和加热条一模一样的资源、大小、风格）
-        AllGuiTextures bar = needsWater ? AllGuiTextures.JEI_HEAT_BAR : AllGuiTextures.JEI_NO_HEAT_BAR;
-        bar.render(graphics, 8 - 7, 55 - 6);   // 微调让文字完美居中在条里（原版就是这么对齐的）
+        Component text = Component.translatable(
+                        needsWater ? "createfisheryindustry.recipe.bait_trap.requires_water"
+                                : "createfisheryindustry.recipe.bait_trap.land_only")
+                .withStyle(ChatFormatting.BOLD);
 
-        // 2. 文字（颜色、加粗、位置完全模仿原版加热条文字）
-        String key = needsWater
-                ? "createfisheryindustry.recipe.bait_trap.requires_water"
-                : "createfisheryindustry.recipe.bait_trap.land_only";
+        int textColor = needsWater ? 0x3AB3A8 : 0x888888;
+        int textWidth = font.width(text);
 
-        int textColor = needsWater ? 0x3AB3A8 : 0x888888; // 水色 vs 原版无加热灰色
+// 关键：中心点用 66（和 Create 官方完全一致）
+        int centeredX = 143 - (textWidth / 2);
 
-        graphics.drawString(font,
-                Component.translatable(key).withStyle(ChatFormatting.BOLD),
-                118, 55, textColor, false); // 位置完全不动
+// 可选阴影（原版也有）
+        graphics.drawString(font, text, centeredX + 1, 56, 0x000000, false);
+        graphics.drawString(font, text, centeredX,     55, textColor,   false);
     }
 }

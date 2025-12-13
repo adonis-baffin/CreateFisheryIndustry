@@ -1,0 +1,7 @@
+{
+  "type": "createfisheryindustry:bait_trap",
+  "ingredients": [{ "item": "minecraft:cooked_cod" }],
+  "results": [{ "id": "createfisheryindustry:raw_lobster", "count": 1, "chance": 1.0 }],
+  "baitLevel": 1,
+  "requires_water": true
+}

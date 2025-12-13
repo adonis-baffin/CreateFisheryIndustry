@@ -1,14 +1,18 @@
 {
   "type": "createfisheryindustry:bait_trap",
   "ingredients": [
-    {
-      "item": "minecraft:carrot"
-    }
+    { "item": "minecraft:carrot" }
   ],
   "results": [
     {
       "id": "minecraft:rabbit",
-      "count": 1
+      "count": 1,
+      "chance": 1
+    },
+    {
+      "id": "minecraft:rabbit_hide",
+      "count": 1,
+      "chance": 0.50
     }
   ],
   "baitLevel": 5,

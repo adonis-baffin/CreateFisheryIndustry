@@ -1,0 +1,20 @@
+{
+  "type": "createfisheryindustry:bait_trap",
+  "ingredients": [
+    { "item": "minecraft:wheat_seeds" }
+  ],
+  "results": [
+    {
+      "id": "minecraft:chicken",
+      "count": 1,
+      "chance": 1
+    },
+    {
+      "id": "minecraft:feather",
+      "count": 1,
+      "chance": 0.50
+    }
+  ],
+  "baitLevel": 5,
+  "requires_water": false
+}

@@ -1,0 +1,7 @@
+{
+  "type": "createfisheryindustry:bait_trap",
+  "ingredients": [{ "item": "createfisheryindustry:salmon_steak" }],
+  "results": [{ "id": "createfisheryindustry:raw_lobster", "count": 1, "chance": 1.0 }],
+  "baitLevel": 3,
+  "requires_water": true
+}
