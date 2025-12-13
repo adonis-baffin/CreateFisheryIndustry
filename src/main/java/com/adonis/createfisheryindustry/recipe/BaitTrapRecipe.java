@@ -71,6 +71,10 @@ public class BaitTrapRecipe extends ProcessingRecipe<RecipeInput, BaitTrapRecipe
         return 4; // Up to 4 possible outputs
     }
 
+    public boolean requiresWater() {
+        return getParams().requiresWater();
+    }
+
     @Override
     protected boolean canSpecifyDuration() {
         return false; // Duration is calculated from bait level

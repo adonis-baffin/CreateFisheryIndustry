@@ -11,5 +11,6 @@
       "count": 1
     }
   ],
-  "baitLevel": 5
+  "baitLevel": 5,
+  "requires_water": false
 }

@@ -11,10 +11,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import java.util.function.Function;
@@ -22,6 +19,7 @@ import java.util.function.Function;
 public class BaitTrapRecipeParams extends ProcessingRecipeParams {
 
     private final int baitLevel;
+    private final boolean requiresWater;
 
     public BaitTrapRecipeParams() {
         super();
@@ -32,12 +30,13 @@ public class BaitTrapRecipeParams extends ProcessingRecipeParams {
         this.fluidIngredients = NonNullList.create();
         this.fluidResults = NonNullList.create();
         this.baitLevel = 1;
+        this.requiresWater = false;
     }
 
-    public BaitTrapRecipeParams(
-            NonNullList<Ingredient> ingredients,
-            NonNullList<ProcessingOutput> results,
-            int baitLevel) {
+    public BaitTrapRecipeParams(NonNullList<Ingredient> ingredients,
+                                NonNullList<ProcessingOutput> results,
+                                int baitLevel,
+                                boolean requiresWater) {
         super();
         this.ingredients = ingredients;
         this.results = results;
@@ -45,71 +44,67 @@ public class BaitTrapRecipeParams extends ProcessingRecipeParams {
         this.requiredHeat = HeatCondition.NONE;
         this.fluidIngredients = NonNullList.create();
         this.fluidResults = NonNullList.create();
-        this.baitLevel = Math.max(1, Math.min(5, baitLevel)); // Clamp to 1-5
+        this.baitLevel = Math.max(1, Math.min(5, baitLevel));
+        this.requiresWater = requiresWater;
+    }
+
+    // 兼容旧构造器（防止旧代码报错）
+    public BaitTrapRecipeParams(NonNullList<Ingredient> ingredients,
+                                NonNullList<ProcessingOutput> results,
+                                int baitLevel) {
+        this(ingredients, results, baitLevel, false);
     }
 
     public int getBaitLevel() {
         return baitLevel;
     }
 
-    private static BaitTrapRecipeParams createFromCodec(
-            NonNullList<Ingredient> ingredients,
-            NonNullList<ProcessingOutput> results,
-            int baitLevel) {
-        return new BaitTrapRecipeParams(ingredients, results, baitLevel);
+    public boolean requiresWater() {
+        return requiresWater;
     }
 
+    // ==================== CODEC ====================
     public static final MapCodec<BaitTrapRecipeParams> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BaitTrapRecipeSerializer.INGREDIENTS_MAP_CODEC.forGetter(p -> p.ingredients),
             BaitTrapRecipeSerializer.RESULTS_MAP_CODEC.forGetter(p -> p.results),
-            Codec.INT.optionalFieldOf("baitLevel", 1).forGetter(p -> p.baitLevel)
-    ).apply(instance, BaitTrapRecipeParams::createFromCodec));
+            Codec.INT.optionalFieldOf("baitLevel", 1).forGetter(p -> p.baitLevel),
+            Codec.BOOL.optionalFieldOf("requires_water", false).forGetter(p -> p.requiresWater)
+    ).apply(instance, BaitTrapRecipeParams::new));
 
+    // ==================== STREAM CODEC ====================
     public static final StreamCodec<RegistryFriendlyByteBuf, BaitTrapRecipeParams> STREAM_CODEC = StreamCodec.of(
-            BaitTrapRecipeParams::encodeToBuffer, BaitTrapRecipeParams::decodeFromBuffer);
+            BaitTrapRecipeParams::encodeToBuffer,
+            BaitTrapRecipeParams::decodeFromBuffer
+    );
 
     private static void encodeToBuffer(RegistryFriendlyByteBuf buffer, BaitTrapRecipeParams params) {
         CatnipStreamCodecBuilders.nonNullList(Ingredient.CONTENTS_STREAM_CODEC).encode(buffer, params.ingredients);
         CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC).encode(buffer, params.results);
         buffer.writeInt(params.baitLevel);
+        buffer.writeBoolean(params.requiresWater);
     }
 
     private static BaitTrapRecipeParams decodeFromBuffer(RegistryFriendlyByteBuf buffer) {
         NonNullList<Ingredient> ingredients = CatnipStreamCodecBuilders.nonNullList(Ingredient.CONTENTS_STREAM_CODEC).decode(buffer);
         NonNullList<ProcessingOutput> results = CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC).decode(buffer);
         int baitLevel = buffer.readInt();
-        return new BaitTrapRecipeParams(ingredients, results, baitLevel);
+        boolean requiresWater = buffer.readBoolean();
+        return new BaitTrapRecipeParams(ingredients, results, baitLevel, requiresWater);
     }
 
+    // ==================== Builder ====================
     public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
-        private NonNullList<Ingredient> ingredients = NonNullList.create();
-        private NonNullList<ProcessingOutput> results = NonNullList.create();
+        private final NonNullList<Ingredient> ingredients = NonNullList.create();
+        private final NonNullList<ProcessingOutput> results = NonNullList.create();
         private int baitLevel = 1;
-
-        public Builder require(ItemLike item) {
-            return require(Ingredient.of(item));
-        }
+        private boolean requiresWater = false;
 
         public Builder require(Ingredient ingredient) {
             ingredients.add(ingredient);
-            return this;
-        }
-
-        public Builder output(ItemLike item) {
-            return output(item, 1);
-        }
-
-        public Builder output(ItemLike item, int count) {
-            results.add(new ProcessingOutput(new ItemStack(item, count), 1.0f));
-            return this;
-        }
-
-        public Builder output(ItemLike item, int count, float chance) {
-            results.add(new ProcessingOutput(new ItemStack(item, count), chance));
             return this;
         }
 
@@ -123,8 +118,13 @@ public class BaitTrapRecipeParams extends ProcessingRecipeParams {
             return this;
         }
 
+        public Builder requiresWater() {
+            this.requiresWater = true;
+            return this;
+        }
+
         public BaitTrapRecipeParams build() {
-            return new BaitTrapRecipeParams(ingredients, results, baitLevel);
+            return new BaitTrapRecipeParams(ingredients, results, baitLevel, requiresWater);
         }
     }
 }

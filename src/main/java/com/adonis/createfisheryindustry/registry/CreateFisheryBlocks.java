@@ -72,16 +72,13 @@ public class CreateFisheryBlocks {
     public static final BlockEntry<BaitTrapBlock> BAIT_TRAP = REGISTRATE
             .block("bait_trap", BaitTrapBlock::new)
             .initialProperties(SharedProperties::wooden)
-            .properties(prop -> prop
+            .properties(p -> p
                     .mapColor(DyeColor.ORANGE)
                     .sound(SoundType.BAMBOO)
-                    .noOcclusion())
+                    .noOcclusion()
+                    .lightLevel(state -> state.getValue(BaitTrapBlock.BAITED) ? 5 : 0) // 发光完美保留
+            )
             .transform(axeOrPickaxe())
-            .blockstate((ctx, prov) -> prov.getVariantBuilder(ctx.get())
-                    .partialState().with(BaitTrapBlock.BAITED, false)
-                    .modelForState().modelFile(prov.models().cubeAll(ctx.getName(), prov.modLoc("block/bait_trap"))).addModel()
-                    .partialState().with(BaitTrapBlock.BAITED, true)
-                    .modelForState().modelFile(prov.models().cubeAll(ctx.getName() + "_baited", prov.modLoc("block/bait_trap_baited"))).addModel())
             .simpleItem()
             .register();
 

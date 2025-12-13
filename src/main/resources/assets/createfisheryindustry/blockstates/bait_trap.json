@@ -1,56 +1,29 @@
 {
   "variants": {
-    "facing=down,waterlogged=false": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 180
-    },
-    "facing=up,waterlogged=false": {
-      "model": "createfisheryindustry:block/bait_trap"
-    },
-    "facing=north,waterlogged=false": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 90
-    },
-    "facing=south,waterlogged=false": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 90,
-      "y": 180
-    },
-    "facing=west,waterlogged=false": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 90,
-      "y": 270
-    },
-    "facing=east,waterlogged=false": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 90,
-      "y": 90
-    },
-    "facing=down,waterlogged=true": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 180
-    },
-    "facing=up,waterlogged=true": {
-      "model": "createfisheryindustry:block/bait_trap"
-    },
-    "facing=north,waterlogged=true": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 90
-    },
-    "facing=south,waterlogged=true": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 90,
-      "y": 180
-    },
-    "facing=west,waterlogged=true": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 90,
-      "y": 270
-    },
-    "facing=east,waterlogged=true": {
-      "model": "createfisheryindustry:block/bait_trap",
-      "x": 90,
-      "y": 90
-    }
+    "baited=false,facing=down,waterlogged=false":  { "model": "createfisheryindustry:block/bait_trap", "x": 180 },
+    "baited=false,facing=down,waterlogged=true":   { "model": "createfisheryindustry:block/bait_trap", "x": 180 },
+    "baited=false,facing=up,waterlogged=false":    { "model": "createfisheryindustry:block/bait_trap" },
+    "baited=false,facing=up,waterlogged=true":     { "model": "createfisheryindustry:block/bait_trap" },
+    "baited=false,facing=north,waterlogged=false": { "model": "createfisheryindustry:block/bait_trap", "x": 90 },
+    "baited=false,facing=north,waterlogged=true":  { "model": "createfisheryindustry:block/bait_trap", "x": 90 },
+    "baited=false,facing=south,waterlogged=false": { "model": "createfisheryindustry:block/bait_trap", "x": 90, "y": 180 },
+    "baited=false,facing=south,waterlogged=true":  { "model": "createfisheryindustry:block/bait_trap", "x": 90, "y": 180 },
+    "baited=false,facing=west,waterlogged=false":  { "model": "createfisheryindustry:block/bait_trap", "x": 90, "y": 270 },
+    "baited=false,facing=west,waterlogged=true":   { "model": "createfisheryindustry:block/bait_trap", "x": 90, "y": 270 },
+    "baited=false,facing=east,waterlogged=false":  { "model": "createfisheryindustry:block/bait_trap", "x": 90, "y": 90 },
+    "baited=false,facing=east,waterlogged=true":   { "model": "createfisheryindustry:block/bait_trap", "x": 90, "y": 90 },
+
+    "baited=true,facing=down,waterlogged=false":  { "model": "createfisheryindustry:block/bait_trap_baited", "x": 180 },
+    "baited=true,facing=down,waterlogged=true":   { "model": "createfisheryindustry:block/bait_trap_baited", "x": 180 },
+    "baited=true,facing=up,waterlogged=false":    { "model": "createfisheryindustry:block/bait_trap_baited" },
+    "baited=true,facing=up,waterlogged=true":     { "model": "createfisheryindustry:block/bait_trap_baited" },
+    "baited=true,facing=north,waterlogged=false": { "model": "createfisheryindustry:block/bait_trap_baited", "x": 90 },
+    "baited=true,facing=north,waterlogged=true":  { "model": "createfisheryindustry:block/bait_trap_baited", "x": 90 },
+    "baited=true,facing=south,waterlogged=false": { "model": "createfisheryindustry:block/bait_trap_baited", "x": 90, "y": 180 },
+    "baited=true,facing=south,waterlogged=true":  { "model": "createfisheryindustry:block/bait_trap_baited", "x": 90, "y": 180 },
+    "baited=true,facing=west,waterlogged=false":  { "model": "createfisheryindustry:block/bait_trap_baited", "x": 90, "y": 270 },
+    "baited=true,facing=west,waterlogged=true":   { "model": "createfisheryindustry:block/bait_trap_baited", "x": 90, "y": 270 },
+    "baited=true,facing=east,waterlogged=false":  { "model": "createfisheryindustry:block/bait_trap_baited", "x": 90, "y": 90 },
+    "baited=true,facing=east,waterlogged=true":   { "model": "createfisheryindustry:block/bait_trap_baited", "x": 90, "y": 90 }
   }
 }

@@ -29,6 +29,7 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.BlockCapability;
@@ -253,56 +254,52 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, BaitTrapBlockEntity be) {
-        if (level.isClientSide()) {
+        if (level.isClientSide() || !(level instanceof ServerLevel serverLevel)) {
             return;
         }
 
-        if (!(level instanceof ServerLevel serverLevel)) {
-            return;
-        }
+        boolean isWaterlogged = state.getValue(BlockStateProperties.WATERLOGGED);
+        boolean environmentValid = true;
 
-        // Process bait and loot generation
-        if (be.isBaited()) {
-            be.baitTimeRemaining--;
+        if (be.isBaited() && be.cachedRecipe != null) {
+            boolean recipeRequiresWater = be.cachedRecipe.requiresWater();
+            environmentValid = isWaterlogged == recipeRequiresWater;
 
-            if (be.baitTimeRemaining <= 0) {
-                be.currentBait = ItemStack.EMPTY;
-                be.cachedRecipe = null;
-                be.baitTimeRemaining = 0;
-                be.lootGenerationTicks = 0;
-                be.lootInterval = 0;
-                be.updateBlockState();
-                be.setChanged();
-                be.sendData();
-            } else {
-                // Try to generate loot at fixed intervals
-                be.lootGenerationTicks++;
-                if (be.lootInterval > 0 && be.lootGenerationTicks >= be.lootInterval && be.hasInventorySpace()) {
-                    be.generateLoot(serverLevel);
+            if (environmentValid) {
+                // 只有环境正确才消耗诱饵时间和生成物品
+                be.baitTimeRemaining--;
+
+                if (be.baitTimeRemaining <= 0) {
+                    be.currentBait = ItemStack.EMPTY;
+                    be.cachedRecipe = null;
+                    be.baitTimeRemaining = 0;
                     be.lootGenerationTicks = 0;
-                    // Interval stays the same (fixed)
+                    be.lootInterval = 0;
+                    be.updateBlockState();
+                } else {
+                    be.lootGenerationTicks++;
+                    if (be.lootInterval > 0 && be.lootGenerationTicks >= be.lootInterval && be.hasInventorySpace()) {
+                        be.generateLoot(serverLevel);
+                        be.lootGenerationTicks = 0;
+                    }
                 }
             }
+            // 环境错误 → 完全不走时间
         }
 
-        // Collect nearby items (like MeshTrap)
+        // 下面这些逻辑保持不变（物品收集、自动输出等）
         be.processingTicks++;
         if (be.processingTicks >= PROCESSING_TIME) {
             be.processingTicks = 0;
             be.collectNearbyItems(serverLevel);
-            be.setChanged();
-            be.sendData();
-            serverLevel.sendBlockUpdated(pos, state, state, 3);
         }
 
-        // Auto export to containers
         be.autoExportTicks++;
         if (be.autoExportTicks >= AUTO_EXPORT_COOLDOWN) {
             be.autoExportTicks = 0;
             be.tryExportItems(serverLevel);
         }
 
-        // Export to belts
         be.beltExportTicks++;
         if (be.beltExportTicks >= BELT_EXPORT_COOLDOWN) {
             be.beltExportTicks = 0;
@@ -310,6 +307,8 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
 
         be.tickInternal();
+        be.setChanged();
+        be.sendData();
     }
 
     private void generateLoot(ServerLevel level) {
@@ -575,6 +574,25 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                         .add(CreateLang.text(String.valueOf(cachedRecipe.getBaitLevel())).style(ChatFormatting.GREEN))
                         .add(Component.translatable("gui.createfisheryindustry.bait_trap.level_suffix").withStyle(ChatFormatting.GREEN))
                         .forGoggles(tooltip, 1);
+            }
+            tooltip.add(Component.empty());
+            if (isBaited() && cachedRecipe != null) {
+                boolean isWaterlogged = getBlockState().getValue(BlockStateProperties.WATERLOGGED);
+                boolean requiresWater = cachedRecipe.requiresWater();
+
+                if (isWaterlogged == requiresWater) {
+                    CreateLang.translate("gui.createfisheryindustry.bait_trap.active")
+                            .style(ChatFormatting.GREEN)
+                            .forGoggles(tooltip, 1);
+                } else if (requiresWater) {
+                    CreateLang.translate("gui.createfisheryindustry.bait_trap.invalid_land")
+                            .style(ChatFormatting.RED)
+                            .forGoggles(tooltip, 1);
+                } else {
+                    CreateLang.translate("gui.createfisheryindustry.bait_trap.invalid_water")
+                            .style(ChatFormatting.RED)
+                            .forGoggles(tooltip, 1);
+                }
             }
         } else {
             CreateLang.text("")
