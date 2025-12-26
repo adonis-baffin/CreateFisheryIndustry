@@ -129,6 +129,10 @@
   "item.createfisheryindustry.cooked_mediterranean_mussel": "烤地中海贻贝",
   "item.createfisheryindustry.raw_lobster": "龙虾",
   "item.createfisheryindustry.cooked_lobster": "熟龙虾",
+  "item.createfisheryindustry.mussel_soup": "贻贝汤",
+  "item.createfisheryindustry.lobster_soup": "龙虾汤",
+  "item.createfisheryindustry.seafood_chowder": "海鲜浓汤",
+  "item.createfisheryindustry.seafood_steak": "海鲜牛排",
 
   "createfisheryindustry.recipe.peeling": "切削",
 

@@ -3,11 +3,7 @@ package com.adonis.createfisheryindustry.registry;
 import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshBlockEntity;
 import com.adonis.createfisheryindustry.block.TrapNozzle.TrapNozzleBlockEntity;
-import com.adonis.createfisheryindustry.item.CopperDivingLeggingsItem;
-import com.adonis.createfisheryindustry.item.HarpoonItem;
-import com.adonis.createfisheryindustry.item.HarpoonPouchItem;
-import com.adonis.createfisheryindustry.item.NetheriteDivingLeggingsItem;
-import com.adonis.createfisheryindustry.item.PneumaticHarpoonGunItem;
+import com.adonis.createfisheryindustry.item.*;
 import com.google.common.collect.Sets;
 import com.simibubi.create.content.equipment.armor.AllArmorMaterials;
 import com.simibubi.create.foundation.item.ItemDescription;
@@ -39,38 +35,56 @@ public class CreateFisheryItems {
         return new Item.Properties().stacksTo(64);
     }
 
-    // Food properties for new items
+    // Food properties（严格按你的设计稿修改，只改指定物品，鱼排类保持原值）
     public static final FoodProperties FISH_SKIN_FOOD = new FoodProperties.Builder()
             .nutrition(1).saturationModifier(0.4f).build();
+
     public static final FoodProperties ROASTED_FISH_SKIN_FOOD = new FoodProperties.Builder()
-            .nutrition(4).saturationModifier(0.4f).build();
+            .nutrition(2).saturationModifier(0.6f).build();
+
+    public static final FoodProperties RAW_BLUE_MUSSEL_FOOD = new FoodProperties.Builder()
+            .nutrition(2).saturationModifier(0.3f).build();
+
+    public static final FoodProperties COOKED_BLUE_MUSSEL_FOOD = new FoodProperties.Builder()
+            .nutrition(5).saturationModifier(0.6f).build();
+
+    public static final FoodProperties RAW_MEDITERRANEAN_MUSSEL_FOOD = new FoodProperties.Builder()
+            .nutrition(2).saturationModifier(0.4f).build();
+
+    public static final FoodProperties COOKED_MEDITERRANEAN_MUSSEL_FOOD = new FoodProperties.Builder()
+            .nutrition(5).saturationModifier(0.8f).build();
+
+    public static final FoodProperties RAW_LOBSTER_FOOD = new FoodProperties.Builder()
+            .nutrition(3).saturationModifier(0.3f).build();
+
+    public static final FoodProperties COOKED_LOBSTER_FOOD = new FoodProperties.Builder()
+            .nutrition(8).saturationModifier(0.6f).build();
+
+    // 鱼排类数值保持原样（未在设计稿中提及，不修改）
     public static final FoodProperties COD_STEAK_FOOD = new FoodProperties.Builder()
             .nutrition(2).saturationModifier(0.4f).build();
+
     public static final FoodProperties SALMON_STEAK_FOOD = new FoodProperties.Builder()
             .nutrition(2).saturationModifier(0.4f).build();
+
     public static final FoodProperties COOKED_COD_STEAK_FOOD = new FoodProperties.Builder()
             .nutrition(4).saturationModifier(0.6f).build();
+
     public static final FoodProperties COOKED_SALMON_STEAK_FOOD = new FoodProperties.Builder()
             .nutrition(6).saturationModifier(0.96f).build();
 
-    // ============ 新增海鲜食物属性（全部先设为 nutrition=1, saturation=1.0） ============
-    public static final FoodProperties RAW_BLUE_MUSSEL_FOOD = new FoodProperties.Builder()
-            .nutrition(1).saturationModifier(1f).build();
+    // 新增四种食物（按设计稿）
+    public static final FoodProperties MUSSEL_SOUP_FOOD = new FoodProperties.Builder()
+            .nutrition(12).saturationModifier(0.8f).build();
 
-    public static final FoodProperties COOKED_BLUE_MUSSEL_FOOD = new FoodProperties.Builder()
-            .nutrition(1).saturationModifier(1f).build();
+    public static final FoodProperties LOBSTER_SOUP_FOOD = new FoodProperties.Builder()
+            .nutrition(10).saturationModifier(0.8f).build();
 
-    public static final FoodProperties RAW_MEDITERRANEAN_MUSSEL_FOOD = new FoodProperties.Builder()
-            .nutrition(1).saturationModifier(1f).build();
+    public static final FoodProperties SEAFOOD_CHOWDER_FOOD = new FoodProperties.Builder()
+            .nutrition(16).saturationModifier(0.96f).build();
 
-    public static final FoodProperties COOKED_MEDITERRANEAN_MUSSEL_FOOD = new FoodProperties.Builder()
-            .nutrition(1).saturationModifier(1f).build();
-
-    public static final FoodProperties RAW_LOBSTER_FOOD = new FoodProperties.Builder()
-            .nutrition(1).saturationModifier(1f).build();
-
-    public static final FoodProperties COOKED_LOBSTER_FOOD = new FoodProperties.Builder()
-            .nutrition(1).saturationModifier(1f).build();
+    public static final FoodProperties SEAFOOD_STEAK_FOOD = new FoodProperties.Builder()
+            .nutrition(16).saturationModifier(0.96f).build();
 
     // Existing items
     public static final ItemEntry<Item> ZINC_SHEET = REGISTRATE.item("zinc_sheet",
@@ -156,17 +170,16 @@ public class CreateFisheryItems {
             })
             .register();
 
-    // New food items
-    public static final ItemEntry<Item> FISH_SKIN = REGISTRATE.item("fish_skin",
-                    p -> new Item(basicItem().food(FISH_SKIN_FOOD)))
+    public static final ItemEntry<FastEatFoodItem> FISH_SKIN = REGISTRATE.item("fish_skin",
+                    p -> new FastEatFoodItem(basicItem().food(FISH_SKIN_FOOD)))
             .onRegister(item -> {
                 ItemDescription.useKey(item, "item.createfisheryindustry.fish_skin");
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("fish_skin", net.minecraft.core.registries.Registries.ITEM));
             })
             .register();
 
-    public static final ItemEntry<Item> ROASTED_FISH_SKIN = REGISTRATE.item("roasted_fish_skin",
-                    p -> new Item(basicItem().food(ROASTED_FISH_SKIN_FOOD)))
+    public static final ItemEntry<FastEatFoodItem> ROASTED_FISH_SKIN = REGISTRATE.item("roasted_fish_skin",
+                    p -> new FastEatFoodItem(basicItem().food(ROASTED_FISH_SKIN_FOOD)))
             .onRegister(item -> {
                 ItemDescription.useKey(item, "item.createfisheryindustry.roasted_fish_skin");
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("roasted_fish_skin", net.minecraft.core.registries.Registries.ITEM));
@@ -205,33 +218,32 @@ public class CreateFisheryItems {
             })
             .register();
 
-    //新增食物
-    public static final ItemEntry<Item> RAW_BLUE_MUSSEL = REGISTRATE.item("raw_blue_mussel",
-                    p -> new Item(basicItem().food(RAW_BLUE_MUSSEL_FOOD)))
+    public static final ItemEntry<FastEatFoodItem> RAW_BLUE_MUSSEL = REGISTRATE.item("raw_blue_mussel",
+                    p -> new FastEatFoodItem(basicItem().food(RAW_BLUE_MUSSEL_FOOD)))
             .onRegister(item -> {
                 ItemDescription.useKey(item, "item.createfisheryindustry.raw_blue_mussel");
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("raw_blue_mussel", net.minecraft.core.registries.Registries.ITEM));
             })
             .register();
 
-    public static final ItemEntry<Item> COOKED_BLUE_MUSSEL = REGISTRATE.item("cooked_blue_mussel",
-                    p -> new Item(basicItem().food(COOKED_BLUE_MUSSEL_FOOD)))
+    public static final ItemEntry<FastEatFoodItem> COOKED_BLUE_MUSSEL = REGISTRATE.item("cooked_blue_mussel",
+                    p -> new FastEatFoodItem(basicItem().food(COOKED_BLUE_MUSSEL_FOOD)))
             .onRegister(item -> {
                 ItemDescription.useKey(item, "item.createfisheryindustry.cooked_blue_mussel");
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("cooked_blue_mussel", net.minecraft.core.registries.Registries.ITEM));
             })
             .register();
 
-    public static final ItemEntry<Item> RAW_MEDITERRANEAN_MUSSEL = REGISTRATE.item("raw_mediterranean_mussel",
-                    p -> new Item(basicItem().food(RAW_MEDITERRANEAN_MUSSEL_FOOD)))
+    public static final ItemEntry<FastEatFoodItem> RAW_MEDITERRANEAN_MUSSEL = REGISTRATE.item("raw_mediterranean_mussel",
+                    p -> new FastEatFoodItem(basicItem().food(RAW_MEDITERRANEAN_MUSSEL_FOOD)))
             .onRegister(item -> {
                 ItemDescription.useKey(item, "item.createfisheryindustry.raw_mediterranean_mussel");
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("raw_mediterranean_mussel", net.minecraft.core.registries.Registries.ITEM));
             })
             .register();
 
-    public static final ItemEntry<Item> COOKED_MEDITERRANEAN_MUSSEL = REGISTRATE.item("cooked_mediterranean_mussel",
-                    p -> new Item(basicItem().food(COOKED_MEDITERRANEAN_MUSSEL_FOOD)))
+    public static final ItemEntry<FastEatFoodItem> COOKED_MEDITERRANEAN_MUSSEL = REGISTRATE.item("cooked_mediterranean_mussel",
+                    p -> new FastEatFoodItem(basicItem().food(COOKED_MEDITERRANEAN_MUSSEL_FOOD)))
             .onRegister(item -> {
                 ItemDescription.useKey(item, "item.createfisheryindustry.cooked_mediterranean_mussel");
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("cooked_mediterranean_mussel", net.minecraft.core.registries.Registries.ITEM));
@@ -251,6 +263,38 @@ public class CreateFisheryItems {
             .onRegister(item -> {
                 ItemDescription.useKey(item, "item.createfisheryindustry.cooked_lobster");
                 CREATIVE_TAB_ITEMS.add(REGISTRATE.get("cooked_lobster", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<BowlSoupItem> MUSSEL_SOUP = REGISTRATE.item("mussel_soup",
+                    p -> new BowlSoupItem(basicItem().food(MUSSEL_SOUP_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.mussel_soup");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("mussel_soup", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<BowlSoupItem> LOBSTER_SOUP = REGISTRATE.item("lobster_soup",
+                    p -> new BowlSoupItem(basicItem().food(LOBSTER_SOUP_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.lobster_soup");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("lobster_soup", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<BowlSoupItem> SEAFOOD_CHOWDER = REGISTRATE.item("seafood_chowder",
+                    p -> new BowlSoupItem(basicItem().food(SEAFOOD_CHOWDER_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.seafood_chowder");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("seafood_chowder", net.minecraft.core.registries.Registries.ITEM));
+            })
+            .register();
+
+    public static final ItemEntry<Item> SEAFOOD_STEAK = REGISTRATE.item("seafood_steak",
+                    p -> new Item(basicItem().food(SEAFOOD_STEAK_FOOD)))
+            .onRegister(item -> {
+                ItemDescription.useKey(item, "item.createfisheryindustry.seafood_steak");
+                CREATIVE_TAB_ITEMS.add(REGISTRATE.get("seafood_steak", net.minecraft.core.registries.Registries.ITEM));
             })
             .register();
 

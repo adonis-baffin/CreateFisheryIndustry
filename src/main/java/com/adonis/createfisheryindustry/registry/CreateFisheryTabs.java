@@ -43,7 +43,6 @@ public class CreateFisheryTabs {
     public static class IndustryItemsGenerator implements CreativeModeTab.DisplayItemsGenerator {
         @Override
         public void accept(CreativeModeTab.@NotNull ItemDisplayParameters parameters, CreativeModeTab.@NotNull Output output) {
-            output.accept(CreateFisheryItems.ZINC_SHEET.get());
             output.accept(CreateFisheryBlocks.FRAME_TRAP);
             output.accept(CreateFisheryBlocks.TRAP_BEARING);
             output.accept(CreateFisheryBlocks.MESH_TRAP);
@@ -66,6 +65,10 @@ public class CreateFisheryTabs {
             output.accept(CreateFisheryItems.COOKED_MEDITERRANEAN_MUSSEL.get());
             output.accept(CreateFisheryItems.RAW_LOBSTER.get());
             output.accept(CreateFisheryItems.COOKED_LOBSTER.get());
+            output.accept(CreateFisheryItems.MUSSEL_SOUP.get());
+            output.accept(CreateFisheryItems.LOBSTER_SOUP.get());
+            output.accept(CreateFisheryItems.SEAFOOD_CHOWDER.get());
+            output.accept(CreateFisheryItems.SEAFOOD_STEAK.get());
         }
     }
 
@@ -73,6 +76,7 @@ public class CreateFisheryTabs {
     public static class EquipmentItemsGenerator implements CreativeModeTab.DisplayItemsGenerator {
         @Override
         public void accept(CreativeModeTab.@NotNull ItemDisplayParameters parameters, CreativeModeTab.@NotNull Output output) {
+            output.accept(CreateFisheryItems.ZINC_SHEET.get());
             output.accept(CreateFisheryItems.WORN_HARPOON.get());
             output.accept(CreateFisheryItems.HARPOON.get());
             output.accept(CreateFisheryItems.WAXED_LEATHER.get());

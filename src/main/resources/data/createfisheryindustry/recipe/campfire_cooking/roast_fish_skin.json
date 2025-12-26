@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "cookingtime": 600,
+  "experience": 0.0,
+  "ingredient": {
+    "item": "createfisheryindustry:fish_skin"
+  },
+  "result": {
+    "count": 1,
+    "id": "createfisheryindustry:roasted_fish_skin"
+  }
+}

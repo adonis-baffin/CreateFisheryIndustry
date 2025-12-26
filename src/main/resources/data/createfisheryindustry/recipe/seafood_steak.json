@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:beef"
+    },
+    {
+      "tag": "c:raw_fish_steak"
+    },
+    {
+      "item": "createfisheryindustry:raw_lobster"
+    }
+  ],
+  "result": {
+    "id": "createfisheryindustry:seafood_steak",
+    "count": 1
+  }
+}

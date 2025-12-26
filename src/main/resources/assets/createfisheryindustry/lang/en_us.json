@@ -138,6 +138,10 @@
   "item.createfisheryindustry.cooked_mediterranean_mussel": "Cooked Mediterranean Mussel",
   "item.createfisheryindustry.raw_lobster": "Raw Lobster",
   "item.createfisheryindustry.cooked_lobster": "Cooked Lobster",
+  "item.createfisheryindustry.mussel_soup": "Mussel Soup",
+  "item.createfisheryindustry.lobster_soup": "Lobster Soup",
+  "item.createfisheryindustry.seafood_chowder": "Seafood Chowder",
+  "item.createfisheryindustry.seafood_steak": "Seafood Steak",
 
 
   "createfisheryindustry.recipe.peeling": "Peeling",
