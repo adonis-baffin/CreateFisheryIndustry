@@ -7,6 +7,8 @@ import com.adonis.createfisheryindustry.config.CreateFisheryCommonConfig;
 import com.adonis.createfisheryindustry.config.CreateFisheryStressConfig;
 import com.adonis.createfisheryindustry.data.PeelerEntityProcessingManager;
 import com.adonis.createfisheryindustry.event.HarpoonDropHandler;
+import com.adonis.createfisheryindustry.fluid.StandardDispenserBehaviour;
+import com.adonis.createfisheryindustry.registry.SoupFluids;
 import com.adonis.createfisheryindustry.recipe.CreateFisheryRecipeTypes;
 import com.adonis.createfisheryindustry.registry.*;
 import com.mojang.logging.LogUtils;
@@ -16,9 +18,13 @@ import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -32,7 +38,9 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.slf4j.Logger;
 
 @Mod(CreateFisheryMod.ID)
@@ -66,6 +74,8 @@ public class CreateFisheryMod {
         CreateFisheryItems.register(bus);
         CreateFisheryTabs.register(bus);
         CreateFisheryComponents.register(bus);
+
+        SoupFluids.register();
 
         LOGGER.info("Registering mounted storage types...");
         CreateFisheryMountedStorageTypes.register(bus);
@@ -110,6 +120,10 @@ public class CreateFisheryMod {
                     CreateFisheryBlocks.MESH_TRAP.get(),
                     meshTrapStorageType
             );
+
+            DispenserBlock.registerBehavior(SoupFluids.LOBSTER_SOUP.getBucket().get(), StandardDispenserBehaviour.INSTANCE);
+            DispenserBlock.registerBehavior(SoupFluids.MUSSEL_SOUP.getBucket().get(), StandardDispenserBehaviour.INSTANCE);
+            DispenserBlock.registerBehavior(SoupFluids.SEAFOOD_CHOWDER.getBucket().get(), StandardDispenserBehaviour.INSTANCE);
         });
     }
 

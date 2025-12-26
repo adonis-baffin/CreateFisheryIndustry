@@ -81,10 +81,10 @@ public class CreateFisheryItems {
             .nutrition(10).saturationModifier(0.8f).build();
 
     public static final FoodProperties SEAFOOD_CHOWDER_FOOD = new FoodProperties.Builder()
-            .nutrition(16).saturationModifier(0.96f).build();
+            .nutrition(14).saturationModifier(0.96f).build();
 
     public static final FoodProperties SEAFOOD_STEAK_FOOD = new FoodProperties.Builder()
-            .nutrition(16).saturationModifier(0.96f).build();
+            .nutrition(14).saturationModifier(0.96f).build();
 
     // Existing items
     public static final ItemEntry<Item> ZINC_SHEET = REGISTRATE.item("zinc_sheet",

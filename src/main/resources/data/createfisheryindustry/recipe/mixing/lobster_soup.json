@@ -1,0 +1,23 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    {
+      "type": "neoforge:tag",
+      "amount": 250,
+      "tag": "c:milk"
+    },
+    {
+      "item": "createfisheryindustry:raw_lobster"
+    },
+    {
+      "item": "minecraft:kelp"
+    }
+  ],
+  "results": [
+    {
+      "amount": 250,
+      "id": "createfisheryindustry:lobster_soup"
+    }
+  ]
+}

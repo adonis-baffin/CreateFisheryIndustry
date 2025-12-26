@@ -1,0 +1,21 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    {
+      "type": "neoforge:tag",
+      "amount": 250,
+      "tag": "c:milk"
+    },
+    {
+      "tag": "c:mussels",
+      "count": 2
+    }
+  ],
+  "results": [
+    {
+      "amount": 250,
+      "id": "createfisheryindustry:mussel_soup"
+    }
+  ]
+}

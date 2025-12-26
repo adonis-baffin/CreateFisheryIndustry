@@ -1,0 +1,30 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    {
+      "type": "neoforge:tag",
+      "amount": 500,
+      "tag": "c:milk"
+    },
+    {
+      "item": "createfisheryindustry:raw_lobster"
+    },
+    {
+      "tag": "c:mussels",
+      "count": 2
+    },
+    {
+      "tag": "c:raw_fish_steaks"
+    },
+    {
+      "item": "minecraft:kelp"
+    }
+  ],
+  "results": [
+    {
+      "amount": 500,
+      "id": "createfisheryindustry:seafood_chowder"
+    }
+  ]
+}

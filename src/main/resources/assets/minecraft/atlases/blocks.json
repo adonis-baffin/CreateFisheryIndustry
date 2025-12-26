@@ -1,0 +1,28 @@
+{
+  "sources": [
+    {
+      "type": "single",
+      "resource": "createfisheryindustry:fluid/lobster_soup_still"
+    },
+    {
+      "type": "single",
+      "resource": "createfisheryindustry:fluid/lobster_soup_flow"
+    },
+    {
+      "type": "single",
+      "resource": "createfisheryindustry:fluid/mussel_soup_still"
+    },
+    {
+      "type": "single",
+      "resource": "createfisheryindustry:fluid/mussel_soup_flow"
+    },
+    {
+      "type": "single",
+      "resource": "createfisheryindustry:fluid/seafood_chowder_still"
+    },
+    {
+      "type": "single",
+      "resource": "createfisheryindustry:fluid/seafood_chowder_flow"
+    }
+  ]
+}

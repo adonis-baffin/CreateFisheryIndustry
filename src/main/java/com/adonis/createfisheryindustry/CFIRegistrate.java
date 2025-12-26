@@ -3,10 +3,13 @@ package com.adonis.createfisheryindustry;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
 import com.simibubi.create.api.registry.CreateRegistries;
 import com.simibubi.create.api.registry.registrate.SimpleBuilder;
+import com.simibubi.create.content.fluids.VirtualFluid;
 import com.simibubi.create.foundation.data.CreateBlockEntityBuilder;
+import com.simibubi.create.foundation.data.VirtualFluidBuilder;
 import com.tterrag.registrate.AbstractRegistrate;
 import com.tterrag.registrate.builders.BlockEntityBuilder;
 import com.tterrag.registrate.builders.Builder;
+import com.tterrag.registrate.builders.FluidBuilder;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
@@ -17,6 +20,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -77,6 +84,43 @@ public class CFIRegistrate extends AbstractRegistrate<CFIRegistrate> {
     @Override
     public <T extends BlockEntity, P> CreateBlockEntityBuilder<T, P> blockEntity(P parent, String name, BlockEntityBuilder.BlockEntityFactory<T> factory) {
         return (CreateBlockEntityBuilder<T, P>) entry(name, callback -> CreateBlockEntityBuilder.create(this, parent, name, callback, factory));
+    }
+
+    public FluidType defaultFluidType(FluidType.Properties properties, ResourceLocation stillTexture, ResourceLocation flowingTexture) {
+        return new FluidType(properties) {
+            @Override
+            public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
+                consumer.accept(new IClientFluidTypeExtensions() {
+                    @Override public ResourceLocation getStillTexture() { return stillTexture; }
+                    @Override public ResourceLocation getFlowingTexture() { return flowingTexture; }
+                });
+            }
+        };
+    }
+
+    // 新增：普通 fluid 重载（龙+风格）
+    @Override
+    public FluidBuilder<BaseFlowingFluid.Flowing, CFIRegistrate> fluid(String name) {
+        return fluid(name,
+                asResource("fluid/" + name + "_still"),
+                asResource("fluid/" + name + "_flow"));
+    }
+
+    @Override
+    public FluidBuilder<BaseFlowingFluid.Flowing, CFIRegistrate> fluid(String name, FluidBuilder.FluidTypeFactory typeFactory) {
+        return fluid(name,
+                asResource("fluid/" + name + "_still"),
+                asResource("fluid/" + name + "_flow"),
+                typeFactory);
+    }
+
+    public FluidBuilder<BaseFlowingFluid.Flowing, CFIRegistrate> fluid(String name, ResourceLocation still, ResourceLocation flow) {
+        return fluid(name, still, flow, this::defaultFluidType);
+    }
+
+    public FluidBuilder<BaseFlowingFluid.Flowing, CFIRegistrate> fluid(String name, ResourceLocation still, ResourceLocation flow, FluidBuilder.FluidTypeFactory typeFactory) {
+        return entry("flowing_" + name, callback -> new FluidBuilder<>(self(), self(), name, callback, still, flow, typeFactory, BaseFlowingFluid.Flowing::new)
+                .defaultLang().defaultSource().defaultBlock().defaultBucket());
     }
 
     /**

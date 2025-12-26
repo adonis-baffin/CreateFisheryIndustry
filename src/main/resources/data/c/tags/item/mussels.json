@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "createfisheryindustry:raw_blue_mussel",
+    "createfisheryindustry:raw_mediterranean_mussel"
+  ]
+}

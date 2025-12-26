@@ -3,13 +3,13 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "minecraft:beef"
+      "item": "minecraft:cooked_beef"
     },
     {
-      "tag": "c:raw_fish_steak"
+      "tag": "c:cooked_fish_steaks"
     },
     {
-      "item": "createfisheryindustry:raw_lobster"
+      "item": "createfisheryindustry:cooked_lobster"
     }
   ],
   "result": {
