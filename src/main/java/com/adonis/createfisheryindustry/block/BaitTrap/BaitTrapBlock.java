@@ -144,18 +144,8 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
         // 潜行 + 手持物品 = 尝试添加或替换诱饵
         if (player.isShiftKeyDown() && !stack.isEmpty()) {
             if (baitTrap.findRecipe(stack) != null) {
-                // 检查是否已有诱饵
-                if (baitTrap.isBaited()) {
-                    ItemStack currentBait = baitTrap.getCurrentBait();
-                    // 如果是相同诱饵，不做任何事
-                    if (ItemStack.isSameItem(currentBait, stack)) {
-                        player.displayClientMessage(
-                                Component.translatable("create_fishery.bait_trap.same_bait"),
-                                true
-                        );
-                        return ItemInteractionResult.CONSUME;
-                    }
-                    // 不同诱饵，先返还旧诱饵（非创造模式）
+                if (baitTrap.isBaited() && !ItemStack.isSameItemSameComponents(baitTrap.getCurrentBait(), stack)) {
+                    // 不同诱饵，先移除旧的
                     ItemStack removedBait = baitTrap.removeBait();
                     if (!removedBait.isEmpty() && !player.isCreative()) {
                         if (!player.getInventory().add(removedBait)) {
@@ -164,10 +154,10 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
                     }
                 }
 
-                // 添加新诱饵
+                // 尝试添加（会堆叠）
                 if (baitTrap.tryAddBait(stack)) {
                     if (!player.isCreative()) {
-                        stack.shrink(1);
+                        // stack 已 shrink，无需额外操作
                     }
                     return ItemInteractionResult.SUCCESS;
                 }

@@ -102,7 +102,7 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
     }
 
     public boolean isBaited() {
-        return !currentBait.isEmpty() && baitTimeRemaining > 0;
+        return !currentBait.isEmpty() && currentBait.getCount() > 0 && baitTimeRemaining > 0;
     }
 
     public ItemStack getCurrentBait() {
@@ -165,21 +165,34 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
             return false;
         }
 
-        // If already baited, don't allow adding new bait
-        if (isBaited()) {
-            CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: already baited");
+        // 如果 currentBait 不为空，且不是相同物品，返回 false（调用方需先移除旧的）
+        if (!currentBait.isEmpty() && !ItemStack.isSameItemSameComponents(currentBait, stack)) {
+            CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: different bait type");
             return false;
         }
 
-        currentBait = stack.copyWithCount(1);
-        cachedRecipe = recipe;
-        baitTimeRemaining = BAIT_DURATION_TICKS;
-        lootGenerationTicks = 0;
-        // Use fixed loot interval from recipe
-        lootInterval = recipe.getLootTimeTicks();
+        // 堆叠到 currentBait
+        if (currentBait.isEmpty()) {
+            currentBait = stack.copyWithCount(1);
+            cachedRecipe = recipe;
+            baitTimeRemaining = BAIT_DURATION_TICKS;
+            lootGenerationTicks = 0;
+            lootInterval = recipe.getLootTimeTicks();
+        } else {
+            // 相同物品，增加 count（不超过 maxStackSize）
+            int maxAdd = currentBait.getMaxStackSize() - currentBait.getCount();
+            if (maxAdd <= 0) {
+                CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: bait stack full");
+                return false;
+            }
+            int added = Math.min(maxAdd, stack.getCount());
+            currentBait.grow(added);
+            stack.shrink(added);
+            // 时间和 interval 已设置，不需重置
+        }
 
-        CreateFisheryMod.LOGGER.info("[BaitTrap] Bait set successfully: bait={}, level={}, interval={}",
-                currentBait.getItem(), recipe.getBaitLevel(), lootInterval);
+        CreateFisheryMod.LOGGER.info("[BaitTrap] Bait added successfully: bait={}, count={}, level={}, interval={}",
+                currentBait.getItem(), currentBait.getCount(), recipe.getBaitLevel(), lootInterval);
 
         updateBlockState();
         setChanged();
@@ -261,33 +274,54 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         boolean isWaterlogged = state.getValue(BlockStateProperties.WATERLOGGED);
         boolean environmentValid = true;
 
-        if (be.isBaited() && be.cachedRecipe != null) {
-            boolean recipeRequiresWater = be.cachedRecipe.requiresWater();
-            environmentValid = isWaterlogged == recipeRequiresWater;
+        boolean inOverworld = level.dimension() == Level.OVERWORLD;
 
-            if (environmentValid) {
-                // 只有环境正确才消耗诱饵时间和生成物品
-                be.baitTimeRemaining--;
-
-                if (be.baitTimeRemaining <= 0) {
-                    be.currentBait = ItemStack.EMPTY;
-                    be.cachedRecipe = null;
-                    be.baitTimeRemaining = 0;
-                    be.lootGenerationTicks = 0;
-                    be.lootInterval = 0;
-                    be.updateBlockState();
+        if (be.isBaited()) {
+            if (be.cachedRecipe == null) {
+                be.cachedRecipe = be.findRecipe(be.currentBait);
+                if (be.cachedRecipe != null) {
+                    be.lootInterval = be.cachedRecipe.getLootTimeTicks();
                 } else {
-                    be.lootGenerationTicks++;
-                    if (be.lootInterval > 0 && be.lootGenerationTicks >= be.lootInterval && be.hasInventorySpace()) {
-                        be.generateLoot(serverLevel);
-                        be.lootGenerationTicks = 0;
-                    }
+                    CreateFisheryMod.LOGGER.warn("[BaitTrap] Failed to re-cache recipe for bait: {}", be.currentBait.getItem());
                 }
             }
-            // 环境错误 → 完全不走时间
+
+            if (be.cachedRecipe != null) {
+                boolean recipeRequiresWater = be.cachedRecipe.requiresWater();
+                environmentValid = isWaterlogged == recipeRequiresWater;
+
+                if (environmentValid && inOverworld) {
+                    be.baitTimeRemaining--;
+
+                    if (be.baitTimeRemaining <= 0) {
+                        // 耗尽当前诱饵，减少 count
+                        be.currentBait.shrink(1);
+                        if (be.currentBait.getCount() > 0) {
+                            // 还有剩余，切换到下一个诱饵，重置时间
+                            be.baitTimeRemaining = BAIT_DURATION_TICKS;
+                            be.lootGenerationTicks = 0;  // 可选：重置生成计时
+                        } else {
+                            // 无剩余，清空
+                            be.currentBait = ItemStack.EMPTY;
+                            be.cachedRecipe = null;
+                            be.baitTimeRemaining = 0;
+                            be.lootGenerationTicks = 0;
+                            be.lootInterval = 0;
+                        }
+                        be.updateBlockState();
+                    } else {
+                        be.lootGenerationTicks++;
+                        if (be.lootInterval > 0 && be.lootGenerationTicks >= be.lootInterval && be.hasInventorySpace()) {
+                            be.generateLoot(serverLevel);
+                            be.lootGenerationTicks = 0;
+                        }
+                    }
+                }
+                // 环境错误或非主世界 → 不走时间
+            }
         }
 
-        // 下面这些逻辑保持不变（物品收集、自动输出等）
+        // 下面这些逻辑保持不变
         be.processingTicks++;
         if (be.processingTicks >= PROCESSING_TIME) {
             be.processingTicks = 0;
@@ -364,7 +398,6 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         for (Direction direction : Direction.values()) {
             BlockPos neighborPos = getBlockPos().relative(direction);
 
-            // 检查黑名单标签（包括溜槽和其他trap方块）
             BlockState neighborState = level.getBlockState(neighborPos);
             if (neighborState.is(CreateFisheryTags.Blocks.TRAP_EXPORT_BLACKLIST)) {
                 continue;
@@ -432,7 +465,7 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                 continue;
             }
 
-            // Skip blocks in the export blacklist tag (包括溜槽和其他trap方块)
+            // Skip blocks in the export blacklist tag
             BlockState neighborState = level.getBlockState(neighborPos);
             if (neighborState.is(CreateFisheryTags.Blocks.TRAP_EXPORT_BLACKLIST)) {
                 continue;
@@ -530,7 +563,6 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        // 显示库存内容
         CreateLang.translate("gui.goggles.bait_trap_contents").forGoggles(tooltip);
 
         boolean isEmpty = true;
@@ -549,10 +581,8 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
             CreateLang.translate("gui.goggles.inventory.empty").forGoggles(tooltip, 1);
         }
 
-        // 添加空行
         tooltip.add(Component.empty());
 
-        // 显示诱饵状态
         CreateLang.translate("gui.goggles.bait_trap_status").forGoggles(tooltip);
 
         if (isBaited()) {
@@ -560,9 +590,9 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                     .add(Component.translatable("gui.createfisheryindustry.bait_trap.bait").withStyle(ChatFormatting.GRAY))
                     .add(Component.literal(": ").withStyle(ChatFormatting.GRAY))
                     .add(Component.translatable(currentBait.getDescriptionId()).withStyle(ChatFormatting.AQUA))
+                    .add(Component.literal(" x" + currentBait.getCount()).withStyle(ChatFormatting.AQUA))  // 新增：显示 count
                     .forGoggles(tooltip, 1);
 
-            // 如果 cachedRecipe 为空，尝试重新获取
             if (cachedRecipe == null && level != null) {
                 cachedRecipe = findRecipe(currentBait);
             }
