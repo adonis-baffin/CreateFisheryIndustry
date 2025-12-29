@@ -91,7 +91,7 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
 
     // 定时器
     private int updateTimer = 0;
-    private int extractTimer = 0;
+//    private int extractTimer = 0;
 
     // 统计数据
     private int totalCaught = 0;
@@ -100,6 +100,9 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     // 虚拟钓鱼工具
     private FishingHook virtualHook;
     private TrapBearingFakePlayer fakePlayer;
+
+    // 添加这个字段，用于记录是否因为库存满而暂停钓鱼
+    private boolean fishingPausedDueToFullInventory = false;
 
     public TrapBearingBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -143,10 +146,10 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             }
 
             // 每 10 ticks 尝试从装置存储抽取物品
-            if (++extractTimer >= EXTRACT_INTERVAL) {
-                extractTimer = 0;
-                extractItemsFromContraption();
-            }
+//            if (++extractTimer >= EXTRACT_INTERVAL) {
+//                extractTimer = 0;
+//                extractItemsFromContraption();
+//            }
 
             updateFishingLogic();
         }
@@ -161,57 +164,57 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
      * 从装置存储中抽取物品到自身存储
      * 这个方法是安全的：如果装置存储不可用，直接跳过，等下次再试
      */
-    private void extractItemsFromContraption() {
-        // 安全检查：装置是否就绪
-        if (movedContraption == null) {
-            return;
-        }
-
-        var contraption = movedContraption.getContraption();
-        if (contraption == null || contraption.disassembled) {
-            return;
-        }
-
-        var storage = contraption.getStorage();
-        if (storage == null) {
-            return;
-        }
-
-        var contraptionItems = storage.getAllItems();
-        if (contraptionItems == null || contraptionItems.getSlots() <= 0) {
-            return;
-        }
-
-        // 遍历装置存储中的物品
-        for (int i = 0; i < contraptionItems.getSlots(); i++) {
-            ItemStack stackInSlot = contraptionItems.getStackInSlot(i);
-            if (stackInSlot.isEmpty()) {
-                continue;
-            }
-
-            // 尝试插入到自身存储
-            ItemStack toInsert = stackInSlot.copy();
-            ItemStack remainder = ItemHandlerHelper.insertItem(inventory, toInsert, true); // 先模拟
-
-            if (remainder.getCount() < toInsert.getCount()) {
-                // 可以插入至少一部分
-                int insertCount = toInsert.getCount() - remainder.getCount();
-
-                // 从装置存储中提取
-                ItemStack extracted = contraptionItems.extractItem(i, insertCount, false);
-
-                // 插入到自身存储
-                if (!extracted.isEmpty()) {
-                    ItemHandlerHelper.insertItem(inventory, extracted, false);
-                }
-            }
-
-            // 检查自身存储是否已满
-            if (isInventoryFull()) {
-                break;
-            }
-        }
-    }
+//    private void extractItemsFromContraption() {
+//        // 安全检查：装置是否就绪
+//        if (movedContraption == null) {
+//            return;
+//        }
+//
+//        var contraption = movedContraption.getContraption();
+//        if (contraption == null || contraption.disassembled) {
+//            return;
+//        }
+//
+//        var storage = contraption.getStorage();
+//        if (storage == null) {
+//            return;
+//        }
+//
+//        var contraptionItems = storage.getAllItems();
+//        if (contraptionItems == null || contraptionItems.getSlots() <= 0) {
+//            return;
+//        }
+//
+//        // 遍历装置存储中的物品
+//        for (int i = 0; i < contraptionItems.getSlots(); i++) {
+//            ItemStack stackInSlot = contraptionItems.getStackInSlot(i);
+//            if (stackInSlot.isEmpty()) {
+//                continue;
+//            }
+//
+//            // 尝试插入到自身存储
+//            ItemStack toInsert = stackInSlot.copy();
+//            ItemStack remainder = ItemHandlerHelper.insertItem(inventory, toInsert, true); // 先模拟
+//
+//            if (remainder.getCount() < toInsert.getCount()) {
+//                // 可以插入至少一部分
+//                int insertCount = toInsert.getCount() - remainder.getCount();
+//
+//                // 从装置存储中提取
+//                ItemStack extracted = contraptionItems.extractItem(i, insertCount, false);
+//
+//                // 插入到自身存储
+//                if (!extracted.isEmpty()) {
+//                    ItemHandlerHelper.insertItem(inventory, extracted, false);
+//                }
+//            }
+//
+//            // 检查自身存储是否已满
+//            if (isInventoryFull()) {
+//                break;
+//            }
+//        }
+//    }
 
     /**
      * 检查自身存储是否已满
@@ -219,11 +222,11 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
     private boolean isInventoryFull() {
         for (int i = 0; i < inventory.getSlots(); i++) {
             ItemStack stack = inventory.getStackInSlot(i);
-            if (stack.isEmpty() || stack.getCount() < stack.getMaxStackSize()) {
-                return false;
+            if (stack.isEmpty()) {
+                return false; // 还有空槽位，未满
             }
         }
-        return true;
+        return true; // 所有 27 个槽位都有物品，已满
     }
 
     /**
@@ -399,25 +402,43 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
 
         // 等级为0时不钓鱼
         if (currentFishingLevel == 0) {
+            isFishing = false;
+            fishingPausedDueToFullInventory = false;
             return;
         }
 
-        // 存储满了不钓鱼
-        if (isInventoryFull()) {
+        boolean currentlyFull = isInventoryFull();
+
+        // 如果库存已满，暂停钓鱼（不递减倒计时）
+        if (currentlyFull) {
+            if (isFishing && !fishingPausedDueToFullInventory) {
+                // 刚变成满，标记暂停状态
+                fishingPausedDueToFullInventory = true;
+            }
+            // 无论如何都不递减 cooldown，也不生成任何东西
             return;
         }
 
-        // 确保钓鱼已启动
+        // 库存有空间
+
+        // 如果之前因为满而暂停，现在恢复
+        if (fishingPausedDueToFullInventory) {
+            fishingPausedDueToFullInventory = false;
+            // 可选：这里可以给玩家一点反馈，比如小粒子，但不必须
+        }
+
+        // 确保钓鱼状态已启动
         if (!isFishing) {
             isFishing = true;
             fishingCooldown = calculateCooldownForLevel(currentFishingLevel);
+            shouldResetCooldownNextTime = false;
         }
 
-        // 倒计时递减
+        // 正常递减倒计时
         if (--fishingCooldown <= 0) {
             performFishing();
 
-            // 检查是否需要更新倒计时（因等级变化）
+            // 重置倒计时
             if (shouldResetCooldownNextTime) {
                 fishingCooldown = calculateCooldownForLevel(currentFishingLevel);
                 shouldResetCooldownNextTime = false;
@@ -426,7 +447,7 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             }
         }
 
-        // 显示工作粒子
+        // 显示工作中粒子（有空间时才显示，避免满时还有动画误导）
         if (level.getRandom().nextFloat() < 0.1f) {
             showWorkingParticles();
         }
@@ -436,40 +457,45 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
      * 执行钓鱼
      */
     private void performFishing() {
-        // 再次检查存储空间（防止在倒计时期间变满）
+        // 双重保险：再次检查库存（防止极端并发情况）
         if (isInventoryFull()) {
             return;
         }
 
         successfulAttempts++;
 
-        // 战利品生成
+        // 生成战利品
         ItemStack loot;
         if (level.getRandom().nextFloat() < 0.05f) {
             // 5% 概率生成 worn_harpoon
             loot = new ItemStack(CreateFisheryItems.WORN_HARPOON.get());
         } else {
-            // 生成钓鱼战利品
             loot = generateFishingLoot();
         }
 
-        if (!loot.isEmpty()) {
-            totalCaught++;
+        if (loot.isEmpty()) {
+            // 战利品生成失败（极少见），直接结束
+            return;
+        }
 
-            // 直接插入到自身的存储中
-            ItemStack remainder = ItemHandlerHelper.insertItem(inventory, loot, false);
+        totalCaught++;
 
-            if (!remainder.isEmpty()) {
-                // 存储已满，掉落到随机捕鱼框位置或轴承位置
-                spawnItemAtBestLocation(remainder);
-            }
+        // 尝试插入到自身库存
+        ItemStack remainder = ItemHandlerHelper.insertItem(inventory, loot, false);
 
-            // 生成经验颗粒
+        boolean fullyInserted = remainder.isEmpty();
+
+        // 如果没有完全插入（库存在此期间变满），将剩余部分掉落
+        if (!fullyInserted) {
+            spawnItemAtBestLocation(remainder);
+        }
+
+        // 只有至少插入了一部分，才视为“成功钓鱼一次”，生成经验和特效
+        if (fullyInserted || remainder.getCount() < loot.getCount()) {
             spawnExperienceNugget();
-
-            // 播放音效和粒子效果
             playFishingEffects();
         }
+        // 如果完全没插进去（理论上不会，因为前面有检查），也不生成经验/特效
     }
 
     /**
