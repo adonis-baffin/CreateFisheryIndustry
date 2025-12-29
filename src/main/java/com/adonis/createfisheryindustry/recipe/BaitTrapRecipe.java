@@ -17,13 +17,55 @@ import java.util.Set;
 
 @ParametersAreNonnullByDefault
 public class BaitTrapRecipe extends ProcessingRecipe<RecipeInput, BaitTrapRecipeParams> {
-    private static final int[] LOOT_TIME_TICKS = {
-            24000,  // Level 1: 20 minutes
-            19200,  // Level 2: 16 minutes
-            14400,  // Level 3: 12 minutes
-            9600,   // Level 4: 8 minutes
-            4800    // Level 5: 4 minutes
+    private static final int[] MAX_EXTRA_DELAY_TICKS = {
+            21600,  // Level 1: 0-18 min
+            16800,  // Level 2: 0-14 min
+            12000,  // Level 3: 0-10 min
+            7200,   // Level 4: 0-6 min
+            2400    // Level 5: 0-2 min
     };
+
+    private static final int FIXED_WAIT_TICKS = 2400;
+
+    /**
+     * 获取固定等待时间（所有等级均为2分钟）
+     */
+    public int getFixedWaitTicks() {
+        return FIXED_WAIT_TICKS;
+    }
+
+    /**
+     * 获取该等级的最大额外随机延迟（包含）
+     */
+    public int getMaxExtraDelayTicks() {
+        int level = getBaitLevel();
+        int index = Math.max(0, Math.min(4, level - 1));
+        return MAX_EXTRA_DELAY_TICKS[index];
+    }
+
+    /**
+     * 获取该等级的最长可能间隔时间（固定 + 最大额外）
+     * 用于兼容旧代码或未来扩展
+     */
+    public int getMaxTotalTicks() {
+        return getFixedWaitTicks() + getMaxExtraDelayTicks();
+    }
+
+    /**
+     * 获取该等级的最短可能间隔时间（仅固定部分）
+     */
+    public int getMinTotalTicks() {
+        return getFixedWaitTicks();
+    }
+
+    /**
+     * 用于JEI显示：返回分钟范围，如 "2-4 min"
+     */
+    public String getLootTimeMinutesRange() {
+        int minMin = getFixedWaitTicks() / 20 / 60;
+        int maxMin = getMaxTotalTicks() / 20 / 60;
+        return minMin + "-" + maxMin + " min";
+    }
 
     public BaitTrapRecipe(BaitTrapRecipeParams params) {
         super(CreateFisheryRecipeTypes.BAIT_TRAP, params);
@@ -93,44 +135,6 @@ public class BaitTrapRecipe extends ProcessingRecipe<RecipeInput, BaitTrapRecipe
         }
 
         return false;
-    }
-
-    /**
-     * Get the fixed loot generation time in ticks based on bait level.
-     * Level 5: 4 min (4800 ticks)
-     * Level 4: 8 min (9600 ticks)
-     * Level 3: 12 min (14400 ticks)
-     * Level 2: 16 min (19200 ticks)
-     * Level 1: 20 min (24000 ticks)
-     */
-    public int getLootTimeTicks() {
-        int level = getBaitLevel();
-        // Clamp level to valid range (1-5) and convert to array index (0-4)
-        int index = Math.max(0, Math.min(4, level - 1));
-        return LOOT_TIME_TICKS[index];
-    }
-
-    /**
-     * Get the loot generation time in minutes for display purposes.
-     */
-    public int getLootTimeMinutes() {
-        return getLootTimeTicks() / 20 / 60;
-    }
-
-    /**
-     * @deprecated Use {@link #getLootTimeTicks()} instead. Kept for compatibility.
-     */
-    @Deprecated
-    public int getMinLootTimeTicks() {
-        return getLootTimeTicks();
-    }
-
-    /**
-     * @deprecated Use {@link #getLootTimeTicks()} instead. Kept for compatibility.
-     */
-    @Deprecated
-    public int getMaxLootTimeTicks() {
-        return getLootTimeTicks();
     }
 
     public void addRequiredMachines(Set<ItemLike> list) {

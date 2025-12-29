@@ -50,7 +50,7 @@ public class BaitTrapCategory extends CFIRecipeCategory<BaitTrapRecipe> {
         Font font = Minecraft.getInstance().font;
 
         AllGuiTextures.JEI_SHADOW.render(graphics, 79, 43);
-        baitTrap.draw(graphics, 90, 10);
+        baitTrap.draw(graphics, 90, 10, recipe);
         AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 91, 8);
 
         // 等级
@@ -62,7 +62,7 @@ public class BaitTrapCategory extends CFIRecipeCategory<BaitTrapRecipe> {
 
         // 生成间隔时间
         graphics.drawString(font,
-                recipe.getLootTimeMinutes() + " min",
+                recipe.getLootTimeMinutesRange(),
                 10, 55, 0x526878, false);
 
 // ==================== 环境需求文字（完美对齐原版加热条）===================

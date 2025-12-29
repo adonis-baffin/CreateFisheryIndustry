@@ -49,8 +49,8 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
     protected static final double COLLECTION_RANGE = 1.5;
     protected static final int PROCESSING_TIME = 10;
 
-    // Bait duration: 12 minutes = 12 * 60 * 20 = 14400 ticks
-    public static final int BAIT_DURATION_TICKS = 14400;
+    // Bait duration: 20 minutes = 20 * 60 * 20 = 24000 ticks
+    public static final int BAIT_DURATION_TICKS = 24000;
 
     private static final int AUTO_EXPORT_COOLDOWN = 20;
     private static final int BELT_EXPORT_COOLDOWN = 5;
@@ -59,8 +59,9 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
     protected final ItemStackHandler inventory;
     protected ItemStack currentBait = ItemStack.EMPTY;
     protected int baitTimeRemaining = 0;
-    protected int lootGenerationTicks = 0;
-    protected int lootInterval = 0; // Fixed interval from recipe
+    protected int lootPhaseTicks = 0;        // 当前阶段已过去的时间
+    protected int extraDelayTicks = 0;       // 当前周期随机出的额外延迟（0 ~ max）
+    protected boolean inExtraPhase = false;   // 是否处于额外延迟阶段
 
     // Cache the current recipe
     @Nullable
@@ -124,75 +125,74 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
      */
     @Nullable
     public BaitTrapRecipe findRecipe(ItemStack bait) {
-        CreateFisheryMod.LOGGER.info("[BaitTrap] findRecipe called for: {}", bait.getItem());
-
         if (level == null || bait.isEmpty()) {
-            CreateFisheryMod.LOGGER.info("[BaitTrap] findRecipe early return: level null = {}, bait empty = {}",
-                    level == null, bait.isEmpty());
             return null;
         }
-
-        CreateFisheryMod.LOGGER.info("[BaitTrap] Looking up recipe type: {}", CreateFisheryRecipeTypes.BAIT_TRAP.getId());
 
         SingleRecipeInput input = new SingleRecipeInput(bait);
         Optional<RecipeHolder<BaitTrapRecipe>> recipeHolder = level.getRecipeManager()
                 .getRecipeFor(CreateFisheryRecipeTypes.BAIT_TRAP.getType(), input, level);
 
-        CreateFisheryMod.LOGGER.info("[BaitTrap] Recipe lookup result: {}", recipeHolder.isPresent() ? "found" : "not found");
-
         if (recipeHolder.isPresent()) {
             BaitTrapRecipe recipe = recipeHolder.get().value();
-            CreateFisheryMod.LOGGER.info("[BaitTrap] Found recipe with baitLevel: {}", recipe.getBaitLevel());
         }
 
         return recipeHolder.map(RecipeHolder::value).orElse(null);
     }
 
-    public boolean tryAddBait(ItemStack stack) {
-        CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait called with: {}", stack.getItem());
+    private void resetLootTimer() {
+        if (cachedRecipe == null) {
+            lootPhaseTicks = 0;
+            extraDelayTicks = 0;
+            inExtraPhase = false;
+            return;
+        }
 
+        lootPhaseTicks = 0;
+        inExtraPhase = false;
+
+        // 随机生成本次的额外延迟
+        int maxExtra = cachedRecipe.getMaxExtraDelayTicks();
+        extraDelayTicks = level.getRandom().nextInt(maxExtra + 1); // 包含 maxExtra
+    }
+
+    public boolean tryAddBait(ItemStack stack) {
         if (stack.isEmpty() || level == null) {
-            CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: stack empty = {}, level null = {}",
-                    stack.isEmpty(), level == null);
             return false;
         }
 
         BaitTrapRecipe recipe = findRecipe(stack);
-        CreateFisheryMod.LOGGER.info("[BaitTrap] findRecipe result: {}", recipe != null ? "found" : "null");
 
         if (recipe == null) {
-            CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: no matching recipe");
             return false;
         }
 
-        // 如果 currentBait 不为空，且不是相同物品，返回 false（调用方需先移除旧的）
         if (!currentBait.isEmpty() && !ItemStack.isSameItemSameComponents(currentBait, stack)) {
-            CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: different bait type");
             return false;
         }
 
-        // 堆叠到 currentBait
+        int maxStackSize = stack.getMaxStackSize();
+        int spaceLeft = currentBait.isEmpty() ? maxStackSize : (maxStackSize - currentBait.getCount());
+        int added = Math.min(spaceLeft, stack.getCount());
+
+        if (added <= 0) {
+            return false;
+        }
+
         if (currentBait.isEmpty()) {
-            currentBait = stack.copyWithCount(1);
+            // 首次放入诱饵
+            currentBait = stack.copyWithCount(added);
             cachedRecipe = recipe;
             baitTimeRemaining = BAIT_DURATION_TICKS;
-            lootGenerationTicks = 0;
-            lootInterval = recipe.getLootTimeTicks();
+
+            // 新机制：首次放入时立即开始计时周期
+            resetLootTimer();
         } else {
-            // 相同物品，增加 count（不超过 maxStackSize）
-            int maxAdd = currentBait.getMaxStackSize() - currentBait.getCount();
-            if (maxAdd <= 0) {
-                CreateFisheryMod.LOGGER.info("[BaitTrap] tryAddBait failed: bait stack full");
-                return false;
-            }
-            int added = Math.min(maxAdd, stack.getCount());
+            // 仅堆叠，不重置计时（继续当前周期）
             currentBait.grow(added);
-            stack.shrink(added);
-            // 时间和 interval 已设置，不需重置
         }
 
-        CreateFisheryMod.LOGGER.info("[BaitTrap] Bait added successfully: bait={}, count={}, level={}, interval={}",
-                currentBait.getItem(), currentBait.getCount(), recipe.getBaitLevel(), lootInterval);
+        stack.shrink(added);
 
         updateBlockState();
         setChanged();
@@ -210,8 +210,9 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         currentBait = ItemStack.EMPTY;
         cachedRecipe = null;
         baitTimeRemaining = 0;
-        lootGenerationTicks = 0;
-        lootInterval = 0;
+
+        // 新机制：移除诱饵时重置所有计时状态
+        resetLootTimer();
 
         updateBlockState();
         setChanged();
@@ -272,56 +273,69 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
 
         boolean isWaterlogged = state.getValue(BlockStateProperties.WATERLOGGED);
+        boolean inOverworld = level.dimension() == Level.OVERWORLD;
         boolean environmentValid = true;
 
-        boolean inOverworld = level.dimension() == Level.OVERWORLD;
-
         if (be.isBaited()) {
+            // 确保配方已缓存
             if (be.cachedRecipe == null) {
                 be.cachedRecipe = be.findRecipe(be.currentBait);
-                if (be.cachedRecipe != null) {
-                    be.lootInterval = be.cachedRecipe.getLootTimeTicks();
-                } else {
-                    CreateFisheryMod.LOGGER.warn("[BaitTrap] Failed to re-cache recipe for bait: {}", be.currentBait.getItem());
-                }
             }
 
             if (be.cachedRecipe != null) {
                 boolean recipeRequiresWater = be.cachedRecipe.requiresWater();
                 environmentValid = isWaterlogged == recipeRequiresWater;
 
+                // 只有环境正确 + 主世界 才消耗诱饵时间并推进战利品计时
                 if (environmentValid && inOverworld) {
                     be.baitTimeRemaining--;
 
+                    // 诱饵时间耗尽：消耗一个诱饵
                     if (be.baitTimeRemaining <= 0) {
-                        // 耗尽当前诱饵，减少 count
                         be.currentBait.shrink(1);
                         if (be.currentBait.getCount() > 0) {
-                            // 还有剩余，切换到下一个诱饵，重置时间
+                            // 还有剩余诱饵，补满20分钟并继续当前战利品周期（不重置）
                             be.baitTimeRemaining = BAIT_DURATION_TICKS;
-                            be.lootGenerationTicks = 0;  // 可选：重置生成计时
                         } else {
-                            // 无剩余，清空
+                            // 诱饵完全用完
                             be.currentBait = ItemStack.EMPTY;
                             be.cachedRecipe = null;
                             be.baitTimeRemaining = 0;
-                            be.lootGenerationTicks = 0;
-                            be.lootInterval = 0;
+                            be.resetLootTimer(); // 重置战利品计时，防止残留状态
                         }
                         be.updateBlockState();
-                    } else {
-                        be.lootGenerationTicks++;
-                        if (be.lootInterval > 0 && be.lootGenerationTicks >= be.lootInterval && be.hasInventorySpace()) {
-                            be.generateLoot(serverLevel);
-                            be.lootGenerationTicks = 0;
+                    }
+
+                    // 诱饵还有剩余时间：推进战利品生成计时（新机制）
+                    if (be.hasInventorySpace()) {
+                        be.lootPhaseTicks++;
+
+                        int currentTarget = be.inExtraPhase
+                                ? be.extraDelayTicks
+                                : be.cachedRecipe.getFixedWaitTicks();
+
+                        // 当 currentTarget == 0 时直接通过（防止5级额外延迟为0时卡住）
+                        if (currentTarget <= 0 || be.lootPhaseTicks >= currentTarget) {
+                            if (be.inExtraPhase) {
+                                // 额外延迟阶段结束 → 生成战利品
+                                be.generateLoot(serverLevel);
+                                // generateLoot 内部已调用 resetLootTimer()，开始全新周期
+                            } else {
+                                // 固定2分钟阶段结束 → 进入额外延迟阶段
+                                be.inExtraPhase = true;
+                                be.lootPhaseTicks = 0;
+                            }
                         }
                     }
                 }
-                // 环境错误或非主世界 → 不走时间
+                // else: 环境无效或不在主世界 → 诱饵时间不减少，战利品计时不推进（已在上面不执行相关代码）
             }
+        } else {
+            // 没有诱饵时确保计时器清零（防御性编程）
+            be.resetLootTimer();
         }
 
-        // 下面这些逻辑保持不变
+        // 以下为原有的自动化功能（不受诱饵状态影响）
         be.processingTicks++;
         if (be.processingTicks >= PROCESSING_TIME) {
             be.processingTicks = 0;
@@ -347,15 +361,12 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
     private void generateLoot(ServerLevel level) {
         if (cachedRecipe == null) {
-            // Try to find recipe again (in case it wasn't cached)
+            // 尝试重新查找配方（防止意外丢失）
             cachedRecipe = findRecipe(currentBait);
             if (cachedRecipe == null) return;
-
-            // Also update the loot interval if recipe was re-cached
-            lootInterval = cachedRecipe.getLootTimeTicks();
         }
 
-        // Roll for results using the recipe's roll system
+        // 使用配方进行随机滚结果
         RandomSource randomSource = level.getRandom();
         List<ItemStack> results = cachedRecipe.rollResults(randomSource);
 
@@ -364,6 +375,9 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                 insertItem(result.copy());
             }
         }
+
+        // 重要：生成战利品后立即重置计时器，开始新一轮（固定2分钟 + 新随机额外延迟）
+        resetLootTimer();
     }
 
     protected void collectNearbyItems(ServerLevel level) {
@@ -643,8 +657,9 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
             tag.put("CurrentBait", currentBait.save(provider));
         }
         tag.putInt("BaitTimeRemaining", baitTimeRemaining);
-        tag.putInt("LootGenerationTicks", lootGenerationTicks);
-        tag.putInt("LootInterval", lootInterval);
+        tag.putInt("LootPhaseTicks", lootPhaseTicks);
+        tag.putInt("ExtraDelayTicks", extraDelayTicks);
+        tag.putBoolean("InExtraPhase", inExtraPhase);
     }
 
     @Override
@@ -664,8 +679,13 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
             cachedRecipe = null;
         }
         baitTimeRemaining = tag.getInt("BaitTimeRemaining");
-        lootGenerationTicks = tag.getInt("LootGenerationTicks");
-        lootInterval = tag.getInt("LootInterval");
+        lootPhaseTicks = tag.getInt("LootPhaseTicks");
+        extraDelayTicks = tag.getInt("ExtraDelayTicks");
+        inExtraPhase = tag.getBoolean("InExtraPhase");
+
+        if (!tag.contains("LootPhaseTicks")) {
+            resetLootTimer();
+        }
     }
 
     @Override

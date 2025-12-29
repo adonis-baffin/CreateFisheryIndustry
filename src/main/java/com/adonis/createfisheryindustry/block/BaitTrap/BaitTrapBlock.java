@@ -77,7 +77,6 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
         return 0;
     }
 
-    // 添加这个方法来让诱饵状态发光
     @Override
     public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
         return state.getValue(BAITED) ? 5 : 0;
