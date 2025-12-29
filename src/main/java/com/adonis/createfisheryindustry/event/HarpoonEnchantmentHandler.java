@@ -90,9 +90,6 @@ public class HarpoonEnchantmentHandler {
             DamageSource damageSource = target.level().damageSources().thorns(player);
             target.hurt(damageSource, damage);
             target.setLastHurtByPlayer(player);
-
-            LOGGER.debug("Barbed enchantment dealt {} damage to {} (level {})",
-                    damage, target.getName().getString(), level);
         }
     }
 
@@ -105,8 +102,6 @@ public class HarpoonEnchantmentHandler {
 
         // 检查目标生命值是否低于阈值
         if (target.getHealth() <= healthThreshold && target.getHealth() > 0) {
-            LOGGER.debug("Execution triggered on {} (health: {}, threshold: {})",
-                    target.getName().getString(), target.getHealth(), healthThreshold);
 
             // 设置最后攻击玩家，确保掉落物和经验正确归属
             target.setLastHurtByPlayer(player);

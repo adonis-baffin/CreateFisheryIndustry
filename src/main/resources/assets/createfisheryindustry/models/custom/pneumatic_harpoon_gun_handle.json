@@ -1,4 +1,5 @@
 {
+	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
 		"2": "createfisheryindustry:block/pneumatic_harpoon_gun_handle",
@@ -276,7 +277,7 @@
 			"scale": [0.38457, 0.38457, 0.38457]
 		},
 		"gui": {
-			"rotation": [73, -66, 60],
+			"rotation": [89, -62, 60],
 			"translation": [-0.5, 0.25, 0],
 			"scale": [0.6, 0.6, 0.6]
 		},

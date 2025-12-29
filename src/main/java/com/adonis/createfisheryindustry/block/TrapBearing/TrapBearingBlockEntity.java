@@ -8,7 +8,12 @@ import com.simibubi.create.content.contraptions.Contraption;
 import com.simibubi.create.content.kinetics.base.IRotate.StressImpact;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.CreateLang;
-
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.tags.BiomeTags;
 import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -495,7 +500,36 @@ public class TrapBearingBlockEntity extends MechanicalBearingBlockEntity {
             spawnExperienceNugget();
             playFishingEffects();
         }
-        // 如果完全没插进去（理论上不会，因为前面有检查），也不生成经验/特效
+        // ===== 额外海洋贻贝奖励（生物群系专属）=====
+        if (level instanceof ServerLevel serverLevel) {
+            Holder<Biome> biomeHolder = level.getBiome(worldPosition);
+
+            // 只在海洋生物群系中触发额外奖励
+            if (biomeHolder.is(BiomeTags.IS_OCEAN)) {
+                ResourceKey<Biome> biomeKey = biomeHolder.unwrapKey().orElse(null);
+                if (biomeKey == null) return;
+
+                // 概率：25% 触发额外贻贝
+                if (level.random.nextFloat() < 0.1f) {
+                    ItemStack musselStack;
+                    int amount = 1 + level.random.nextInt(2); // 1~3 个
+
+                    // 暖水海洋：地中海贻贝
+                    if (biomeKey.equals(Biomes.WARM_OCEAN) || biomeKey.equals(Biomes.LUKEWARM_OCEAN)) {
+                        musselStack = new ItemStack(CreateFisheryItems.RAW_MEDITERRANEAN_MUSSEL.get(), amount);
+                    } else {
+                        // 其他所有海洋：蓝贻贝
+                        musselStack = new ItemStack(CreateFisheryItems.RAW_BLUE_MUSSEL.get(), amount);
+                    }
+
+                    // 尝试插入轴承自身库存，失败则掉落世界
+                    ItemStack musselRemainder = ItemHandlerHelper.insertItem(inventory, musselStack, false);
+                    if (!musselRemainder.isEmpty()) {
+                        spawnItemAtBestLocation(musselRemainder);
+                    }
+                }
+            }
+        }
     }
 
     /**
