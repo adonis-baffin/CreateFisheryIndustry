@@ -76,10 +76,7 @@ public class CreateFisheryMod {
         CreateFisheryComponents.register(bus);
 
         SoupFluids.register();
-
-        LOGGER.info("Registering mounted storage types...");
         CreateFisheryMountedStorageTypes.register(bus);
-        LOGGER.info("Mounted storage types registered");
 
         SERIALIZERS.register(bus);
         TYPES.register(bus);

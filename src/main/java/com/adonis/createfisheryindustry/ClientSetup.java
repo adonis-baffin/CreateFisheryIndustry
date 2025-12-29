@@ -5,7 +5,6 @@ import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshRenderer;
 import com.adonis.createfisheryindustry.block.SmartNozzle.SmartNozzleRenderer;
 import com.adonis.createfisheryindustry.client.CreateFisheryPartialModels;
 import com.adonis.createfisheryindustry.client.renderer.MechanicalPeelerRenderer;
-import com.adonis.createfisheryindustry.block.TrapBearing.TrapBearingRenderer;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonRenderer;
 import com.adonis.createfisheryindustry.client.renderer.HarpoonISTER;
 import com.adonis.createfisheryindustry.client.renderer.PneumaticHarpoonTargetHandler;
@@ -60,7 +59,7 @@ public class ClientSetup {
             BlockEntityRenderers.register(CreateFisheryBlockEntities.SMART_MESH.get(), SmartMeshRenderer::new);
             BlockEntityRenderers.register(CreateFisheryBlockEntities.BAIT_TRAP.get(), BaitTrapRenderer::new);
             BlockEntityRenderers.register(CreateFisheryBlockEntities.MECHANICAL_PEELER.get(), MechanicalPeelerRenderer::new);
-            BlockEntityRenderers.register(CreateFisheryBlockEntities.TRAP_BEARING.get(), TrapBearingRenderer::new);
+//            BlockEntityRenderers.register(CreateFisheryBlockEntities.TRAP_BEARING.get(), TrapBearingRenderer::new);
 
             EntityRenderers.register(CreateFisheryEntityTypes.HARPOON.get(), HarpoonRenderer::new);
             EntityRenderers.register(CreateFisheryEntityTypes.TETHERED_HARPOON.get(), TetheredHarpoonRenderer::new);

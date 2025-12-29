@@ -2,6 +2,8 @@ package com.adonis.createfisheryindustry.item;
 
 import com.adonis.createfisheryindustry.client.renderer.PneumaticHarpoonGunItemRenderer;
 import com.adonis.createfisheryindustry.entity.TetheredHarpoonEntity;
+import com.adonis.createfisheryindustry.network.CFINetwork;
+import com.adonis.createfisheryindustry.network.HarpoonGunStateSyncPacket;
 import com.adonis.createfisheryindustry.procedures.PneumaticHarpoonGunItemInHandTickProcedure;
 import com.adonis.createfisheryindustry.registry.CreateFisheryEnchantments;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
@@ -174,6 +176,9 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
                     tag.remove("AccumulatedAirConsumption");
                     tag.putLong("CooldownEndTick", world.getGameTime() + COOLDOWN_TICKS);
                 });
+                if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                    CFINetwork.sendToClient(new HarpoonGunStateSyncPacket(false), serverPlayer);
+                }
                 player.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("item.armor.equip_chain")), 1.0F, 1.0F);
                 return InteractionResultHolder.sidedSuccess(itemstack, false);
             }
@@ -274,6 +279,9 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
                 tag.putFloat("AccumulatedAirConsumption", 0.0F);
                 tag.putBoolean("tagHooked", true);
             });
+            if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                CFINetwork.sendToClient(new HarpoonGunStateSyncPacket(true), serverPlayer);
+            }
 
             player.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("entity.arrow.shoot")), 1.0F, 1.0F);
         }
