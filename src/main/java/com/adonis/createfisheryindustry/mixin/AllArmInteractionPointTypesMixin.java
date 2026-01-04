@@ -1,5 +1,6 @@
 package com.adonis.createfisheryindustry.mixin;
 
+import com.adonis.createfisheryindustry.block.BaitTrap.BaitTrapInteractionPointType;
 import com.adonis.createfisheryindustry.block.MeshTrap.MeshTrapInteractionPointType;
 import com.adonis.createfisheryindustry.block.SmartMesh.SmartMeshInteractionPointType;
 import com.adonis.createfisheryindustry.block.SmartNozzle.SmartNozzleInteractionPointType;
@@ -28,6 +29,8 @@ public class AllArmInteractionPointTypesMixin {
             registerMethod.invoke(null, "smart_mesh", new SmartMeshInteractionPointType());
 
             registerMethod.invoke(null, "smart_nozzle", new SmartNozzleInteractionPointType());
+
+            registerMethod.invoke(null, "bait_trap", new BaitTrapInteractionPointType());
 
         } catch (Exception e) {
         }

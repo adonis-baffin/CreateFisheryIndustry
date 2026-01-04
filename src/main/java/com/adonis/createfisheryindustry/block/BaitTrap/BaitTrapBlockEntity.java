@@ -95,6 +95,33 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
             public boolean isItemValid(int slot, @NotNull ItemStack stack) {
                 return true;
             }
+
+            @Override
+            public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+                if (stack.isEmpty()) {
+                    return ItemStack.EMPTY;
+                }
+
+                // simulate 时只考虑普通库存（保守，防止机械臂误判）
+                if (simulate) {
+                    return super.insertItem(slot, stack, true);
+                }
+
+                // 非 simulate：先尝试放入诱饵槽
+                ItemStack copyForBait = stack.copy();
+                if (BaitTrapBlockEntity.this.tryAddBait(copyForBait)) {
+                    // 成功吃掉至少一部分
+                    if (copyForBait.isEmpty()) {
+                        // 全被诱饵槽吃掉
+                        return ItemStack.EMPTY;
+                    }
+                    // 还有剩余 → 尝试把剩余插入普通库存
+                    return super.insertItem(slot, copyForBait, false);
+                }
+
+                // 无法放入诱饵槽（不是诱饵、已满或类型不匹配）
+                return super.insertItem(slot, stack, false);
+            }
         };
     }
 

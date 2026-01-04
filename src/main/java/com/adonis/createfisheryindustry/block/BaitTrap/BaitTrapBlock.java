@@ -1,6 +1,7 @@
 package com.adonis.createfisheryindustry.block.BaitTrap;
 
 import com.adonis.createfisheryindustry.CreateFisheryMod;
+import com.adonis.createfisheryindustry.recipe.BaitTrapRecipe;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlockEntities;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
@@ -116,7 +117,7 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
     @Override
     public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                            Player player, InteractionHand hand, BlockHitResult hitResult) {
-        // 扳手处理
+        // 扳手处理（保持不变）
         if (stack.getItem() instanceof WrenchItem) {
             UseOnContext wrenchContext = new UseOnContext(level, player, hand, stack, hitResult);
             InteractionResult result = player.isShiftKeyDown()
@@ -140,11 +141,12 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
             return ItemInteractionResult.FAIL;
         }
 
-        // 潜行 + 手持物品 = 尝试添加或替换诱饵
-        if (player.isShiftKeyDown() && !stack.isEmpty()) {
-            if (baitTrap.findRecipe(stack) != null) {
+        // 只有潜行 + 手持有效诱饵时才允许放入诱饵
+        if (player.isShiftKeyDown()) {
+            BaitTrapRecipe recipe = baitTrap.findRecipe(stack);
+            if (recipe != null) {
+                // 如果当前已有不同类型的诱饵，先吐出旧诱饵
                 if (baitTrap.isBaited() && !ItemStack.isSameItemSameComponents(baitTrap.getCurrentBait(), stack)) {
-                    // 不同诱饵，先移除旧的
                     ItemStack removedBait = baitTrap.removeBait();
                     if (!removedBait.isEmpty() && !player.isCreative()) {
                         if (!player.getInventory().add(removedBait)) {
@@ -153,65 +155,17 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
                     }
                 }
 
-                // 尝试添加（会堆叠）
+                // 尝试放入新诱饵
                 if (baitTrap.tryAddBait(stack)) {
-                    if (!player.isCreative()) {
-                        // stack 已 shrink，无需额外操作
-                    }
-                    return ItemInteractionResult.SUCCESS;
+                    // stack 已经被 tryAddBait shrink，无需额外操作
+                    return ItemInteractionResult.sidedSuccess(false);
                 }
-                return ItemInteractionResult.CONSUME;
-            }
-            // 不是有效诱饵，继续执行提取逻辑
-        }
-
-        // 提取物品逻辑
-        var inventory = baitTrap.getInventory();
-        if (inventory == null) {
-            return ItemInteractionResult.FAIL;
-        }
-
-        ItemStack extracted = ItemStack.EMPTY;
-        int totalItems = 0;
-
-        for (int i = 0; i < inventory.getSlots(); i++) {
-            ItemStack slotStack = inventory.getStackInSlot(i);
-            if (!slotStack.isEmpty()) {
-                totalItems += slotStack.getCount();
             }
         }
 
-        for (int i = 0; i < inventory.getSlots(); i++) {
-            extracted = inventory.extractItem(i, 64, false);
-            if (!extracted.isEmpty()) {
-                break;
-            }
-        }
-
-        if (!extracted.isEmpty()) {
-            ItemHandlerHelper.giveItemToPlayer(player, extracted);
-
-            player.displayClientMessage(
-                    Component.translatable("create_fishery.bait_trap.extracted",
-                            extracted.getCount(),
-                            Component.translatable(extracted.getDescriptionId())),
-                    true
-            );
-            return ItemInteractionResult.sidedSuccess(false);
-        } else {
-            if (totalItems > 0) {
-                player.displayClientMessage(
-                        Component.translatable("create_fishery.bait_trap.extraction_failed"),
-                        true
-                );
-            } else {
-                player.displayClientMessage(
-                        Component.translatable("create_fishery.bait_trap.empty"),
-                        true
-                );
-            }
-            return ItemInteractionResult.CONSUME;
-        }
+        // 其他情况（包括手持非诱饵物品右键）不处理提取，直接 PASS
+        // 提取普通物品的逻辑移到空手右键（useWithoutItem）
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
@@ -226,19 +180,76 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
             return InteractionResult.PASS;
         }
 
-        // Sneak + empty hand to remove bait
         if (player.isShiftKeyDown()) {
+            // 空手 + 潜行：取出全部诱饵
             ItemStack removedBait = baitTrap.removeBait();
-            if (!removedBait.isEmpty() && player instanceof ServerPlayer serverPlayer) {
-                if (!serverPlayer.getInventory().add(removedBait)) {
-                    serverPlayer.drop(removedBait, false);
+            if (!removedBait.isEmpty()) {
+                if (!player.getInventory().add(removedBait)) {
+                    player.drop(removedBait, false);
                 }
-                level.setBlock(pos, state.setValue(BAITED, false), 3); // Switch back from baited mode
+                player.displayClientMessage(
+                        Component.translatable("create_fishery.bait_trap.bait_removed",
+                                removedBait.getCount(),
+                                Component.translatable(removedBait.getDescriptionId())),
+                        true
+                );
                 return InteractionResult.SUCCESS;
+            } else {
+                player.displayClientMessage(
+                        Component.translatable("create_fishery.bait_trap.no_bait"),
+                        true
+                );
+                return InteractionResult.CONSUME;
+            }
+        } else {
+            // 空手 + 非潜行：提取普通库存物品（一次最多64个）
+            var inventory = baitTrap.getInventory();
+            if (inventory == null) {
+                return InteractionResult.FAIL;
+            }
+
+            ItemStack extracted = ItemStack.EMPTY;
+            int totalItems = 0;
+
+            for (int i = 0; i < inventory.getSlots(); i++) {
+                ItemStack slotStack = inventory.getStackInSlot(i);
+                if (!slotStack.isEmpty()) {
+                    totalItems += slotStack.getCount();
+                }
+            }
+
+            for (int i = 0; i < inventory.getSlots(); i++) {
+                extracted = inventory.extractItem(i, 64, false);
+                if (!extracted.isEmpty()) {
+                    break;
+                }
+            }
+
+            if (!extracted.isEmpty()) {
+                ItemHandlerHelper.giveItemToPlayer(player, extracted);
+
+                player.displayClientMessage(
+                        Component.translatable("create_fishery.bait_trap.extracted",
+                                extracted.getCount(),
+                                Component.translatable(extracted.getDescriptionId())),
+                        true
+                );
+                return InteractionResult.SUCCESS;
+            } else {
+                if (totalItems > 0) {
+                    player.displayClientMessage(
+                            Component.translatable("create_fishery.bait_trap.extraction_failed"),
+                            true
+                    );
+                } else {
+                    player.displayClientMessage(
+                            Component.translatable("create_fishery.bait_trap.empty"),
+                            true
+                    );
+                }
+                return InteractionResult.CONSUME;
             }
         }
-
-        return InteractionResult.PASS;
     }
 
     @Nullable

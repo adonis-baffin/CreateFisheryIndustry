@@ -1,6 +1,5 @@
 package com.adonis.createfisheryindustry.block.MeshTrap;
 
-import com.adonis.createfisheryindustry.CreateFisheryMod;
 import com.adonis.createfisheryindustry.registry.CreateFisheryBlocks;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPoint;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointType;
