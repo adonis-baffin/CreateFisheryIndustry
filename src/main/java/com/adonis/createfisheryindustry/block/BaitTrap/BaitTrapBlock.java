@@ -128,8 +128,10 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
             }
         }
 
+        // 关键修改：手持动力臂物品（ArmItem）时，使用 SKIP_DEFAULT_BLOCK_INTERACTION
+        // 这会跳过方块的所有自定义右键逻辑（不会触发提取或放入），同时允许 Create 的机械臂系统正常高亮交互点
         if (stack.getItem() instanceof ArmItem) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
 
         if (level.isClientSide()) {
@@ -157,14 +159,12 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
 
                 // 尝试放入新诱饵
                 if (baitTrap.tryAddBait(stack)) {
-                    // stack 已经被 tryAddBait shrink，无需额外操作
                     return ItemInteractionResult.sidedSuccess(false);
                 }
             }
         }
 
-        // 其他情况（包括手持非诱饵物品右键）不处理提取，直接 PASS
-        // 提取普通物品的逻辑移到空手右键（useWithoutItem）
+        // 其他手持物品右键一律不做任何操作
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
@@ -183,22 +183,21 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
         if (player.isShiftKeyDown()) {
             // 空手 + 潜行：取出全部诱饵
             ItemStack removedBait = baitTrap.removeBait();
-            if (!removedBait.isEmpty()) {
+
+            // 防御性检查：确保栈有效且有数量
+            if (!removedBait.isEmpty() && removedBait.getCount() > 0) {
                 if (!player.getInventory().add(removedBait)) {
                     player.drop(removedBait, false);
                 }
-                player.displayClientMessage(
-                        Component.translatable("create_fishery.bait_trap.bait_removed",
-                                removedBait.getCount(),
-                                Component.translatable(removedBait.getDescriptionId())),
-                        true
-                );
+
+                // 已删除取出诱饵的消息提示（避免任何潜在的翻译/占位符异常）
                 return InteractionResult.SUCCESS;
             } else {
-                player.displayClientMessage(
-                        Component.translatable("create_fishery.bait_trap.no_bait"),
-                        true
-                );
+                // 可选：保留“无诱饵”提示，或也删除（如果你想完全无消息）
+                // player.displayClientMessage(
+                //         Component.translatable("create_fishery.bait_trap.no_bait"),
+                //         true
+                // );
                 return InteractionResult.CONSUME;
             }
         } else {
@@ -220,18 +219,18 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
 
             for (int i = 0; i < inventory.getSlots(); i++) {
                 extracted = inventory.extractItem(i, 64, false);
-                if (!extracted.isEmpty()) {
+                if (extracted.getCount() > 0) {  // 这里也改为检查 count > 0（一致性 + 安全）
                     break;
                 }
             }
 
-            if (!extracted.isEmpty()) {
+            if (extracted.getCount() > 0) {
                 ItemHandlerHelper.giveItemToPlayer(player, extracted);
 
                 player.displayClientMessage(
                         Component.translatable("create_fishery.bait_trap.extracted",
                                 extracted.getCount(),
-                                Component.translatable(extracted.getDescriptionId())),
+                                extracted.getHoverName()),  // 同上，使用 getHoverName()
                         true
                 );
                 return InteractionResult.SUCCESS;

@@ -66,6 +66,7 @@
   "create_fishery.bait_trap.empty": "诱捕网为空",
   "create_fishery.bait_trap.same_bait": "诱捕网中已有相同诱饵",
   "create_fishery.bait_trap.no_bait": "诱捕网中没有诱饵",
+  "create_fishery.bait_trap.bait_removed": "已从诱饵槽移除 %s 个 %s",
   "create.gui.createfisheryindustry.bait_trap.active": "诱捕中…",
   "create.gui.createfisheryindustry.bait_trap.invalid_land": "此诱饵在陆地上无效",
   "create.gui.createfisheryindustry.bait_trap.invalid_water": "此诱饵在水下无效",
