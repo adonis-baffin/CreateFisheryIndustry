@@ -50,7 +50,6 @@
   "create_fishery.bait_trap.empty": "Bait Mesh is empty",
   "create_fishery.bait_trap.same_bait": "Same bait already in trap",
   "create_fishery.bait_trap.no_bait": "No bait in the trap",
-  "create_fishery.bait_trap.bait_removed": "Removed %s × %s from the bait slot",
   "create.gui.createfisheryindustry.bait_trap.active": "Trapping…",
   "create.gui.createfisheryindustry.bait_trap.invalid_land": "Insufficient Bait on land",
   "create.gui.createfisheryindustry.bait_trap.invalid_water": "Insufficient Bait under water",

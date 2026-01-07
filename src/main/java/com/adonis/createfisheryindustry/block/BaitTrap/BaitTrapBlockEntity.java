@@ -96,31 +96,68 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                 return true;
             }
 
+            private int calculateBaitInsertAmount(ItemStack stack) {
+                if (stack.isEmpty() || level == null) {
+                    return 0;
+                }
+                BaitTrapRecipe recipe = findRecipe(stack);
+                if (recipe == null) {
+                    return 0;
+                }
+                if (!currentBait.isEmpty() && !ItemStack.isSameItemSameComponents(currentBait, stack)) {
+                    return 0;
+                }
+                int maxStackSize = stack.getMaxStackSize();
+                int availableSpace = currentBait.isEmpty() ? maxStackSize : maxStackSize - currentBait.getCount();
+                return Math.min(availableSpace, stack.getCount());
+            }
+
             @Override
             public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
                 if (stack.isEmpty()) {
                     return ItemStack.EMPTY;
                 }
 
-                // simulate 时只考虑普通库存（保守，防止机械臂误判）
-                if (simulate) {
-                    return super.insertItem(slot, stack, true);
-                }
+                boolean isCurrentBaitType = !currentBait.isEmpty() &&
+                        ItemStack.isSameItemSameComponents(stack, currentBait);
 
-                // 非 simulate：先尝试放入诱饵槽
-                ItemStack copyForBait = stack.copy();
-                if (BaitTrapBlockEntity.this.tryAddBait(copyForBait)) {
-                    // 成功吃掉至少一部分
-                    if (copyForBait.isEmpty()) {
-                        // 全被诱饵槽吃掉
+                if (simulate) {
+                    // 核心修改：只要诱饵槽有任何当前类型的诱饵（哪怕只有一个），机械臂完全认为无法插入该物品
+                    // 这样机械臂不会不断伸缩尝试
+                    if (isCurrentBaitType) {
+                        return stack.copy();
+                    }
+
+                    // 其他情况（无诱饵 或 不同类型）：保守计算，能放多少到诱饵槽，剩余尝试普通槽
+                    int canInsertToBait = calculateBaitInsertAmount(stack);
+                    int remainingCount = stack.getCount() - canInsertToBait;
+                    if (remainingCount <= 0) {
                         return ItemStack.EMPTY;
                     }
-                    // 还有剩余 → 尝试把剩余插入普通库存
-                    return super.insertItem(slot, copyForBait, false);
-                }
+                    return super.insertItem(slot, stack.copyWithCount(remainingCount), true);
+                } else {
+                    // 非 simulate（实际插入，如漏斗、管道、手动等）：优先放诱饵槽，剩余同类型拒绝进普通槽
+                    ItemStack copyForBait = stack.copy();
+                    if (BaitTrapBlockEntity.this.tryAddBait(copyForBait)) {
+                        if (copyForBait.isEmpty()) {
+                            return ItemStack.EMPTY;
+                        }
+                        // 放了部分后，如果现在有诱饵且剩余同类型，拒绝进普通槽
+                        if (!BaitTrapBlockEntity.this.currentBait.isEmpty() &&
+                                ItemStack.isSameItemSameComponents(copyForBait, BaitTrapBlockEntity.this.currentBait)) {
+                            return copyForBait;
+                        }
+                        return super.insertItem(slot, copyForBait, false);
+                    }
 
-                // 无法放入诱饵槽（不是诱饵、已满或类型不匹配）
-                return super.insertItem(slot, stack, false);
+                    // 未能放入诱饵槽，但如果是当前类型，拒绝
+                    if (!BaitTrapBlockEntity.this.currentBait.isEmpty() &&
+                            ItemStack.isSameItemSameComponents(stack, BaitTrapBlockEntity.this.currentBait)) {
+                        return stack;
+                    }
+
+                    return super.insertItem(slot, stack, false);
+                }
             }
         };
     }
@@ -238,7 +275,6 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
         cachedRecipe = null;
         baitTimeRemaining = 0;
 
-        // 新机制：移除诱饵时重置所有计时状态
         resetLootTimer();
 
         updateBlockState();

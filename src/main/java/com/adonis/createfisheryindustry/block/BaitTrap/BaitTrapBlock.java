@@ -189,15 +189,8 @@ public class BaitTrapBlock extends Block implements EntityBlock, ProperWaterlogg
                 if (!player.getInventory().add(removedBait)) {
                     player.drop(removedBait, false);
                 }
-
-                // 已删除取出诱饵的消息提示（避免任何潜在的翻译/占位符异常）
                 return InteractionResult.SUCCESS;
             } else {
-                // 可选：保留“无诱饵”提示，或也删除（如果你想完全无消息）
-                // player.displayClientMessage(
-                //         Component.translatable("create_fishery.bait_trap.no_bait"),
-                //         true
-                // );
                 return InteractionResult.CONSUME;
             }
         } else {
