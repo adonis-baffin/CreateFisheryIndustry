@@ -2,7 +2,7 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"1": "create:机械动力：地理学/potato_cannon",
+		"1": "create:potato_cannon",
 		"5": "potato_cannon_zinc (1)",
 		"particle": "createfisheryindustry:block/pneumatic_harpoon_gun_handle"
 	},

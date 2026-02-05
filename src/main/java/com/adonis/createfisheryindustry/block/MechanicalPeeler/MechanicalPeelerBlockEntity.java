@@ -1271,14 +1271,13 @@ public class MechanicalPeelerBlockEntity extends KineticBlockEntity implements I
     private void spawnBlockProcessingParticles(BlockState state) {
         if (targetBlockPos == null || level == null || !level.isClientSide) return;
 
-        // 添加这个检查
         VoxelShape shape = state.getShape(level, targetBlockPos);
         if (shape.isEmpty()) return;
 
         RandomSource random = level.random;
         Vec3 center = Vec3.atCenterOf(targetBlockPos);
 
-        // 获取边界尺寸，使用已验证的 shape
+        // 延迟计算 bounds，只在确认 shape 非空后进行
         AABB bounds = shape.bounds();
 
         if (state.getBlock() == Blocks.AMETHYST_CLUSTER) {
