@@ -134,17 +134,26 @@ public class FrameTrapScenes {
         scene.idle(50); // 等待旋转完成
         scene.idle(60);
 
-        // 高亮木桶
+// 高亮木桶
         scene.idle(10);
 
         // Text 4: 自动存储到容器（不显示物品）
         scene.overlay().showText(100)
                 .attachKeyFrame()
                 .colored(PonderPalette.GREEN)
-                .text("And automatically store them in connected containers")
+                .text("createfisheryindustry.ponder.frame_trap.text_4")
                 .pointAt(util.vector().blockSurface(util.grid().at(4, 4, 3), Direction.NORTH))
                 .placeNearTarget();
-        scene.idle(100);
+        scene.idle(110);
+
+        // Text 5: 若没有存储容器则功能不生效
+        scene.overlay().showText(100)
+                .attachKeyFrame()
+                .colored(PonderPalette.RED)
+                .text("createfisheryindustry.ponder.frame_trap.text_5")
+                .pointAt(util.vector().blockSurface(util.grid().at(4, 4, 3), Direction.NORTH))
+                .placeNearTarget();
+        scene.idle(110);
 
         scene.markAsFinished();
     }

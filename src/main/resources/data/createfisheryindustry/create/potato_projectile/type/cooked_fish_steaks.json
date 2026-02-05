@@ -1,0 +1,19 @@
+{
+  "items": [
+    "createfisheryindustry:cooked_cod_steak",
+    "createfisheryindustry:cooked_salmon_steak"
+  ],
+  "damage": 8,
+  "knockback": 1.2,
+  "velocity_multiplier": 1.2,
+  "reload_ticks": 18,
+  "render_mode": {
+    "type": "create:tumble"
+  },
+  "sound_pitch": 1.0,
+  "sticky": true,
+  "pre_entity_hit": {
+    "type": "create:set_on_fire",
+    "ticks": 80
+  }
+}

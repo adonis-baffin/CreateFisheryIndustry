@@ -1,0 +1,14 @@
+{
+  "items": "createfisheryindustry:raw_lobster",
+  "damage": 9,
+  "knockback": 1.8,
+  "velocity_multiplier": 1.0,
+  "reload_ticks": 25,
+  "render_mode": {
+    "type": "create:toward_motion",
+    "spin": 0.8,
+    "sprite_angle_offset": 140
+  },
+  "sound_pitch": 0.8,
+  "sticky": true
+}

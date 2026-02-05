@@ -164,5 +164,131 @@
 
   "createfisheryindustry.ponder.mechanical_peeler_copper.header": "Usando descascadores mecânicos em engenhocas",
   "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "Quando descascadores se movem como parte de uma engenhoca animada...",
-  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...eles processarão quaisquer blocos nos quais a engenhoca os fizer colidir"
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...eles processarão quaisquer blocos nos quais a engenhoca os fizer colidir",
+
+  "block.createfisheryindustry.bait_trap": "Armadilha com isca",
+  "block.createfisheryindustry.trap_bearing": "Rolamento armadilha",
+  "block.createfisheryindustry.smart_nozzle": "Bocal inteligente",
+
+  "item.createfisheryindustry.raw_blue_mussel": "Mexilhão azul cru",
+  "item.createfisheryindustry.cooked_blue_mussel": "Mexilhão azul assado",
+  "item.createfisheryindustry.raw_mediterranean_mussel": "Mexilhão mediterrâneo cru",
+  "item.createfisheryindustry.cooked_mediterranean_mussel": "Mexilhão mediterrâneo assado",
+  "item.createfisheryindustry.raw_lobster": "Lagosta crua",
+  "item.createfisheryindustry.cooked_lobster": "Lagosta cozida",
+  "item.createfisheryindustry.mussel_soup": "Sopa de mexilhão",
+  "item.createfisheryindustry.lobster_soup": "Sopa de lagosta",
+  "item.createfisheryindustry.seafood_chowder": "Caldeirada de frutos do mar",
+  "item.createfisheryindustry.seafood_steak": "Bife de frutos do mar",
+
+  "fluid.createfisheryindustry.lobster_soup": "Sopa de lagosta",
+  "fluid.createfisheryindustry.mussel_soup": "Sopa de mexilhão",
+  "fluid.createfisheryindustry.seafood_chowder": "Caldeirada de frutos do mar",
+
+  "item.createfisheryindustry.lobster_soup_bucket": "Balde de sopa de lagosta",
+  "item.createfisheryindustry.mussel_soup_bucket": "Balde de sopa de mexilhão",
+  "item.createfisheryindustry.seafood_chowder_bucket": "Balde de caldeirada de frutos do mar",
+
+  "entity.createfisheryindustry.tethered_harpoon": "Arpão amarrado",
+
+  "itemGroup.createfisheryindustry.fishery_equipment_tab": "Create: Equipamento Pesqueiro",
+
+  "create.gui.goggles.bait_trap_contents": "Conteúdo da armadilha com isca:",
+  "create.gui.goggles.bait_trap_status": "Estado da armadilha com isca:",
+
+  "gui.createfisheryindustry.bait_trap.level": "Nível da isca",
+  "gui.createfisheryindustry.bait_trap.level_suffix": "",
+  "gui.createfisheryindustry.bait_trap.no_bait": "Sem isca",
+  "gui.createfisheryindustry.bait_trap.bait": "Isca",
+
+  "createfisheryindustry.recipe.bait_trap": "Captura com isca",
+  "createfisheryindustry.recipe.bait_trap.bait_level": "Nível da isca",
+  "createfisheryindustry.recipe.bait_trap.land_only": "em terra",
+  "createfisheryindustry.recipe.bait_trap.requires_water": "na água",
+
+  "create_fishery.bait_trap.extracted": "Extraído %s x %s",
+  "create_fishery.bait_trap.extraction_failed": "Extração falhada, tente novamente",
+  "create_fishery.bait_trap.empty": "A armadilha com isca está vazia",
+  "create_fishery.bait_trap.same_bait": "Já há a mesma isca na armadilha",
+  "create_fishery.bait_trap.no_bait": "Não há isca na armadilha",
+  "create.gui.createfisheryindustry.bait_trap.active": "Capturando…",
+  "create.gui.createfisheryindustry.bait_trap.invalid_land": "Isca insuficiente em terra",
+  "create.gui.createfisheryindustry.bait_trap.invalid_water": "Isca insuficiente debaixo d'água",
+
+  "create_fishery.harpoon_pouch.remaining": "Arpões restantes: %s",
+  "create_fishery.harpoon_pouch.empty": "A bolsa de arpões está vazia",
+
+  "create_fishery.pneumatic_harpoon_gun.insufficient_air": "Ar insuficiente para disparar",
+  "create_fishery.pneumatic_harpoon_gun.must_aim_entity": "Ao agachar deve mirar numa entidade",
+  "create_fishery.pneumatic_harpoon_gun.no_valid_target": "Sem alvo válido",
+  "create_fishery.pneumatic_harpoon_gun.target_too_far": "Alvo muito longe",
+  "create_fishery.pneumatic_harpoon_gun.reloading": "O canhão de arpão está recarregando",
+  "create_fishery.pneumatic_harpoon_gun.pulled_item": "Puxado %s item(ns)",
+  "create_fishery.pneumatic_harpoon_gun.hooked_entity": "Enganchado %s",
+  "create_fishery.pneumatic_harpoon_gun.anchored_block": "Ancorado num bloco",
+  "create_fishery.pneumatic_harpoon_gun.released": "Arpão libertado",
+
+  "create_fishery.harpoon.tooltip": "Pode ser usado com o canhão de arpão pneumático",
+  "create_fishery.harpoon.tooltip.controls": "Controles:",
+  "create_fishery.harpoon.tooltip.shoot": "Clique direito: Disparar arpão",
+  "create_fishery.harpoon.tooltip.retract": "Clique direito (enganchado): Recolher arpão",
+  "create_fishery.harpoon.tooltip.sneak": "Agachar + Clique direito: Disparar apenas em entidades",
+
+  "create_fishery.harpoon.damage": "Dano: %s",
+  "create_fishery.harpoon.range": "Alcance: %s blocos",
+  "create_fishery.harpoon.air_consumption": "Consumo de ar: %s por disparo",
+  "create_fishery.harpoon.pull_strength": "Força de tração: %s",
+
+  "death.attack.harpoon": "%1$s foi arpoado por %2$s",
+  "death.attack.harpoon.item": "%1$s foi arpoado por %2$s usando %3$s",
+
+  "create.trap_bearing.status": "Estado do rolamento armadilha: %1$s",
+  "create.trap_bearing.idle": "Ocioso",
+  "create.trap_bearing.lvl": "Nível %1$s",
+  "create.trap_bearing.max_lvl": "Nível máximo",
+  "create.trap_bearing.frame_traps": "Armadilhas de estrutura",
+  "create.trap_bearing.frame_traps_dots": "...... ",
+  "create.trap_bearing.working_state": "Estado de trabalho: ",
+  "create.trap_bearing.state.insufficient": "Condições insuficientes",
+  "create.trap_bearing.state.idle": "Ocioso",
+  "create.trap_bearing.state.water_fishing": "Pesca na água",
+  "create.trap_bearing.state.water_fishing_treasure": "Pesca na água, tesouros disponíveis",
+  "create.trap_bearing.state.lava_fishing": "Pesca na lava",
+  "create.trap_bearing.state.unknown": "Estado desconhecido",
+
+  "create.tooltip.trap_bearing.header": "Informação do rolamento armadilha",
+  "create.tooltip.trap_bearing.not_running": "Não montado",
+  "create.tooltip.trap_bearing.status": "Nível: %1$s",
+  "create.tooltip.trap_bearing.frame_traps": "Armadilhas: ",
+  "create.tooltip.trap_bearing.working_state": "Estado: %1$s",
+  "create.tooltip.trap_bearing.storage": "Armazenamento: %1$s itens (%2$s/%3$s slots)",
+
+  "enchantment.create_fishery.execution": "Execução",
+  "enchantment.create_fishery.execution.desc": "Mata instantaneamente entidades enganchadas com menos de %s de vida",
+  "enchantment.create_fishery.barbed": "Farpado",
+  "enchantment.create_fishery.barbed.desc": "Causa dano contínuo a entidades enganchadas",
+  "enchantment.createfisheryindustry.execution": "Execução",
+  "enchantment.createfisheryindustry.barbed": "Farpado",
+
+  "createfisheryindustry.recipe.peeling": "Descascar",
+
+  "createfisheryindustry.ponder.trap_bearing.header": "Rolamento armadilha",
+  "createfisheryindustry.ponder.trap_bearing.text_1": "O rolamento armadilha pode obter automaticamente espólio de pesca para o jogador",
+  "createfisheryindustry.ponder.trap_bearing.text_2": "O rolamento armadilha é um tipo especial de rolamento mecânico que requer força rotacional contínua",
+  "createfisheryindustry.ponder.trap_bearing.text_3": "O rolamento armadilha deve ser usado com armadilhas de estrutura na água, caso contrário funciona como um rolamento mecânico normal",
+  "createfisheryindustry.ponder.trap_bearing.text_4": "Cada 8 armadilhas de estrutura submersas aumentam o nível de pesca em um",
+  "createfisheryindustry.ponder.trap_bearing.text_5": "É necessário pelo menos nível 1 (8 armadilhas) para começar a obter espólio. Níveis mais altos aumentam a velocidade",
+  "createfisheryindustry.ponder.trap_bearing.text_6": "A partir do nível 4 há chance de obter espólio de tesouro",
+  "createfisheryindustry.ponder.trap_bearing.text_7": "O nível máximo de pesca é 8. Mais de 64 armadilhas não aumentam a eficiência",
+  "createfisheryindustry.ponder.trap_bearing.text_8": "O espólio de pesca é armazenado dentro do rolamento e pode ser extraído por funis ou tubos",
+  "createfisheryindustry.ponder.trap_bearing.text_9": "Diferente da pesca normal, o rolamento armadilha pode obter espólio exclusivo, como arpões gastos",
+  "createfisheryindustry.ponder.trap_bearing.text_10": "Em biomas oceânicos também obtém espólio exclusivo do oceano, como mexilhões",
+
+  "createfisheryindustry.ponder.bait_trap.header": "Armadilha com isca",
+  "createfisheryindustry.ponder.bait_trap.text_1": "A armadilha com isca é um dispositivo passivo que pode automatizar a produção de drops de certos mobs",
+  "createfisheryindustry.ponder.bait_trap.text_2": "Agache e clique direito na armadilha com a isca correspondente para inseri-la",
+  "createfisheryindustry.ponder.bait_trap.text_3": "Em condições ambientais adequadas, a armadilha gerará periodicamente o espólio correspondente",
+  "createfisheryindustry.ponder.bait_trap.text_4": "A armadilha enviará automaticamente itens para contentores ou esteiras adjacentes",
+  "createfisheryindustry.ponder.bait_trap.text_5": "A isca é consumida gradualmente. Quando esgotada, a captura para",
+  "createfisheryindustry.ponder.bait_trap.text_6": "Use um aplicador para repor a isca automaticamente"
 }

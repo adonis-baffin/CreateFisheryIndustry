@@ -1,0 +1,36 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    }
+  ],
+  "type": "farmersdelight:cooking",
+  "experience": 1.5,
+  "ingredients": [
+    {
+      "item": "farmersdelight:milk_bottle"
+    },
+    {
+      "item": "farmersdelight:milk_bottle"
+    },
+    {
+      "item": "createfisheryindustry:raw_lobster"
+    },
+    {
+      "count": 2,
+      "tag": "c:mussels"
+    },
+    {
+      "tag": "c:raw_fish_steaks"
+    },
+    {
+      "item": "minecraft:kelp"
+    }
+  ],
+  "recipe_book_tab": "meals",
+  "result": {
+    "count": 1,
+    "id": "createfisheryindustry:seafood_chowder"
+  }
+}

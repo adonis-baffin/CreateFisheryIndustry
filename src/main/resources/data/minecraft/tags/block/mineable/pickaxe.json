@@ -5,6 +5,8 @@
     "createfisheryindustry:smart_mesh",
     "createfisheryindustry:trap_nozzle",
     "createfisheryindustry:smart_nozzle",
-    "createfisheryindustry:mechanical_peeler"
+    "createfisheryindustry:mechanical_peeler",
+    "createfisheryindustry:trap_bearing",
+    "createfisheryindustry:bait_trap"
   ]
 }

@@ -164,5 +164,130 @@
 
   "createfisheryindustry.ponder.mechanical_peeler_copper.header": "Использование механических чистилок на штуковинах",
   "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "Когда чистилки движутся как часть штуковины...",
-  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...они будут обрабатывать блоки, на которые штуковина их наталкивает"
+  "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "...они будут обрабатывать блоки, на которые штуковина их наталкивает",
+
+  "block.createfisheryindustry.bait_trap": "Приманная ловушка",
+  "block.createfisheryindustry.trap_bearing": "Ловчий подшипник",
+
+  "item.createfisheryindustry.raw_blue_mussel": "Сырая голубая мидия",
+  "item.createfisheryindustry.cooked_blue_mussel": "Жареная голубая мидия",
+  "item.createfisheryindustry.raw_mediterranean_mussel": "Сырая средиземноморская мидия",
+  "item.createfisheryindustry.cooked_mediterranean_mussel": "Жареная средиземноморская мидия",
+  "item.createfisheryindustry.raw_lobster": "Сырой омар",
+  "item.createfisheryindustry.cooked_lobster": "Приготовленный омар",
+  "item.createfisheryindustry.mussel_soup": "Суп из мидий",
+  "item.createfisheryindustry.lobster_soup": "Суп из омаров",
+  "item.createfisheryindustry.seafood_chowder": "Чаудер из морепродуктов",
+  "item.createfisheryindustry.seafood_steak": "Стейк из морепродуктов",
+
+  "fluid.createfisheryindustry.lobster_soup": "Суп из омаров",
+  "fluid.createfisheryindustry.mussel_soup": "Суп из мидий",
+  "fluid.createfisheryindustry.seafood_chowder": "Чаудер из морепродуктов",
+
+  "item.createfisheryindustry.lobster_soup_bucket": "Ведро супа из омаров",
+  "item.createfisheryindustry.mussel_soup_bucket": "Ведро супа из мидий",
+  "item.createfisheryindustry.seafood_chowder_bucket": "Ведро чаудера из морепродуктов",
+
+  "entity.createfisheryindustry.tethered_harpoon": "Привязанный гарпун",
+
+  "itemGroup.createfisheryindustry.fishery_equipment_tab": "Create: Рыболовное оборудование",
+
+  "create.gui.goggles.bait_trap_contents": "Содержимое приманной ловушки:",
+  "create.gui.goggles.bait_trap_status": "Статус приманной ловушки:",
+
+  "gui.createfisheryindustry.bait_trap.level": "Уровень приманки",
+  "gui.createfisheryindustry.bait_trap.level_suffix": "",
+  "gui.createfisheryindustry.bait_trap.no_bait": "Нет приманки",
+  "gui.createfisheryindustry.bait_trap.bait": "Приманка",
+
+  "createfisheryindustry.recipe.bait_trap": "Ловля на приманку",
+  "createfisheryindustry.recipe.bait_trap.bait_level": "Уровень приманки",
+  "createfisheryindustry.recipe.bait_trap.land_only": "на суше",
+  "createfisheryindustry.recipe.bait_trap.requires_water": "в воде",
+
+  "create_fishery.bait_trap.extracted": "Извлечено %s x %s",
+  "create_fishery.bait_trap.extraction_failed": "Извлечение не удалось, попробуйте снова",
+  "create_fishery.bait_trap.empty": "Приманная ловушка пуста",
+  "create_fishery.bait_trap.same_bait": "В ловушке уже есть такая же приманка",
+  "create_fishery.bait_trap.no_bait": "В ловушке нет приманки",
+  "create.gui.createfisheryindustry.bait_trap.active": "Ловля…",
+  "create.gui.createfisheryindustry.bait_trap.invalid_land": "Недостаточно приманки на суше",
+  "create.gui.createfisheryindustry.bait_trap.invalid_water": "Недостаточно приманки под водой",
+
+  "create_fishery.harpoon_pouch.remaining": "Осталось гарпунов: %s",
+  "create_fishery.harpoon_pouch.empty": "Мешок для гарпунов пуст",
+
+  "create_fishery.pneumatic_harpoon_gun.insufficient_air": "Недостаточно воздуха для выстрела",
+  "create_fishery.pneumatic_harpoon_gun.must_aim_entity": "При приседании нужно целиться в сущность",
+  "create_fishery.pneumatic_harpoon_gun.no_valid_target": "Нет действительной цели",
+  "create_fishery.pneumatic_harpoon_gun.target_too_far": "Цель слишком далеко",
+  "create_fishery.pneumatic_harpoon_gun.reloading": "Гарпунное ружьё перезаряжается",
+  "create_fishery.pneumatic_harpoon_gun.pulled_item": "Притянуто %s предмет(ов)",
+  "create_fishery.pneumatic_harpoon_gun.hooked_entity": "Зацеплено %s",
+  "create_fishery.pneumatic_harpoon_gun.anchored_block": "Зацеплено за блок",
+  "create_fishery.pneumatic_harpoon_gun.released": "Гарпун отпущен",
+
+  "create_fishery.harpoon.tooltip": "Можно использовать с пневматическим гарпунным ружьём",
+  "create_fishery.harpoon.tooltip.controls": "Управление:",
+  "create_fishery.harpoon.tooltip.shoot": "ПКМ: Выстрелить гарпуном",
+  "create_fishery.harpoon.tooltip.retract": "ПКМ (зацеплено): Втянуть гарпун",
+  "create_fishery.harpoon.tooltip.sneak": "Приседание + ПКМ: Стрелять только по сущностям",
+
+  "create_fishery.harpoon.damage": "Урон: %s",
+  "create_fishery.harpoon.range": "Дальность: %s блоков",
+  "create_fishery.harpoon.air_consumption": "Расход воздуха: %s за выстрел",
+  "create_fishery.harpoon.pull_strength": "Сила тяги: %s",
+
+  "death.attack.harpoon": "%1$s был гарпунирован %2$s",
+  "death.attack.harpoon.item": "%1$s был гарпунирован %2$s с помощью %3$s",
+
+  "create.trap_bearing.status": "Статус ловчего подшипника: %1$s",
+  "create.trap_bearing.idle": "Бездействие",
+  "create.trap_bearing.lvl": "Уровень %1$s",
+  "create.trap_bearing.max_lvl": "Максимальный уровень",
+  "create.trap_bearing.frame_traps": "Каркасные ловушки",
+  "create.trap_bearing.frame_traps_dots": "...... ",
+  "create.trap_bearing.working_state": "Состояние работы: ",
+  "create.trap_bearing.state.insufficient": "Недостаточные условия",
+  "create.trap_bearing.state.idle": "Бездействие",
+  "create.trap_bearing.state.water_fishing": "Рыбалка в воде",
+  "create.trap_bearing.state.water_fishing_treasure": "Рыбалка в воде, доступны сокровища",
+  "create.trap_bearing.state.lava_fishing": "Рыбалка в лаве",
+  "create.trap_bearing.state.unknown": "Неизвестное состояние",
+
+  "create.tooltip.trap_bearing.header": "Информация о ловчем подшипнике",
+  "create.tooltip.trap_bearing.not_running": "Не собран",
+  "create.tooltip.trap_bearing.status": "Уровень: %1$s",
+  "create.tooltip.trap_bearing.frame_traps": "Ловушки: ",
+  "create.tooltip.trap_bearing.working_state": "Состояние: %1$s",
+  "create.tooltip.trap_bearing.storage": "Хранение: %1$s предметов (%2$s/%3$s слотов)",
+
+  "enchantment.create_fishery.execution": "Казнь",
+  "enchantment.create_fishery.execution.desc": "Мгновенно убивает зацепленные сущности ниже %s здоровья",
+  "enchantment.create_fishery.barbed": "Шипованный",
+  "enchantment.create_fishery.barbed.desc": "Наносит урон со временем зацепленным сущностям",
+  "enchantment.createfisheryindustry.execution": "Казнь",
+  "enchantment.createfisheryindustry.barbed": "Шипованный",
+
+  "createfisheryindustry.recipe.peeling": "Очистка",
+
+  "createfisheryindustry.ponder.trap_bearing.header": "Ловчий подшипник",
+  "createfisheryindustry.ponder.trap_bearing.text_1": "Ловчий подшипник может автоматически добывать рыболовную добычу для игрока",
+  "createfisheryindustry.ponder.trap_bearing.text_2": "Ловчий подшипник — особый тип механического подшипника, требующий постоянного вращения",
+  "createfisheryindustry.ponder.trap_bearing.text_3": "Ловчий подшипник должен использоваться с каркасными ловушками в воде, иначе он работает как обычный механический подшипник",
+  "createfisheryindustry.ponder.trap_bearing.text_4": "Каждые 8 каркасных ловушек в воде повышают уровень рыбалки на один",
+  "createfisheryindustry.ponder.trap_bearing.text_5": "Для начала добычи нужен хотя бы уровень 1 (8 ловушек). Чем выше уровень — тем быстрее добыча",
+  "createfisheryindustry.ponder.trap_bearing.text_6": "На уровне 4 и выше появляется шанс на сокровища",
+  "createfisheryindustry.ponder.trap_bearing.text_7": "Максимальный уровень — 8. Больше 64 ловушек не повышают эффективность",
+  "createfisheryindustry.ponder.trap_bearing.text_8": "Добыча хранится внутри подшипника и может извлекаться воронками или трубами",
+  "createfisheryindustry.ponder.trap_bearing.text_9": "В отличие от обычной рыбалки, ловчий подшипник даёт эксклюзивную добычу, например изношенные гарпуны",
+  "createfisheryindustry.ponder.trap_bearing.text_10": "В океанских биомах также появляются мидии и другая океанская добыча",
+
+  "createfisheryindustry.ponder.bait_trap.header": "Приманная ловушка",
+  "createfisheryindustry.ponder.bait_trap.text_1": "Приманная ловушка — пассивное устройство для автоматизации добычи дропа некоторых мобов",
+  "createfisheryindustry.ponder.bait_trap.text_2": "Приседая, ПКМ по ловушке нужной приманкой — вставить её",
+  "createfisheryindustry.ponder.bait_trap.text_3": "В подходящих условиях ловушка периодически генерирует соответствующую добычу",
+  "createfisheryindustry.ponder.bait_trap.text_4": "Ловушка автоматически выводит предметы в соседние контейнеры или ленты",
+  "createfisheryindustry.ponder.bait_trap.text_5": "Приманка постепенно расходуется. При исчерпании ловля останавливается",
+  "createfisheryindustry.ponder.bait_trap.text_6": "Для автоматической заправки приманки можно использовать развёртыватель"
 }

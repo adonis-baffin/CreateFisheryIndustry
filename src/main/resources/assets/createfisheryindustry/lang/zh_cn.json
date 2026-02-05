@@ -3,7 +3,10 @@
   "block.createfisheryindustry.mesh_trap": "捕获网",
   "block.createfisheryindustry.trap_nozzle": "气捕网",
   "block.createfisheryindustry.smart_mesh": "智能滤网",
+  "block.createfisheryindustry.smart_nozzle": "智能气滤网",
   "block.createfisheryindustry.trap_bearing": "捕鱼轴承",
+  "block.createfisheryindustry.mechanical_peeler": "动力切削机",
+  "block.createfisheryindustry.bait_trap": "诱捕网",
   "item.createfisheryindustry.zinc_sheet": "锌板",
   "item.createfisheryindustry.pneumatic_mechanism": "气动构件",
   "item.createfisheryindustry.incomplete_pneumatic_mechanism": "未完成的气动构件",
@@ -45,12 +48,28 @@
   "itemGroup.createfisheryindustry.fishery_industry_tab": "机械动力：渔业",
   "itemGroup.createfisheryindustry.fishery_equipment_tab": "机械动力：渔业装备",
 
-  "create.gui.goggles.mesh_trap_contents": "捕获网内含：",
   "create.gui.goggles.inventory.empty": "空",
+  "create.gui.goggles.mesh_trap_contents": "捕获网内含：",
   "create.gui.goggles.trap_nozzle_contents": "气捕网内含：",
   "create.gui.goggles.smart_mesh_contents": "智能滤网内含：",
+  "create.gui.goggles.smart_nozzle_contents": "智能气滤网内含",
 
-  "block.createfisheryindustry.bait_trap": "诱捕网",
+  "create_fishery.smart_mesh.extracted": "提取了 %s 个 %s",
+  "create_fishery.smart_mesh.extraction_failed": "提取失败，请重试",
+  "create_fishery.smart_mesh.empty": "智能滤网为空",
+
+  "create_fishery.mesh_trap.extracted": "提取了 %s 个 %s",
+  "create_fishery.mesh_trap.extraction_failed": "提取失败，请重试",
+  "create_fishery.mesh_trap.empty": "捕获网为空",
+
+  "create_fishery.trap_nozzle.extracted": "提取了 %s 个 %s",
+  "create_fishery.trap_nozzle.extraction_failed": "提取失败，请重试",
+  "create_fishery.trap_nozzle.empty": "气滤网为空",
+
+  "create_fishery.smart_nozzle.extracted": "提取了 %s 个 %s",
+  "create_fishery.smart_nozzle.extraction_failed": "提取失败，请重试",
+  "create_fishery.smart_nozzle.empty": "智能气滤网为空",
+
   "create.gui.goggles.bait_trap_contents": "诱捕网内含：",
   "create.gui.goggles.bait_trap_status": "诱捕网状态：",
   "gui.createfisheryindustry.bait_trap.level": "诱饵等级",
@@ -59,8 +78,7 @@
   "gui.createfisheryindustry.bait_trap.bait": "诱饵",
   "createfisheryindustry.recipe.bait_trap": "诱捕",
   "createfisheryindustry.recipe.bait_trap.bait_level": "诱饵等级",
-  "createfisheryindustry.recipe.bait_trap.wait_time": "等待时间",
-  "create_fishery.bait_trap.extracted": "取出了 %s 个 %s",
+  "create_fishery.bait_trap.extracted": "提取了 %s 个 %s",
   "create_fishery.bait_trap.extraction_failed": "取出失败，请重试",
   "create_fishery.bait_trap.empty": "诱捕网为空",
   "create_fishery.bait_trap.same_bait": "诱捕网中已有相同诱饵",
@@ -72,13 +90,15 @@
   "createfisheryindustry.recipe.bait_trap.requires_water": "水中",
 
   "item.createfisheryindustry.harpoon_pouch.fullness": "%s/%s",
+  "create_fishery.harpoon_pouch.remaining": "剩余鱼叉：%s",
+  "create_fishery.harpoon_pouch.empty": "鱼叉袋已空",
 
   "tooltip.keyShift": "Shift",
   "tooltip.holdForDescription": "按住 [$] 查看描述",
 
   "item.createfisheryindustry.copper_diving_leggings.tooltip.summary": "铜潜水护腿与潜水靴配合使用，在海底体验月球漫步的感觉。",
   "item.createfisheryindustry.copper_diving_leggings.tooltip.condition1": "穿在腿上时：",
-  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "穿戴者能够在水中或岩浆中获得疾跑与超级跳跃的能力，最多可以跨越四格的高度，并且超级跳跃在落地后也不会受到摔落伤害。",
+  "item.createfisheryindustry.copper_diving_leggings.tooltip.behaviour1": "穿戴者能够在水中获得疾跑与超级跳跃的能力，最多可以跨越四格的高度，并且超级跳跃在落地后也不会受到摔落伤害。",
 
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.summary": "下界合金潜水护腿与潜水靴配合使用，在海底或熔岩海底体验月球漫步的感觉。",
   "item.createfisheryindustry.netherite_diving_leggings.tooltip.condition1": "穿在腿上时：",
@@ -95,7 +115,7 @@
   "block.createfisheryindustry.frame_trap.tooltip.behaviour1": "可以捕获触碰到的鱼类，或其他种类的小型生物，并收集路径上的物品。此外，还会随时间获得当前生物群系的钓鱼战利品。每当钓鱼触发或捕获生物时，获得经验颗粒。",
 
   "block.createfisheryindustry.mesh_trap.tooltip.summary": "自动收集周边的物品，捕获鱼类或其他小型生物，并存储。注意捕获网并没有获取钓鱼战利品的能力。",
-  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "对实体使用时",
+  "block.createfisheryindustry.mesh_trap.tooltip.condition1": "对实体使用时:",
   "block.createfisheryindustry.mesh_trap.tooltip.behaviour1": "捕获可以被捕捉的实体，获得其掉落物和经验",
   "block.createfisheryindustry.mesh_trap.tooltip.condition2": "右键点击时：",
   "block.createfisheryindustry.mesh_trap.tooltip.behaviour2": "取出其中的物品，一次最多一组。",
@@ -140,37 +160,13 @@
 
   "createfisheryindustry.recipe.peeling": "切削",
 
-  "gui.goggles.kinetic_stats": "Kinetic Stats",
-  "create.gui.goggles.speed": "Speed: %s RPM",
-  "create.gui.goggles.peeler_input": "Input:",
-  "create.gui.goggles.peeler_outputs": "动力切削机内含:",
+  "gui.goggles.kinetic_stats": "动力学状态",
   "create.gui.goggles.peeler_stored_outputs": "动力切削机内含:",
-  "block.createfisheryindustry.mechanical_peeler": "动力切削机",
   "create.gui.goggles.mechanical_peeler_contents": "动力切削机副产品",
 
   "block.createfisheryindustry.mechanical_peeler.tooltip.summary": "用于处理去皮配方的机械元件，也可与部分生物交互",
   "block.createfisheryindustry.mechanical_peeler.tooltip.condition1": "接入应力时",
   "block.createfisheryindustry.mechanical_peeler.tooltip.behaviour1": "在物品处理方面，可以处理去皮配方，类似动力锯。在对实体处理方面，可以给羊去羊毛，或采集乌龟和犰狳的鳞甲。在对方块处理方面，可以给整棵树去树皮，给方块除锈除蜡，还可以采收成熟的紫水晶簇。",
-
-  "block.createfisheryindustry.smart_nozzle": "智能气滤网",
-
-  "create.gui.goggles.smart_nozzle_contents": "智能气滤网内容物",
-
-  "create_fishery.smart_mesh.extracted": "提取了 %s 个 %s",
-  "create_fishery.smart_mesh.extraction_failed": "提取失败，请重试",
-  "create_fishery.smart_mesh.empty": "智能滤网为空",
-
-  "create_fishery.mesh_trap.extracted": "提取了 %s 个 %s",
-  "create_fishery.mesh_trap.extraction_failed": "提取失败，请重试",
-  "create_fishery.mesh_trap.empty": "捕获网为空",
-
-  "create_fishery.trap_nozzle.extracted": "提取了 %s 个 %s",
-  "create_fishery.trap_nozzle.extraction_failed": "提取失败，请重试",
-  "create_fishery.trap_nozzle.empty": "气滤网为空",
-
-  "create_fishery.smart_nozzle.extracted": "提取了 %s 个 %s",
-  "create_fishery.smart_nozzle.extraction_failed": "提取失败，请重试",
-  "create_fishery.smart_nozzle.empty": "智能气滤网为空",
 
   "block.createfisheryindustry.smart_nozzle.tooltip.summary": "具有过滤功能的智能气滤网，可以自动收集符合过滤条件的附近物品。",
   "block.createfisheryindustry.smart_nozzle.tooltip.condition1": "当连接到鼓风机时：",
@@ -209,6 +205,8 @@
   "createfisheryindustry.ponder.frame_trap.text_2": "当捕鱼框作为动态结构的一部分移动时……",
   "createfisheryindustry.ponder.frame_trap.text_3": "它会收集触碰到的掉落物，并捕捉路径上的小型生物。每次捕获生物还会获得经验颗粒",
   "createfisheryindustry.ponder.frame_trap.text_4": "并自动存储到该结构相接的容器中",
+  "createfisheryindustry.ponder.frame_trap.text_5": "若动态结构中没有任何存储容器，捕鱼框的物品收集和实体捕获功能将不会生效",
+
   "createfisheryindustry.ponder.frame_trap_underwater.header": "在水下使用捕鱼框",
   "createfisheryindustry.ponder.frame_trap_underwater.text_1": "当捕鱼框在水下随着动态结构移动时……",
   "createfisheryindustry.ponder.frame_trap_underwater.text_2": "有概率随时间获得钓鱼战利品，同时获得经验颗粒",
@@ -232,7 +230,23 @@
   "createfisheryindustry.ponder.mechanical_peeler_copper.text_1": "当动力切削机作为动态结构的一部分移动时……",
   "createfisheryindustry.ponder.mechanical_peeler_copper.text_2": "……它会处理前方的方块或实体",
 
-  "create_fishery.harpoon_pouch.remaining": "剩余鱼叉：%s",
-  "create_fishery.harpoon_pouch.empty": "鱼叉袋已空"
+  "createfisheryindustry.ponder.trap_bearing.header": "捕鱼轴承",
+  "createfisheryindustry.ponder.trap_bearing.text_1": "捕鱼轴承可为玩家自动获取钓鱼战利品",
+  "createfisheryindustry.ponder.trap_bearing.text_2": "捕鱼轴承本身是一种特殊的动力轴承，需要持续的旋转力驱动",
+  "createfisheryindustry.ponder.trap_bearing.text_3": "捕鱼轴承必须配合水中的捕鱼框使用，否则与普通动力轴承无异",
+  "createfisheryindustry.ponder.trap_bearing.text_4": "每8个位于水源中的捕鱼框可提升一级捕鱼等级",
+  "createfisheryindustry.ponder.trap_bearing.text_5": "至少需要一级捕鱼等级（8个捕鱼框）才能开始获取钓鱼战利品，等级越高，获取速度越快",
+  "createfisheryindustry.ponder.trap_bearing.text_6": "捕鱼等级达到四级及以上时，有机会获取宝藏类战利品",
+  "createfisheryindustry.ponder.trap_bearing.text_7": "捕鱼等级最高为八级，超过64个捕鱼框不会再提升效率",
+  "createfisheryindustry.ponder.trap_bearing.text_8": "捕鱼战利品会存储在捕鱼轴承内部，可以通过漏斗或管道直接提取",
+  "createfisheryindustry.ponder.trap_bearing.text_9": "与普通钓鱼不同，捕鱼轴承可获取专属的额外战利品，例如破损的鱼叉",
+  "createfisheryindustry.ponder.trap_bearing.text_10": "在海洋群系中使用捕鱼轴承，还会额外获得贻贝等海洋特有战利品",
 
+  "createfisheryindustry.ponder.bait_trap.header": "诱捕网",
+  "createfisheryindustry.ponder.bait_trap.text_1": "诱捕网是一种被动捕获装置，可用于自动化生产某些生物的战利品",
+  "createfisheryindustry.ponder.bait_trap.text_2": "使用对应诱饵潜行右键诱捕网即可放入",
+  "createfisheryindustry.ponder.bait_trap.text_3": "在合适的环境条件下，诱捕网会定期生成对应战利品",
+  "createfisheryindustry.ponder.bait_trap.text_4": "诱捕网会自动将物品输出到临近的容器或传送带内",
+  "createfisheryindustry.ponder.bait_trap.text_5": "诱饵会随使用逐渐消耗，耗尽后捕获停止",
+  "createfisheryindustry.ponder.bait_trap.text_6": "可以用动力臂来自动补充诱饵"
 }
