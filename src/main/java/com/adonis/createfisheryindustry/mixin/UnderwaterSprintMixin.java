@@ -93,13 +93,26 @@ public abstract class UnderwaterSprintMixin {
         player.setSprinting(true);
 
         // 添加速度属性修改器 - 使用新的API
+        // 修复：改用 ADD_VALUE 操作，避免与其他模组的乘数叠加导致速度爆炸
         AttributeInstance speedAttribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speedAttribute != null && !speedAttribute.hasModifier(SPRINT_BOOST_ID)) {
-            // 疾跑通常增加30%速度
+            // 检查是否已经有其他模组的移动速度修改器（如 Nether Depths Update 的 Hell Rider）
+            double existingBonus = 0.0;
+            for (AttributeModifier modifier : speedAttribute.getModifiers()) {
+                // 如果已经存在其他增加速度的修改器，减少我们的加成
+                if (modifier.amount() > 0) {
+                    existingBonus += modifier.amount();
+                }
+            }
+            
+            // 基础疾跑加成 15%，如果已有其他加成则降低我们的加成
+            double baseSprintBoost = 0.15;
+            double finalBoost = Math.max(0.05, baseSprintBoost - existingBonus * 0.5);
+            
             AttributeModifier sprintBoost = new AttributeModifier(
                     SPRINT_BOOST_ID,
-                    0.3,
-                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                    finalBoost,
+                    AttributeModifier.Operation.ADD_VALUE
             );
             speedAttribute.addTransientModifier(sprintBoost);
         }
@@ -203,21 +216,24 @@ public abstract class UnderwaterSprintMixin {
             float yaw = player.getYRot() * 0.017453292F; // 转换为弧度
             float pitch = player.getXRot() * 0.017453292F;
 
+            // 修复：降低基础速度加成，避免与其他模组（如 Nether Depths Update）叠加
+            double adjustedMultiplier = speedMultiplier * 0.5; // 减半速度加成
+
             // 计算3D移动向量
-            double moveX = -Math.sin(yaw) * Math.cos(pitch) * speedMultiplier * forwardInput;
-            double moveY = -Math.sin(pitch) * speedMultiplier * forwardInput * 0.5; // 垂直移动减半
-            double moveZ = Math.cos(yaw) * Math.cos(pitch) * speedMultiplier * forwardInput;
+            double moveX = -Math.sin(yaw) * Math.cos(pitch) * adjustedMultiplier * forwardInput;
+            double moveY = -Math.sin(pitch) * adjustedMultiplier * forwardInput * 0.5; // 垂直移动减半
+            double moveZ = Math.cos(yaw) * Math.cos(pitch) * adjustedMultiplier * forwardInput;
 
             // 添加侧向移动
-            moveX += Math.cos(yaw) * speedMultiplier * sideInput * 0.8; // 侧向移动稍慢
-            moveZ += Math.sin(yaw) * speedMultiplier * sideInput * 0.8;
+            moveX += Math.cos(yaw) * adjustedMultiplier * sideInput * 0.8; // 侧向移动稍慢
+            moveZ += Math.sin(yaw) * adjustedMultiplier * sideInput * 0.8;
 
             // 应用速度加成
             Vec3 currentMotion = player.getDeltaMovement();
             Vec3 newMotion = currentMotion.add(moveX, moveY, moveZ);
 
-            // 限制最大速度，防止过快
-            double maxSpeed = 0.5;
+            // 修复：更严格的最高速度限制，防止与其他模组叠加导致速度爆炸
+            double maxSpeed = 0.35; // 从 0.5 降低到 0.35
             double horizontalSpeed = Math.sqrt(newMotion.x * newMotion.x + newMotion.z * newMotion.z);
             if (horizontalSpeed > maxSpeed) {
                 double scale = maxSpeed / horizontalSpeed;

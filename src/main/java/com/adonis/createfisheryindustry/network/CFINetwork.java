@@ -12,8 +12,7 @@ public class CFINetwork {
     @SubscribeEvent
     public static void register(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar(CreateFisheryMod.ID)
-                .versioned("1")
-                .optional();
+                .versioned("1");
 
         registrar.playToClient(
                 HarpoonGunStateSyncPacket.TYPE,

@@ -373,6 +373,16 @@ public class BaitTrapBlockEntity extends BlockEntity implements IHaveGoggleInfor
                     if (be.hasInventorySpace()) {
                         be.lootPhaseTicks++;
 
+                        // 双重检查 cachedRecipe 是否为 null，防止时序问题
+                        if (be.cachedRecipe == null) {
+                            be.cachedRecipe = be.findRecipe(be.currentBait);
+                        }
+                        if (be.cachedRecipe == null) {
+                            // 如果仍然找不到配方，重置计时器并跳过
+                            be.resetLootTimer();
+                            return;
+                        }
+
                         int currentTarget = be.inExtraPhase
                                 ? be.extraDelayTicks
                                 : be.cachedRecipe.getFixedWaitTicks();

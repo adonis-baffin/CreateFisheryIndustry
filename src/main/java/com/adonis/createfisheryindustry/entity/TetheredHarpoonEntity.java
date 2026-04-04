@@ -369,14 +369,21 @@ public class TetheredHarpoonEntity extends AbstractArrow {
 
     @Override
     public void playerTouch(Player entity) {
-        if (this.ownedBy(entity) || this.getOwner() == null) {
-            super.playerTouch(entity);
-        }
+        // 完全阻止玩家从鱼叉实体拾取物品
+        // 鱼叉只能通过鱼叉枪的回收机制收回，不能作为物品拾取
+    }
+
+    @Override
+    protected boolean tryPickup(Player player) {
+        // 阻止任何拾取行为
+        return false;
     }
 
     @Override
     protected ItemStack getDefaultPickupItem() {
-        return ItemStack.EMPTY;
+        // 返回空物品栈会导致 Vanity 等 mod 在同步实体物品时出错
+        // 因为 1.21+ 的 ItemStack 网络编码器不允许传输空物品栈
+        return new ItemStack(CreateFisheryItems.HARPOON.get());
     }
 
     @Override
