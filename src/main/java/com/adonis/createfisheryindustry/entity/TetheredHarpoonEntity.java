@@ -11,6 +11,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -219,7 +220,7 @@ public class TetheredHarpoonEntity extends AbstractArrow {
         this.discard();
     }
 
-    public void playSound(SoundEvent sound, float volume, float pitch) {
+    public void playSound(Holder<SoundEvent> sound, float volume, float pitch) {
         this.level().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundSource(), volume, pitch);
     }
 

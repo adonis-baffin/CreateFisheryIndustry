@@ -4,9 +4,7 @@ import com.adonis.createfisheryindustry.entity.TetheredHarpoonEntity;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -113,7 +111,7 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
         }
     }
 
-    private static void resetHookState(ItemStack itemstack, LevelAccessor world, Player player) {
+    public static void resetHookState(ItemStack itemstack, LevelAccessor world, Player player) {
         CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> {
             tag.putBoolean("tagHooked", false);
             tag.remove("tagHookedEntityId");
@@ -131,7 +129,7 @@ public class PneumaticHarpoonGunItemInHandTickProcedure {
     private static void playTractionSound(LevelAccessor world, Player player) {
         if (world instanceof Level level) {
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("item.armor.equip_chain")),
+                    SoundEvents.ARMOR_EQUIP_CHAIN,
                     SoundSource.PLAYERS, 0.25F, 0.5F);
         }
     }

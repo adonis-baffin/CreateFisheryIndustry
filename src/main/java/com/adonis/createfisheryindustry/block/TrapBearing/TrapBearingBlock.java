@@ -25,13 +25,15 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 
+/**
+ * Independently rewritten block wrapper for the trap bearing feature.
+ */
 public class TrapBearingBlock extends BearingBlock implements IBE<TrapBearingBlockEntity>, SimpleWaterloggedBlock {
 
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public TrapBearingBlock(Properties properties) {
         super(properties);
-        // 注册默认状态时包含 waterlogged
         registerDefaultState(defaultBlockState().setValue(WATERLOGGED, false));
     }
 
@@ -43,20 +45,18 @@ public class TrapBearingBlock extends BearingBlock implements IBE<TrapBearingBlo
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        BlockState state = super.getStateForPlacement(context);
-        if (state == null) {
+        BlockState placedState = super.getStateForPlacement(context);
+        if (placedState == null) {
             return null;
         }
 
-        // 检查放置位置是否有水
         FluidState fluidState = context.getLevel().getFluidState(context.getClickedPos());
-        return state.setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+        return placedState.setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
     }
 
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
-                                  LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        // 如果是 waterlogged，安排流体 tick
+            LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (state.getValue(WATERLOGGED)) {
             level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
@@ -71,34 +71,32 @@ public class TrapBearingBlock extends BearingBlock implements IBE<TrapBearingBlo
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
-                                              BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+            BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (!player.mayBuild() || player.isShiftKeyDown()) {
             return ItemInteractionResult.FAIL;
         }
 
-        if (stack.isEmpty()) {
-            if (level.isClientSide) {
-                return ItemInteractionResult.SUCCESS;
-            }
+        if (!stack.isEmpty()) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
 
-            withBlockEntityDo(level, pos, be -> {
-                if (be.isRunning()) {
-                    be.disassemble();
-                } else {
-                    be.setAssembleNextTick(true);
-                }
-            });
+        if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
         }
 
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        withBlockEntityDo(level, pos, be -> {
+            if (be.isRunning()) {
+                be.disassemble();
+            } else {
+                be.setAssembleNextTick(true);
+            }
+        });
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        // 如果方块被替换为不同类型的方块（而不是状态变化）
         if (!state.is(newState.getBlock())) {
-            // 获取方块实体并掉落物品
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof TrapBearingBlockEntity trapBearing) {
                 trapBearing.dropInventoryContents();

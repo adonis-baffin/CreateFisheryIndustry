@@ -15,11 +15,11 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -131,14 +131,24 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
     @Override
     public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(itemstack, world, entity, slot, selected);
-        if (entity instanceof Player player && (selected || player.getOffhandItem() == itemstack)) {
-            PneumaticHarpoonGunItemInHandTickProcedure.execute(world, player.getX(), player.getY(), player.getZ(), player, itemstack);
+        if (entity instanceof Player player) {
+            if (selected || player.getOffhandItem() == itemstack) {
+                PneumaticHarpoonGunItemInHandTickProcedure.execute(world, player.getX(), player.getY(), player.getZ(), player, itemstack);
 
-            CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
-            if (customData.copyTag().contains("CooldownEndTick")) {
-                long cooldownEndTick = customData.copyTag().getLong("CooldownEndTick");
-                if (world.getGameTime() >= cooldownEndTick) {
-                    CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> tag.remove("CooldownEndTick"));
+                CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+                if (customData.copyTag().contains("CooldownEndTick")) {
+                    long cooldownEndTick = customData.copyTag().getLong("CooldownEndTick");
+                    if (world.getGameTime() >= cooldownEndTick) {
+                        CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> tag.remove("CooldownEndTick"));
+                    }
+                }
+            } else if (!world.isClientSide()) {
+                CustomData customData = itemstack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+                if (customData.copyTag().getBoolean("tagHooked")) {
+                    PneumaticHarpoonGunItemInHandTickProcedure.resetHookState(itemstack, world, player);
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        CFINetwork.sendToClient(new HarpoonGunStateSyncPacket(false), serverPlayer);
+                    }
                 }
             }
         }
@@ -179,7 +189,7 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
                 if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
                     CFINetwork.sendToClient(new HarpoonGunStateSyncPacket(false), serverPlayer);
                 }
-                player.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("item.armor.equip_chain")), 1.0F, 1.0F);
+                world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_CHAIN, SoundSource.PLAYERS, 1.0F, 1.0F);
                 return InteractionResultHolder.sidedSuccess(itemstack, false);
             }
 
@@ -236,7 +246,7 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
 
                     living.hurt(world.damageSources().trident(harpoon, player), baseDamage);
                     living.setLastHurtByPlayer(player);
-                    harpoon.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("entity.trident.hit")), 1.0F, 1.0F);
+                    harpoon.playSound(SoundEvents.TRIDENT_HIT, 1.0F, 1.0F);
                 } else if (target instanceof ItemEntity || target instanceof ExperienceOrb) {
                     Vec3 targetPos = target.position();
                     harpoon.setPos(targetPos);
@@ -262,17 +272,17 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
                         tag2.putInt("tagPulledEntityId", target.getId());
                     });
 
-                    harpoon.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("entity.fishing_bobber.retrieve")), 1.0F, 1.0F);
+                    harpoon.playSound(SoundEvents.FISHING_BOBBER_RETRIEVE, 1.0F, 1.0F);
                 } else {
                     Vec3 targetPos = target.position();
                     harpoon.setPos(targetPos);
                     harpoon.startRetrieving();
-                    harpoon.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("entity.fishing_bobber.retrieve")), 1.0F, 1.0F);
+                    harpoon.playSound(SoundEvents.FISHING_BOBBER_RETRIEVE, 1.0F, 1.0F);
                 }
             } else if (hitResult instanceof BlockHitResult blockHit) {
                 harpoon.setPos(hitPos);
                 harpoon.setAnchored(blockHit.getBlockPos());
-                harpoon.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("entity.trident.hit_ground")), 1.0F, 1.0F);
+                harpoon.playSound(SoundEvents.TRIDENT_HIT_GROUND, 1.0F, 1.0F);
             }
 
             CustomData.update(DataComponents.CUSTOM_DATA, itemstack, tag -> {
@@ -283,7 +293,7 @@ public class PneumaticHarpoonGunItem extends Item implements CustomArmPoseItem {
                 CFINetwork.sendToClient(new HarpoonGunStateSyncPacket(true), serverPlayer);
             }
 
-            player.playSound(BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse("entity.arrow.shoot")), 1.0F, 1.0F);
+            world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F);
         }
 
         return InteractionResultHolder.sidedSuccess(itemstack, world.isClientSide());
